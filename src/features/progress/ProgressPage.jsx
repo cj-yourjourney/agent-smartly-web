@@ -3,6 +3,21 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import {
+  TrendingUp,
+  Target,
+  Flame,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  Trophy,
+  AlertTriangle,
+  Clock,
+  BookOpen,
+  Award,
+  Activity,
+  Info
+} from 'lucide-react'
+import {
   fetchProgressSummary,
   fetchTopicProgress,
   fetchSubtopicProgress,
@@ -96,55 +111,58 @@ export default function ProgressPage() {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Your Progress</h1>
-          <p className="text-base-content/70">
+          <div className="flex items-center gap-3 mb-2">
+            <TrendingUp className="w-10 h-10 text-primary" />
+            <h1 className="text-4xl font-bold">Your Progress</h1>
+          </div>
+          <p className="text-base-content/70 ml-13">
             Track your learning journey and identify areas for improvement
           </p>
         </div>
 
         {error && (
           <div className="alert alert-error mb-6">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="stroke-current shrink-0 h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <AlertTriangle className="w-6 h-6" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="tabs tabs-boxed mb-6 bg-base-100">
+        <div className="tabs tabs-boxed mb-6 bg-base-100 p-2">
           <button
-            className={`tab ${activeTab === 'overview' ? 'tab-active' : ''}`}
+            className={`tab gap-2 tab-lg px-6 ${
+              activeTab === 'overview' ? 'tab-active' : ''
+            }`}
             onClick={() => setActiveTab('overview')}
           >
+            <Activity className="w-4 h-4" />
             Overview
           </button>
           <button
-            className={`tab ${activeTab === 'topics' ? 'tab-active' : ''}`}
+            className={`tab gap-2 tab-lg px-6 ${
+              activeTab === 'topics' ? 'tab-active' : ''
+            }`}
             onClick={() => setActiveTab('topics')}
           >
+            <BookOpen className="w-4 h-4" />
             Topics
           </button>
           <button
-            className={`tab ${activeTab === 'weak-areas' ? 'tab-active' : ''}`}
+            className={`tab gap-2 tab-lg px-6 ${
+              activeTab === 'weak-areas' ? 'tab-active' : ''
+            }`}
             onClick={() => setActiveTab('weak-areas')}
           >
+            <AlertTriangle className="w-4 h-4" />
             Weak Areas
           </button>
           <button
-            className={`tab ${activeTab === 'activity' ? 'tab-active' : ''}`}
+            className={`tab gap-2 tab-lg px-6 ${
+              activeTab === 'activity' ? 'tab-active' : ''
+            }`}
             onClick={() => setActiveTab('activity')}
           >
+            <Clock className="w-4 h-4" />
             Recent Activity
           </button>
         </div>
@@ -154,45 +172,61 @@ export default function ProgressPage() {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-gradient-to-br from-primary to-primary-focus text-primary-content shadow-xl">
                 <div className="card-body">
-                  <h2 className="card-title text-sm">Total Questions</h2>
-                  <p className="text-4xl font-bold">
-                    {summary.total_questions_attempted}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm opacity-90">Total Questions</h2>
+                      <p className="text-4xl font-bold mt-2">
+                        {summary.total_questions_attempted}
+                      </p>
+                    </div>
+                    <Target className="w-12 h-12 opacity-50" />
+                  </div>
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-gradient-to-br from-secondary to-secondary-focus text-secondary-content shadow-xl">
                 <div className="card-body">
-                  <h2 className="card-title text-sm">Overall Accuracy</h2>
-                  <p
-                    className={`text-4xl font-bold ${getAccuracyColor(
-                      summary.overall_accuracy
-                    )}`}
-                  >
-                    {summary.overall_accuracy}%
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm opacity-90">Overall Accuracy</h2>
+                      <p className="text-4xl font-bold mt-2">
+                        {summary.overall_accuracy}%
+                      </p>
+                    </div>
+                    <Award className="w-12 h-12 opacity-50" />
+                  </div>
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-gradient-to-br from-warning to-warning-focus text-warning-content shadow-xl">
                 <div className="card-body">
-                  <h2 className="card-title text-sm">Current Streak</h2>
-                  <p className="text-4xl font-bold text-warning">
-                    {summary.current_streak_days}
-                  </p>
-                  <p className="text-sm text-base-content/70">days</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm opacity-90">Current Streak</h2>
+                      <p className="text-4xl font-bold mt-2">
+                        {summary.current_streak_days}
+                      </p>
+                      <p className="text-xs opacity-75">days</p>
+                    </div>
+                    <Flame className="w-12 h-12 opacity-50" />
+                  </div>
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-gradient-to-br from-info to-info-focus text-info-content shadow-xl">
                 <div className="card-body">
-                  <h2 className="card-title text-sm">Last 7 Days</h2>
-                  <p className="text-4xl font-bold text-info">
-                    {summary.questions_last_7_days}
-                  </p>
-                  <p className="text-sm text-base-content/70">questions</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm opacity-90">Last 7 Days</h2>
+                      <p className="text-4xl font-bold mt-2">
+                        {summary.questions_last_7_days}
+                      </p>
+                      <p className="text-xs opacity-75">questions</p>
+                    </div>
+                    <Calendar className="w-12 h-12 opacity-50" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -200,23 +234,31 @@ export default function ProgressPage() {
             {/* Progress Breakdown */}
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
-                <h2 className="card-title mb-4">Answer Breakdown</h2>
+                <h2 className="card-title mb-4 flex items-center gap-2">
+                  <Trophy className="w-6 h-6 text-primary" />
+                  Answer Breakdown
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
+                  <div className="text-center p-6 bg-success/10 rounded-lg">
+                    <CheckCircle className="w-12 h-12 text-success mx-auto mb-2" />
                     <div className="text-3xl font-bold text-success">
                       {summary.total_correct}
                     </div>
-                    <div className="text-sm text-base-content/70">Correct</div>
+                    <div className="text-sm text-base-content/70">
+                      Correct Answers
+                    </div>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center p-6 bg-error/10 rounded-lg">
+                    <XCircle className="w-12 h-12 text-error mx-auto mb-2" />
                     <div className="text-3xl font-bold text-error">
                       {summary.total_incorrect}
                     </div>
                     <div className="text-sm text-base-content/70">
-                      Incorrect
+                      Incorrect Answers
                     </div>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center p-6 bg-warning/10 rounded-lg">
+                    <Flame className="w-12 h-12 text-warning mx-auto mb-2" />
                     <div className="text-3xl font-bold text-warning">
                       {summary.longest_streak_days}
                     </div>
@@ -227,6 +269,36 @@ export default function ProgressPage() {
                 </div>
               </div>
             </div>
+
+            {/* Progress Bar */}
+            {summary.total_questions_attempted > 0 && (
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h2 className="card-title mb-4">Overall Performance</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          Accuracy Rate
+                        </span>
+                        <span
+                          className={`text-sm font-bold ${getAccuracyColor(
+                            summary.overall_accuracy
+                          )}`}
+                        >
+                          {summary.overall_accuracy}%
+                        </span>
+                      </div>
+                      <progress
+                        className="progress progress-primary w-full h-4"
+                        value={summary.overall_accuracy}
+                        max="100"
+                      ></progress>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -235,28 +307,19 @@ export default function ProgressPage() {
           <div className="space-y-6">
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
-                <h2 className="card-title mb-4">Progress by Topic</h2>
+                <h2 className="card-title mb-4 flex items-center gap-2">
+                  <BookOpen className="w-6 h-6 text-primary" />
+                  Progress by Topic
+                </h2>
 
                 {topicProgress.length === 0 ? (
                   <div className="alert alert-info">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      className="stroke-current shrink-0 w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    <Info className="w-6 h-6" />
                     <span>Start practicing to see your progress by topic!</span>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="table">
+                    <table className="table table-zebra">
                       <thead>
                         <tr>
                           <th>Topic</th>
@@ -274,12 +337,33 @@ export default function ProgressPage() {
                             onClick={() => handleTopicClick(topic.topic)}
                           >
                             <td className="font-semibold">
-                              {topic.topic_display}
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="w-4 h-4" />
+                                {topic.topic_display}
+                              </div>
                             </td>
                             <td>{topic.questions_attempted}</td>
-                            <td>{topic.questions_correct}</td>
-                            <td className={getAccuracyColor(topic.accuracy)}>
-                              {topic.accuracy}%
+                            <td>
+                              <div className="flex items-center gap-1">
+                                <CheckCircle className="w-4 h-4 text-success" />
+                                {topic.questions_correct}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`font-bold ${getAccuracyColor(
+                                    topic.accuracy
+                                  )}`}
+                                >
+                                  {topic.accuracy}%
+                                </span>
+                                <progress
+                                  className="progress progress-primary w-20"
+                                  value={topic.accuracy}
+                                  max="100"
+                                ></progress>
+                              </div>
                             </td>
                             <td>
                               <span
@@ -301,9 +385,12 @@ export default function ProgressPage() {
 
             {/* Subtopics (when topic selected) */}
             {selectedTopic && subtopicProgress.length > 0 && (
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-base-100 shadow-xl border-2 border-primary">
                 <div className="card-body">
-                  <h2 className="card-title mb-4">Subtopic Breakdown</h2>
+                  <h2 className="card-title mb-4 flex items-center gap-2">
+                    <Target className="w-6 h-6 text-primary" />
+                    Subtopic Breakdown
+                  </h2>
                   <div className="overflow-x-auto">
                     <table className="table table-sm">
                       <thead>
@@ -316,15 +403,29 @@ export default function ProgressPage() {
                       </thead>
                       <tbody>
                         {subtopicProgress.map((subtopic, index) => (
-                          <tr key={index}>
+                          <tr key={index} className="hover">
                             <td>{subtopic.subtopic_display}</td>
                             <td>{subtopic.questions_attempted}</td>
-                            <td className={getAccuracyColor(subtopic.accuracy)}>
-                              {subtopic.accuracy}%
+                            <td>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`font-bold ${getAccuracyColor(
+                                    subtopic.accuracy
+                                  )}`}
+                                >
+                                  {subtopic.accuracy}%
+                                </span>
+                                <progress
+                                  className="progress progress-primary w-16"
+                                  value={subtopic.accuracy}
+                                  max="100"
+                                ></progress>
+                              </div>
                             </td>
                             <td>
                               {subtopic.is_weak_area && (
-                                <span className="badge badge-error badge-sm">
+                                <span className="badge badge-error badge-sm gap-1">
+                                  <AlertTriangle className="w-3 h-3" />
                                   Needs Practice
                                 </span>
                               )}
@@ -344,48 +445,49 @@ export default function ProgressPage() {
         {activeTab === 'weak-areas' && (
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
-              <h2 className="card-title mb-4">Areas Needing Practice</h2>
+              <h2 className="card-title mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-error" />
+                Areas Needing Practice
+              </h2>
 
               {weakAreas.length === 0 ? (
                 <div className="alert alert-success">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <CheckCircle className="w-6 h-6" />
                   <span>Great job! No weak areas identified yet.</span>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {weakAreas.map((area, index) => (
-                    <div key={index} className="card bg-base-200">
+                    <div
+                      key={index}
+                      className="card bg-base-200 border-l-4 border-error"
+                    >
                       <div className="card-body">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold">
-                              {area.subtopic_display}
-                            </h3>
-                            <p className="text-sm text-base-content/70">
-                              {area.topic_display}
-                            </p>
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-5 h-5 text-error mt-1" />
+                            <div>
+                              <h3 className="font-bold text-lg">
+                                {area.subtopic_display}
+                              </h3>
+                              <p className="text-sm text-base-content/70 flex items-center gap-1 mt-1">
+                                <BookOpen className="w-4 h-4" />
+                                {area.topic_display}
+                              </p>
+                            </div>
                           </div>
-                          <span className="badge badge-error">
+                          <span className="badge badge-error badge-lg gap-1">
+                            <XCircle className="w-4 h-4" />
                             {area.accuracy}% accuracy
                           </span>
                         </div>
-                        <div className="flex gap-4 text-sm mt-2">
-                          <span>
-                            {area.questions_attempted} questions attempted
+                        <div className="flex gap-6 text-sm mt-3">
+                          <span className="flex items-center gap-1">
+                            <Target className="w-4 h-4" />
+                            {area.questions_attempted} attempted
                           </span>
-                          <span className="text-error">
+                          <span className="flex items-center gap-1 text-error">
+                            <XCircle className="w-4 h-4" />
                             {area.questions_incorrect} incorrect
                           </span>
                         </div>
@@ -402,23 +504,14 @@ export default function ProgressPage() {
         {activeTab === 'activity' && (
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
-              <h2 className="card-title mb-4">Recent Activity (Last 7 Days)</h2>
+              <h2 className="card-title mb-4 flex items-center gap-2">
+                <Clock className="w-6 h-6 text-primary" />
+                Recent Activity (Last 7 Days)
+              </h2>
 
               {recentActivity.length === 0 ? (
                 <div className="alert alert-info">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="stroke-current shrink-0 w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <Info className="w-6 h-6" />
                   <span>No recent activity in the last 7 days.</span>
                 </div>
               ) : (
@@ -432,66 +525,46 @@ export default function ProgressPage() {
                           : 'border-error bg-error/10'
                       }`}
                     >
-                      <div className="flex justify-between items-start">
+                      <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
-                          <p className="font-medium line-clamp-2">
+                          <p className="font-medium line-clamp-2 mb-2">
                             {attempt.question_text}
                           </p>
-                          <div className="flex gap-3 mt-2 text-sm text-base-content/70">
-                            <span className="badge badge-sm">
+                          <div className="flex flex-wrap gap-2 text-sm">
+                            <span className="badge badge-sm gap-1">
+                              <BookOpen className="w-3 h-3" />
                               {attempt.topic}
                             </span>
                             {attempt.subtopic && (
-                              <span className="badge badge-sm badge-outline">
+                              <span className="badge badge-sm badge-outline gap-1">
+                                <Target className="w-3 h-3" />
                                 {attempt.subtopic}
                               </span>
                             )}
                             {attempt.time_spent_seconds && (
-                              <span>{attempt.time_spent_seconds}s</span>
+                              <span className="badge badge-sm badge-ghost gap-1">
+                                <Clock className="w-3 h-3" />
+                                {attempt.time_spent_seconds}s
+                              </span>
                             )}
                           </div>
                         </div>
-                        <div className="ml-4">
+                        <div className="flex-shrink-0">
                           {attempt.is_correct ? (
                             <div className="badge badge-success gap-2">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
+                              <CheckCircle className="w-4 h-4" />
                               Correct
                             </div>
                           ) : (
                             <div className="badge badge-error gap-2">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
+                              <XCircle className="w-4 h-4" />
                               Incorrect
                             </div>
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-base-content/50 mt-2">
+                      <p className="text-xs text-base-content/50 mt-2 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
                         {new Date(attempt.attempted_at).toLocaleString()}
                       </p>
                     </div>
