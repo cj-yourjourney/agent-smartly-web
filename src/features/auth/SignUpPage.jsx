@@ -19,9 +19,7 @@ const SignUpPage = () => {
     username: '',
     email: '',
     password: '',
-    password2: '',
-    first_name: '',
-    last_name: ''
+    password2: ''
   })
 
   const [validationErrors, setValidationErrors] = useState({})
@@ -92,18 +90,6 @@ const SignUpPage = () => {
       errors.password2 = 'Passwords do not match'
     }
 
-    // First name validation (optional)
-    if (formData.first_name && !/^[a-zA-Z\s\-']+$/.test(formData.first_name)) {
-      errors.first_name =
-        'First name can only contain letters, spaces, hyphens, and apostrophes'
-    }
-
-    // Last name validation (optional)
-    if (formData.last_name && !/^[a-zA-Z\s\-']+$/.test(formData.last_name)) {
-      errors.last_name =
-        'Last name can only contain letters, spaces, hyphens, and apostrophes'
-    }
-
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -158,7 +144,7 @@ const SignUpPage = () => {
             Create Account
           </h2>
           <p className="text-center text-base-content/70 mb-6">
-            Sign up to start your coding journey
+           
           </p>
 
           {getGeneralError() && (
@@ -183,17 +169,12 @@ const SignUpPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Username <span className="text-error">*</span>
-                </span>
-              </label>
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder="Enter username"
+                placeholder="Username"
                 className={`input input-bordered w-full ${
                   getFieldError('username') ? 'input-error' : ''
                 }`}
@@ -210,17 +191,12 @@ const SignUpPage = () => {
 
             {/* Email */}
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Email <span className="text-error">*</span>
-                </span>
-              </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter email"
+                placeholder="Email"
                 className={`input input-bordered w-full ${
                   getFieldError('email') ? 'input-error' : ''
                 }`}
@@ -235,70 +211,15 @@ const SignUpPage = () => {
               )}
             </div>
 
-            {/* First Name */}
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">First Name</span>
-              </label>
-              <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="Enter first name (optional)"
-                className={`input input-bordered w-full ${
-                  getFieldError('first_name') ? 'input-error' : ''
-                }`}
-                disabled={loading}
-              />
-              {getFieldError('first_name') && (
-                <label className="label">
-                  <span className="label-text-alt text-error">
-                    {getFieldError('first_name')}
-                  </span>
-                </label>
-              )}
-            </div>
-
-            {/* Last Name */}
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Last Name</span>
-              </label>
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Enter last name (optional)"
-                className={`input input-bordered w-full ${
-                  getFieldError('last_name') ? 'input-error' : ''
-                }`}
-                disabled={loading}
-              />
-              {getFieldError('last_name') && (
-                <label className="label">
-                  <span className="label-text-alt text-error">
-                    {getFieldError('last_name')}
-                  </span>
-                </label>
-              )}
-            </div>
-
             {/* Password */}
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Password <span className="text-error">*</span>
-                </span>
-              </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter password"
+                  placeholder="Password (min 8 characters)"
                   className={`input input-bordered w-full pr-10 ${
                     getFieldError('password') ? 'input-error' : ''
                   }`}
@@ -313,7 +234,7 @@ const SignUpPage = () => {
                   {showPassword ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
+                      className="h-5 w-5 opacity-60"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -328,7 +249,7 @@ const SignUpPage = () => {
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
+                      className="h-5 w-5 opacity-60"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -356,20 +277,10 @@ const SignUpPage = () => {
                   </span>
                 </label>
               )}
-              <label className="label">
-                <span className="label-text-alt">
-                  Must be at least 8 characters
-                </span>
-              </label>
             </div>
 
             {/* Confirm Password */}
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">
-                  Confirm Password <span className="text-error">*</span>
-                </span>
-              </label>
               <div className="relative">
                 <input
                   type={showPassword2 ? 'text' : 'password'}
@@ -391,7 +302,7 @@ const SignUpPage = () => {
                   {showPassword2 ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
+                      className="h-5 w-5 opacity-60"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -406,7 +317,7 @@ const SignUpPage = () => {
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
+                      className="h-5 w-5 opacity-60"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

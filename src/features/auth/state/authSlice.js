@@ -173,21 +173,29 @@ export const fetchUserDetails = createAsyncThunk(
   }
 )
 
-// Initial state - check localStorage on initialization
+// Initial state - don't access localStorage during SSR
 const initialState = {
   user: null,
-  accessToken: getTokensFromStorage().access,
-  refreshToken: getTokensFromStorage().refresh,
-  isAuthenticated: !!getTokensFromStorage().access,
+  accessToken: null,
+  refreshToken: null,
+  isAuthenticated: false,
   loading: false,
   error: null,
-  registerSuccess: false
+  registerSuccess: false,
+  isInitialized: false
 }
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    initializeAuth: (state) => {
+      const tokens = getTokensFromStorage()
+      state.accessToken = tokens.access
+      state.refreshToken = tokens.refresh
+      state.isAuthenticated = !!tokens.access
+      state.isInitialized = true
+    },
     logout: (state) => {
       state.user = null
       state.accessToken = null
@@ -279,6 +287,11 @@ const authSlice = createSlice({
   }
 })
 
-export const { logout, clearError, clearRegisterSuccess, setUser } =
-  authSlice.actions
+export const {
+  initializeAuth,
+  logout,
+  clearError,
+  clearRegisterSuccess,
+  setUser
+} = authSlice.actions
 export default authSlice.reducer
