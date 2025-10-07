@@ -1,167 +1,154 @@
+// features/auth/state/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG } from '../../../shared/api/config'
 
-const API_URL = `${API_CONFIG.BASE_URL}/api/users`
+// Helper functions for token management
+const getTokensFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    const access = localStorage.getItem('accessToken')
+    const refresh = localStorage.getItem('refreshToken')
+    return { access, refresh }
+  }
+  return { access: null, refresh: null }
+}
 
-// ---- Safe localStorage helper ----
-const safeLocalStorage = {
-  getItem: (key) => {
-    if (typeof window !== 'undefined') {
-      try {
-        return localStorage.getItem(key)
-      } catch {
-        return null
-      }
-    }
-    return null
-  },
-  setItem: (key, value) => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(key, value)
-      } catch {
-        // silently fail (e.g., in private mode)
-      }
-    }
-  },
-  removeItem: (key) => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem(key)
-      } catch {
-        // ignore errors
-      }
-    }
+const saveTokensToStorage = (access, refresh) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('accessToken', access)
+    localStorage.setItem('refreshToken', refresh)
   }
 }
 
-// ---- Async Thunks ----
+const removeTokensFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+  }
+}
+
+// Async thunk for login
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async ({ username, password }, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_URL}/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        return rejectWithValue(error.detail || 'Invalid credentials')
-      }
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TOKEN_OBTAIN}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(credentials)
+        }
+      )
 
       const data = await response.json()
-      safeLocalStorage.setItem('access_token', data.access)
-      safeLocalStorage.setItem('refresh_token', data.refresh)
+
+      if (!response.ok) {
+        return rejectWithValue(data)
+      }
+
+      // Save tokens to localStorage
+      saveTokensToStorage(data.access, data.refresh)
 
       return data
     } catch (error) {
-      return rejectWithValue('Network error. Please try again.')
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
 
+// Async thunk for token refresh
+export const refreshAccessToken = createAsyncThunk(
+  'auth/refresh',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { refreshToken } = getState().auth
+
+      if (!refreshToken) {
+        return rejectWithValue({ detail: 'No refresh token available' })
+      }
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TOKEN_REFRESH}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refresh: refreshToken })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        return rejectWithValue(data)
+      }
+
+      // Update access token in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', data.access)
+      }
+
+      return data
+    } catch (error) {
+      return rejectWithValue({
+        detail: 'Failed to refresh token'
+      })
+    }
+  }
+)
+
+// Async thunk for fetching user details
 export const fetchUserDetails = createAsyncThunk(
   'auth/fetchUserDetails',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const token = safeLocalStorage.getItem('access_token')
-      if (!token) return rejectWithValue('No access token found')
+      const { accessToken } = getState().auth
 
-      const response = await fetch(`${API_URL}/auth/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-
-      if (!response.ok) throw new Error('Failed to fetch user details')
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
-  }
-)
-
-export const refreshAccessToken = createAsyncThunk(
-  'auth/refreshToken',
-  async (_, { rejectWithValue }) => {
-    try {
-      const refreshToken = safeLocalStorage.getItem('refresh_token')
-      if (!refreshToken) return rejectWithValue('No refresh token found')
-
-      const response = await fetch(`${API_URL}/token/refresh/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: refreshToken })
-      })
-
-      if (!response.ok) throw new Error('Failed to refresh token')
-
-      const data = await response.json()
-      safeLocalStorage.setItem('access_token', data.access)
-      return data
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
-  }
-)
-
-export const registerUser = createAsyncThunk(
-  'auth/register',
-  async ({ username, email, password, password2 }, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/register/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, password2 })
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        return rejectWithValue(error)
+      if (!accessToken) {
+        return rejectWithValue({ detail: 'No access token available' })
       }
 
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_AUTH}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      )
+
       const data = await response.json()
+
+      if (!response.ok) {
+        return rejectWithValue(data)
+      }
+
       return data
     } catch (error) {
-      return rejectWithValue('Network error. Please try again.')
+      return rejectWithValue({
+        detail: 'Failed to fetch user details'
+      })
     }
   }
 )
 
-// ---- Helpers ----
-const checkExistingAuth = () => {
-  const accessToken = safeLocalStorage.getItem('access_token')
-  const refreshToken = safeLocalStorage.getItem('refresh_token')
-
-  if (accessToken && refreshToken) {
-    return {
-      accessToken,
-      refreshToken,
-      isAuthenticated: true
-    }
-  }
-
-  return {
-    accessToken: null,
-    refreshToken: null,
-    isAuthenticated: false
-  }
-}
-
-// ---- Initial State ----
+// Initial state - check localStorage on initialization
 const initialState = {
   user: null,
-  accessToken: null,
-  refreshToken: null,
-  isAuthenticated: false,
+  accessToken: getTokensFromStorage().access,
+  refreshToken: getTokensFromStorage().refresh,
+  isAuthenticated: !!getTokensFromStorage().access,
   loading: false,
-  error: null,
-  ...checkExistingAuth()
+  error: null
 }
 
-// ---- Slice ----
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -172,22 +159,18 @@ const authSlice = createSlice({
       state.refreshToken = null
       state.isAuthenticated = false
       state.error = null
-
-      safeLocalStorage.removeItem('access_token')
-      safeLocalStorage.removeItem('refresh_token')
+      removeTokensFromStorage()
     },
     clearError: (state) => {
       state.error = null
     },
-    setCredentials: (state, action) => {
-      state.accessToken = action.payload.access
-      state.refreshToken = action.payload.refresh
-      state.isAuthenticated = true
+    setUser: (state, action) => {
+      state.user = action.payload
     }
   },
   extraReducers: (builder) => {
     builder
-      // Login
+      // Login cases
       .addCase(loginUser.pending, (state) => {
         state.loading = true
         state.error = null
@@ -201,51 +184,40 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload
+        state.error = action.payload?.detail || 'Login failed'
         state.isAuthenticated = false
       })
-
-      // Fetch user details
+      // Refresh token cases
+      .addCase(refreshAccessToken.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(refreshAccessToken.fulfilled, (state, action) => {
+        state.loading = false
+        state.accessToken = action.payload.access
+        state.error = null
+      })
+      .addCase(refreshAccessToken.rejected, (state) => {
+        state.loading = false
+        state.accessToken = null
+        state.refreshToken = null
+        state.isAuthenticated = false
+        removeTokensFromStorage()
+      })
+      // Fetch user details cases
       .addCase(fetchUserDetails.pending, (state) => {
         state.loading = true
       })
       .addCase(fetchUserDetails.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload
+        state.error = null
       })
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload
-      })
-
-      // Refresh token
-      .addCase(refreshAccessToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload.access
-      })
-      .addCase(refreshAccessToken.rejected, (state) => {
-        state.user = null
-        state.accessToken = null
-        state.refreshToken = null
-        state.isAuthenticated = false
-        safeLocalStorage.removeItem('access_token')
-        safeLocalStorage.removeItem('refresh_token')
-      })
-
-      // Register
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(registerUser.fulfilled, (state) => {
-        state.loading = false
-        state.error = null
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload
+        state.error = action.payload?.detail || 'Failed to fetch user details'
       })
   }
 })
 
-export const { logout, clearError, setCredentials } = authSlice.actions
+export const { logout, clearError, setUser } = authSlice.actions
 export default authSlice.reducer
