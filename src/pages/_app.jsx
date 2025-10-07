@@ -1,8 +1,13 @@
 // pages/_app.jsx
-import '../sytles/globals.css' // Make sure Tailwind/DaisyUI is imported here
+import { Provider } from 'react-redux'
+import { store } from '../shared/redux/store'
+import '../sytles/globals.css'
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+
+export default function App({ Component, pageProps }) {
+  return (
+    <Provider store={store}>
+      <Component {...pageProps} />
+    </Provider>
+  )
 }
-
-export default MyApp
