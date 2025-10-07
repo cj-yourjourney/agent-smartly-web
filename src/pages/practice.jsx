@@ -1,4 +1,4 @@
-// pages/practice.js
+// pages/practice.jxs
 import { useState, useEffect } from 'react'
 import { API_CONFIG } from '../shared/api/config'
 
@@ -10,12 +10,19 @@ export default function QuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [answerResult, setAnswerResult] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [startTime, setStartTime] = useState(null) // Track when user starts answering
 
   const API_URL = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRACTICE}`
+  const PROGRESS_URL = `${API_CONFIG.BASE_URL}/api/progress`
 
   useEffect(() => {
     fetchTopics()
   }, [])
+
+  // Start timer when a new question is shown
+  useEffect(() => {
+    setStartTime(Date.now())
+  }, [currentQuestionIndex])
 
   const fetchTopics = async () => {
     try {
@@ -50,6 +57,31 @@ export default function QuizPage() {
     setSelectedAnswer(answer)
   }
 
+  const recordQuestionAttempt = async (questionId, userAnswer, timeSpent) => {
+    try {
+      const token = localStorage.getItem('access_token')
+
+      const response = await fetch(`${PROGRESS_URL}/attempts/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          question_id: questionId,
+          user_answer: userAnswer,
+          time_spent_seconds: timeSpent
+        })
+      })
+
+      if (!response.ok) {
+        console.error('Failed to record attempt')
+      }
+    } catch (error) {
+      console.error('Error recording attempt:', error)
+    }
+  }
+
   const handleSubmitAnswer = async () => {
     if (!selectedAnswer) {
       alert('Please select an answer')
@@ -57,6 +89,7 @@ export default function QuizPage() {
     }
 
     const currentQuestion = questions[currentQuestionIndex]
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000) // in seconds
 
     try {
       const response = await fetch(
@@ -71,6 +104,9 @@ export default function QuizPage() {
       )
       const data = await response.json()
       setAnswerResult(data)
+
+      // Record the attempt in the progress tracking system
+      await recordQuestionAttempt(currentQuestion.id, selectedAnswer, timeSpent)
     } catch (error) {
       console.error('Error checking answer:', error)
     }
@@ -98,15 +134,6 @@ export default function QuizPage() {
     setCurrentQuestionIndex(0)
     setSelectedAnswer('')
     setAnswerResult(null)
-  }
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
   }
 
   if (loading) {
