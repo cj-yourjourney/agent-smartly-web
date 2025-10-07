@@ -6,7 +6,7 @@ import { loginUser, clearError } from './state/authSlice'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -44,7 +44,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.username || !formData.password) {
+    if (!formData.email || !formData.password) {
       return
     }
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
             Welcome Back
           </h2>
           <p className="text-center text-base-content/70 mb-6">
-            
+            Sign in to your account
           </p>
 
           {error && (
@@ -88,14 +88,14 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username */}
+            {/* Email */}
             <div className="form-control w-full">
               <input
-                type="text"
-                name="username"
-                value={formData.username}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="Username"
+                placeholder="Email"
                 className="input input-bordered w-full"
                 disabled={loading}
                 required
