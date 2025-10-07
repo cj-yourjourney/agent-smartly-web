@@ -1,5 +1,6 @@
 // pages/practice.js
 import { useState, useEffect } from 'react'
+import { API_CONFIG } from '../shared/api/config'
 
 export default function QuizPage() {
   const [topics, setTopics] = useState([])
@@ -10,7 +11,7 @@ export default function QuizPage() {
   const [answerResult, setAnswerResult] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const API_URL = 'http://localhost:8000/api/practice'
+  const API_URL = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRACTICE}`
 
   useEffect(() => {
     fetchTopics()

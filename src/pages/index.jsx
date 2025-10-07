@@ -1,4 +1,6 @@
 // pages/index.jsx
+import Link from 'next/link'
+
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
@@ -8,7 +10,12 @@ export default function Home() {
       <p className="text-lg text-base-content mb-6">
         This is a simple page using DaisyUI components.
       </p>
-      <button className="btn btn-primary">Click Me</button>
+      <div className="flex gap-4">
+        <button className="btn btn-primary">Click Me</button>
+        <Link href="/practice" className="btn btn-secondary">
+          Practice Quiz
+        </Link>
+      </div>
     </div>
   )
 }
