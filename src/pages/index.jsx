@@ -3,7 +3,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
       <h1 className="text-4xl font-bold text-primary mb-4">
-        Welcome to My Next.js App
+        Welcome to My Next.js App(Updated!!!)
       </h1>
       <p className="text-lg text-base-content mb-6">
         This is a simple page using DaisyUI components.
