@@ -1,17 +1,13 @@
 // features/practice/state/practiceSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { API_CONFIG } from '../../../shared/api/config'
-
-const API_URL = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRACTICE}`
-const PROGRESS_URL = `${API_CONFIG.BASE_URL}/api/progress`
+import { API_CONFIG, api } from '../../../shared/api/config'
 
 // Async thunks
 export const fetchTopics = createAsyncThunk(
   'practice/fetchTopics',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_URL}/topics/`)
-      const data = await response.json()
+      const data = await api.get(API_CONFIG.ENDPOINTS.TOPICS)
       return data
     } catch (error) {
       return rejectWithValue(error.message)
@@ -23,8 +19,7 @@ export const fetchQuestionsByTopic = createAsyncThunk(
   'practice/fetchQuestionsByTopic',
   async (topic, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_URL}/questions/?topic=${topic}`)
-      const data = await response.json()
+      const data = await api.get(API_CONFIG.ENDPOINTS.QUESTIONS, { topic })
       return { questions: data, topic }
     } catch (error) {
       return rejectWithValue(error.message)
@@ -36,17 +31,10 @@ export const checkAnswer = createAsyncThunk(
   'practice/checkAnswer',
   async ({ questionId, answer }, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `${API_URL}/questions/${questionId}/check/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ answer })
-        }
+      const data = await api.post(
+        `${API_CONFIG.ENDPOINTS.QUESTIONS}${questionId}/check/`,
+        { answer }
       )
-      const data = await response.json()
       return data
     } catch (error) {
       return rejectWithValue(error.message)
@@ -58,24 +46,12 @@ export const recordQuestionAttempt = createAsyncThunk(
   'practice/recordAttempt',
   async ({ questionId, userAnswer, timeSpent }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('access_token')
-      const response = await fetch(`${PROGRESS_URL}/attempts/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          question_id: questionId,
-          user_answer: userAnswer,
-          time_spent_seconds: timeSpent
-        })
+      const data = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, {
+        question_id: questionId,
+        user_answer: userAnswer,
+        time_spent_seconds: timeSpent
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to record attempt')
-      }
-      return await response.json()
+      return data
     } catch (error) {
       return rejectWithValue(error.message)
     }

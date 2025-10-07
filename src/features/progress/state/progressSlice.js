@@ -1,58 +1,174 @@
+// features/progress/state/progressSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
-import { API_CONFIG } from '@/shared/api/config'
+import { API_CONFIG, api } from '../../../shared/api/config'
 
-// Fetch progress attempts
-export const fetchProgress = createAsyncThunk(
-  'progress/fetchProgress',
-  async (_, { getState, rejectWithValue }) => {
+// Async thunks
+export const fetchProgressSummary = createAsyncThunk(
+  'progress/fetchSummary',
+  async (_, { rejectWithValue }) => {
     try {
-      const token = getState().auth.access // from your authSlice
-
-      if (!token) {
-        return rejectWithValue({ detail: 'Not authenticated' })
-      }
-
-      const response = await axios.get(
-        `${API_CONFIG.BASE_URL}/api/progress/attempts/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-
-      return response.data
+      const data = await api.get(API_CONFIG.ENDPOINTS.PROGRESS_SUMMARY)
+      return data
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || { detail: 'Failed to fetch progress' }
-      )
+      return rejectWithValue(error.message)
     }
   }
 )
 
+export const fetchTopicProgress = createAsyncThunk(
+  'progress/fetchTopics',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.PROGRESS_TOPICS)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchSubtopicProgress = createAsyncThunk(
+  'progress/fetchSubtopics',
+  async (topic = null, { rejectWithValue }) => {
+    try {
+      const params = topic ? { topic } : {}
+      const data = await api.get(
+        API_CONFIG.ENDPOINTS.PROGRESS_SUBTOPICS,
+        params
+      )
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchWeakAreas = createAsyncThunk(
+  'progress/fetchWeakAreas',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.WEAK_AREAS)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchRecentActivity = createAsyncThunk(
+  'progress/fetchRecentActivity',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.RECENT_ACTIVITY)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+// Initial state
+const initialState = {
+  summary: {
+    total_questions_attempted: 0,
+    total_correct: 0,
+    total_incorrect: 0,
+    overall_accuracy: 0,
+    questions_last_7_days: 0,
+    current_streak_days: 0,
+    longest_streak_days: 0,
+    last_practice_date: null
+  },
+  topicProgress: [],
+  subtopicProgress: [],
+  weakAreas: [],
+  recentActivity: [],
+  loading: false,
+  error: null,
+  selectedTopic: null
+}
+
+// Slice
 const progressSlice = createSlice({
   name: 'progress',
-  initialState: {
-    attempts: [],
-    status: 'idle',
-    error: null
+  initialState,
+  reducers: {
+    setSelectedTopic: (state, action) => {
+      state.selectedTopic = action.payload
+    },
+    clearError: (state) => {
+      state.error = null
+    }
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProgress.pending, (state) => {
-        state.status = 'loading'
+      // Fetch progress summary
+      .addCase(fetchProgressSummary.pending, (state) => {
+        state.loading = true
+        state.error = null
       })
-      .addCase(fetchProgress.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.attempts = action.payload
+      .addCase(fetchProgressSummary.fulfilled, (state, action) => {
+        state.loading = false
+        state.summary = action.payload
       })
-      .addCase(fetchProgress.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload?.detail || 'Unable to load progress.'
+      .addCase(fetchProgressSummary.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch topic progress
+      .addCase(fetchTopicProgress.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchTopicProgress.fulfilled, (state, action) => {
+        state.loading = false
+        state.topicProgress = action.payload
+      })
+      .addCase(fetchTopicProgress.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch subtopic progress
+      .addCase(fetchSubtopicProgress.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchSubtopicProgress.fulfilled, (state, action) => {
+        state.loading = false
+        state.subtopicProgress = action.payload
+      })
+      .addCase(fetchSubtopicProgress.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch weak areas
+      .addCase(fetchWeakAreas.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchWeakAreas.fulfilled, (state, action) => {
+        state.loading = false
+        state.weakAreas = action.payload
+      })
+      .addCase(fetchWeakAreas.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch recent activity
+      .addCase(fetchRecentActivity.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchRecentActivity.fulfilled, (state, action) => {
+        state.loading = false
+        state.recentActivity = action.payload
+      })
+      .addCase(fetchRecentActivity.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
       })
   }
 })
 
+export const { setSelectedTopic, clearError } = progressSlice.actions
 export default progressSlice.reducer

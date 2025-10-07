@@ -30,7 +30,16 @@ export const API_CONFIG = {
     TOKEN_REFRESH: '/api/users/token/refresh/',
     USER_DETAIL: '/api/users/detail/',
     USER_AUTH: '/api/users/auth/',
-    REGISTER: '/api/users/register/'
+    REGISTER: '/api/users/register/',
+
+    // Progress endpoints
+    PROGRESS: '/api/progress',
+    ATTEMPTS: '/api/progress/attempts/',
+    PROGRESS_SUMMARY: '/api/progress/summary/',
+    PROGRESS_TOPICS: '/api/progress/topics/',
+    PROGRESS_SUBTOPICS: '/api/progress/subtopics/',
+    WEAK_AREAS: '/api/progress/weak-areas/',
+    RECENT_ACTIVITY: '/api/progress/recent-activity/'
   }
 }
 
