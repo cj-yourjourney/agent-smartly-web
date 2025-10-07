@@ -60,6 +60,40 @@ export const loginUser = createAsyncThunk(
   }
 )
 
+// Async thunk for registration
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        return rejectWithValue(data)
+      }
+
+      // Save tokens to localStorage
+      saveTokensToStorage(data.access, data.refresh)
+
+      return data
+    } catch (error) {
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
+    }
+  }
+)
+
 // Async thunk for token refresh
 export const refreshAccessToken = createAsyncThunk(
   'auth/refresh',
@@ -146,7 +180,8 @@ const initialState = {
   refreshToken: getTokensFromStorage().refresh,
   isAuthenticated: !!getTokensFromStorage().access,
   loading: false,
-  error: null
+  error: null,
+  registerSuccess: false
 }
 
 const authSlice = createSlice({
@@ -159,10 +194,14 @@ const authSlice = createSlice({
       state.refreshToken = null
       state.isAuthenticated = false
       state.error = null
+      state.registerSuccess = false
       removeTokensFromStorage()
     },
     clearError: (state) => {
       state.error = null
+    },
+    clearRegisterSuccess: (state) => {
+      state.registerSuccess = false
     },
     setUser: (state, action) => {
       state.user = action.payload
@@ -186,6 +225,27 @@ const authSlice = createSlice({
         state.loading = false
         state.error = action.payload?.detail || 'Login failed'
         state.isAuthenticated = false
+      })
+      // Register cases
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.registerSuccess = false
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false
+        state.accessToken = action.payload.access
+        state.refreshToken = action.payload.refresh
+        state.user = action.payload.user
+        state.isAuthenticated = true
+        state.error = null
+        state.registerSuccess = true
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+        state.isAuthenticated = false
+        state.registerSuccess = false
       })
       // Refresh token cases
       .addCase(refreshAccessToken.pending, (state) => {
@@ -219,5 +279,6 @@ const authSlice = createSlice({
   }
 })
 
-export const { logout, clearError, setUser } = authSlice.actions
+export const { logout, clearError, clearRegisterSuccess, setUser } =
+  authSlice.actions
 export default authSlice.reducer
