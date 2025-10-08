@@ -31,7 +31,7 @@ export default function ProgressPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
-  const { isAuthenticated } = useSelector((state) => state.auth)
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth)
   const {
     summary,
     topicProgress,
@@ -43,12 +43,12 @@ export default function ProgressPage() {
     selectedTopic
   } = useSelector((state) => state.progress)
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (wait for auth to initialize first)
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isInitialized && !isAuthenticated) {
       router.push('/login')
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isInitialized, router])
 
   // Fetch data on mount
   useEffect(() => {
@@ -98,7 +98,8 @@ export default function ProgressPage() {
     return 'text-error'
   }
 
-  if (loading && !summary.total_questions_attempted) {
+  // Show loading while auth is initializing or while loading progress data
+  if (!isInitialized || (loading && !summary.total_questions_attempted)) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="loading loading-spinner loading-lg"></span>
