@@ -44,16 +44,23 @@ export const submitExam = createAsyncThunk(
 
 export const recordQuestionAttempt = createAsyncThunk(
   'exam/recordQuestionAttempt',
-  async ({ questionId, userAnswer, timeSpent }, { rejectWithValue }) => {
+  async (
+    { questionId, userAnswer, timeSpent, isCorrect },
+    { rejectWithValue }
+  ) => {
     try {
+      // Use the existing user_progress attempts endpoint
       const response = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, {
         question: questionId,
         user_answer: userAnswer,
-        time_spent: timeSpent
+        time_spent_seconds: timeSpent,
+        is_correct: isCorrect
       })
       return response
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to record attempt')
+      // Don't reject if attempt recording fails - it's not critical for exam flow
+      console.warn('Failed to record attempt:', error)
+      return null
     }
   }
 )
@@ -61,7 +68,7 @@ export const recordQuestionAttempt = createAsyncThunk(
 const initialState = {
   questions: [],
   currentQuestionIndex: 0,
-  answers: [], // { questionId, userAnswer, timeSpent }
+  answers: [], // { question_id, user_answer, time_spent }
   selectedAnswer: null,
   examStartTime: null,
   questionStartTime: null,
@@ -102,15 +109,12 @@ const examSlice = createSlice({
 
       // Check if answer already exists for this question
       const existingAnswerIndex = state.answers.findIndex(
-        (a) => a.questionId === currentQuestion.id
+        (a) => a.question_id === currentQuestion.id
       )
 
       const answerData = {
-        questionId: currentQuestion.id,
         question_id: currentQuestion.id,
-        userAnswer: state.selectedAnswer,
         user_answer: state.selectedAnswer,
-        timeSpent,
         time_spent: timeSpent
       }
 
@@ -131,9 +135,11 @@ const examSlice = createSlice({
         // Load existing answer if available
         const currentQuestion = state.questions[targetIndex]
         const existingAnswer = state.answers.find(
-          (a) => a.questionId === currentQuestion.id
+          (a) => a.question_id === currentQuestion.id
         )
-        state.selectedAnswer = existingAnswer ? existingAnswer.userAnswer : null
+        state.selectedAnswer = existingAnswer
+          ? existingAnswer.user_answer
+          : null
       }
     },
     nextQuestion: (state) => {
@@ -144,9 +150,11 @@ const examSlice = createSlice({
         // Load existing answer if available
         const currentQuestion = state.questions[state.currentQuestionIndex]
         const existingAnswer = state.answers.find(
-          (a) => a.questionId === currentQuestion.id
+          (a) => a.question_id === currentQuestion.id
         )
-        state.selectedAnswer = existingAnswer ? existingAnswer.userAnswer : null
+        state.selectedAnswer = existingAnswer
+          ? existingAnswer.user_answer
+          : null
       }
     },
     previousQuestion: (state) => {
@@ -157,9 +165,11 @@ const examSlice = createSlice({
         // Load existing answer if available
         const currentQuestion = state.questions[state.currentQuestionIndex]
         const existingAnswer = state.answers.find(
-          (a) => a.questionId === currentQuestion.id
+          (a) => a.question_id === currentQuestion.id
         )
-        state.selectedAnswer = existingAnswer ? existingAnswer.userAnswer : null
+        state.selectedAnswer = existingAnswer
+          ? existingAnswer.user_answer
+          : null
       }
     },
     toggleReviewMode: (state) => {
