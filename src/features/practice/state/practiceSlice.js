@@ -1,7 +1,12 @@
 // features/practice/state/practiceSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG, api } from '../../../shared/api/config'
+// Import the centralized recordQuestionAttempt action
+import { recordQuestionAttempt } from '../../progress/state/progressSlice'
 
+
+// Export the shared action for use in practice components
+export { recordQuestionAttempt }
 
 // Async thunks
 export const fetchTopics = createAsyncThunk(
@@ -43,8 +48,7 @@ export const checkAnswer = createAsyncThunk(
   }
 )
 
-// Export the shared action for use in practice components
-export { recordQuestionAttempt }
+
 
 // Initial state
 const initialState = {

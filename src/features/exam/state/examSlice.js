@@ -1,6 +1,12 @@
 // features/exam/state/examSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { api, API_CONFIG } from '../../../shared/api/config'
+// Import the centralized recordQuestionAttempt action
+import { recordQuestionAttempt } from '../../progress/state/progressSlice'
+
+
+// Export the shared action for use in exam components
+export { recordQuestionAttempt }
 
 
 
@@ -44,8 +50,7 @@ export const submitExam = createAsyncThunk(
   }
 )
 
-// Export the shared action for use in exam components
-export { recordQuestionAttempt }
+
 
 const initialState = {
   questions: [],

@@ -9,11 +9,11 @@ import {
   goToNextQuestion,
   goToPreviousQuestion,
   resetToTopicSelection,
-  setStartTime
+  setStartTime,
+  recordQuestionAttempt
 } from './state/practiceSlice'
 
-// Import the centralized recordQuestionAttempt action
-import { recordQuestionAttempt } from '../progress/state/progressSlice'
+
 
 export default function PracticeMode() {
   const dispatch = useDispatch()
