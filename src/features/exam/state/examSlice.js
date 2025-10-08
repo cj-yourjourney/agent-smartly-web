@@ -2,6 +2,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { api, API_CONFIG } from '../../../shared/api/config'
 
+
+
 // Async thunks
 export const fetchExamQuestions = createAsyncThunk(
   'exam/fetchExamQuestions',
@@ -42,28 +44,8 @@ export const submitExam = createAsyncThunk(
   }
 )
 
-export const recordQuestionAttempt = createAsyncThunk(
-  'exam/recordQuestionAttempt',
-  async (
-    { questionId, userAnswer, timeSpent, isCorrect },
-    { rejectWithValue }
-  ) => {
-    try {
-      // Use the existing user_progress attempts endpoint
-      const response = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, {
-        question_id: questionId,
-        user_answer: userAnswer,
-        time_spent_seconds: timeSpent,
-        is_correct: isCorrect
-      })
-      return response
-    } catch (error) {
-      // Don't reject if attempt recording fails - it's not critical for exam flow
-      console.warn('Failed to record attempt:', error)
-      return null
-    }
-  }
-)
+// Export the shared action for use in exam components
+export { recordQuestionAttempt }
 
 const initialState = {
   questions: [],

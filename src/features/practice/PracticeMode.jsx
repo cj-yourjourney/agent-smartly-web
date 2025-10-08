@@ -5,13 +5,15 @@ import {
   fetchTopics,
   fetchQuestionsByTopic,
   checkAnswer,
-  recordQuestionAttempt,
   setSelectedAnswer,
   goToNextQuestion,
   goToPreviousQuestion,
   resetToTopicSelection,
   setStartTime
 } from './state/practiceSlice'
+
+// Import the centralized recordQuestionAttempt action
+import { recordQuestionAttempt } from '../progress/state/progressSlice'
 
 export default function PracticeMode() {
   const dispatch = useDispatch()

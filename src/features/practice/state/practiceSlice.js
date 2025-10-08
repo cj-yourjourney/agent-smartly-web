@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG, api } from '../../../shared/api/config'
 
+
 // Async thunks
 export const fetchTopics = createAsyncThunk(
   'practice/fetchTopics',
@@ -42,21 +43,8 @@ export const checkAnswer = createAsyncThunk(
   }
 )
 
-export const recordQuestionAttempt = createAsyncThunk(
-  'practice/recordAttempt',
-  async ({ questionId, userAnswer, timeSpent }, { rejectWithValue }) => {
-    try {
-      const data = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, {
-        question_id: questionId,
-        user_answer: userAnswer,
-        time_spent_seconds: timeSpent
-      })
-      return data
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
-  }
-)
+// Export the shared action for use in practice components
+export { recordQuestionAttempt }
 
 // Initial state
 const initialState = {
@@ -161,10 +149,6 @@ const practiceSlice = createSlice({
       .addCase(checkAnswer.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
-      })
-      // Record attempt (silent, doesn't affect UI)
-      .addCase(recordQuestionAttempt.rejected, (state, action) => {
-        console.error('Failed to record attempt:', action.payload)
       })
   }
 })

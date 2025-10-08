@@ -67,6 +67,43 @@ export const fetchRecentActivity = createAsyncThunk(
   }
 )
 
+/**
+ * Centralized action for recording question attempts
+ * Used by both practice and exam modules
+ * @param {Object} payload - Question attempt data
+ * @param {number} payload.questionId - The question ID
+ * @param {string} payload.userAnswer - The user's answer
+ * @param {number} payload.timeSpent - Time spent in seconds
+ * @param {boolean} [payload.isCorrect] - Optional: Whether answer is correct (for exam mode)
+ */
+export const recordQuestionAttempt = createAsyncThunk(
+  'progress/recordQuestionAttempt',
+  async (
+    { questionId, userAnswer, timeSpent, isCorrect },
+    { rejectWithValue }
+  ) => {
+    try {
+      const payload = {
+        question_id: questionId,
+        user_answer: userAnswer,
+        time_spent_seconds: timeSpent
+      }
+
+      // Include isCorrect only if provided (for exam submissions)
+      if (isCorrect !== undefined) {
+        payload.is_correct = isCorrect
+      }
+
+      const data = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, payload)
+      return data
+    } catch (error) {
+      // Log error but don't break the user flow
+      console.error('Failed to record question attempt:', error)
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 // Initial state
 const initialState = {
   summary: {
@@ -85,7 +122,8 @@ const initialState = {
   recentActivity: [],
   loading: false,
   error: null,
-  selectedTopic: null
+  selectedTopic: null,
+  recordingAttempt: false
 }
 
 // Slice
@@ -166,6 +204,19 @@ const progressSlice = createSlice({
       .addCase(fetchRecentActivity.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+      // Record question attempt
+      .addCase(recordQuestionAttempt.pending, (state) => {
+        state.recordingAttempt = true
+      })
+      .addCase(recordQuestionAttempt.fulfilled, (state) => {
+        state.recordingAttempt = false
+        // Optionally trigger a refresh of progress data here
+      })
+      .addCase(recordQuestionAttempt.rejected, (state, action) => {
+        state.recordingAttempt = false
+        // Silent failure - don't set error to avoid disrupting user flow
+        console.error('Failed to record attempt:', action.payload)
       })
   }
 })

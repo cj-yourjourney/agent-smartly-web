@@ -11,10 +11,11 @@ import {
   nextQuestion,
   previousQuestion,
   submitExam,
-  recordQuestionAttempt,
   toggleReviewMode,
   resetExam
 } from './state/examSlice'
+// Import the centralized recordQuestionAttempt action
+import { recordQuestionAttempt } from '../progress/state/progressSlice'
 
 export default function ExamMode() {
   const dispatch = useDispatch()
