@@ -51,7 +51,7 @@ export const recordQuestionAttempt = createAsyncThunk(
     try {
       // Use the existing user_progress attempts endpoint
       const response = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, {
-        question: questionId,
+        question_id: questionId,
         user_answer: userAnswer,
         time_spent_seconds: timeSpent,
         is_correct: isCorrect
