@@ -1,6 +1,7 @@
 // features/exam/ExamMode.jsx
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from 'next/router'
 import {
   fetchExamQuestions,
   fetchExamStats,
@@ -18,6 +19,9 @@ import {
 
 export default function ExamMode() {
   const dispatch = useDispatch()
+  const router = useRouter()
+
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth)
   const {
     questions,
     currentQuestionIndex,
@@ -37,10 +41,19 @@ export default function ExamMode() {
   const [timeElapsed, setTimeElapsed] = useState(0)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
 
+  // Redirect if not authenticated (wait for auth to initialize first)
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, isInitialized, router])
+
   // Fetch exam stats on component mount
   useEffect(() => {
-    dispatch(fetchExamStats())
-  }, [dispatch])
+    if (isAuthenticated) {
+      dispatch(fetchExamStats())
+    }
+  }, [dispatch, isAuthenticated])
 
   // Timer effect
   useEffect(() => {
@@ -152,6 +165,15 @@ export default function ExamMode() {
     ) {
       dispatch(resetExam())
     }
+  }
+
+  // Show loading while auth is initializing
+  if (!isInitialized) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    )
   }
 
   // Loading screen
