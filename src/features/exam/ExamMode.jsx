@@ -16,7 +16,6 @@ import {
   recordQuestionAttempt
 } from './state/examSlice'
 
-
 export default function ExamMode() {
   const dispatch = useDispatch()
   const {
@@ -110,12 +109,27 @@ export default function ExamMode() {
     dispatch(goToQuestion(index))
   }
 
-  const handleSubmitExam = async () => {
-    // Save current answer if any
+  const handleOpenSubmitModal = () => {
+    // Save current answer before opening modal
     if (selectedAnswer !== null) {
-      dispatch(saveAnswer())
-    }
+      const currentQuestion = questions[currentQuestionIndex]
+      const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000)
 
+      dispatch(saveAnswer())
+
+      // Record attempt to backend
+      dispatch(
+        recordQuestionAttempt({
+          questionId: currentQuestion.id,
+          userAnswer: selectedAnswer,
+          timeSpent
+        })
+      )
+    }
+    setShowSubmitModal(true)
+  }
+
+  const handleSubmitExam = async () => {
     const totalTime = Math.floor((Date.now() - examStartTime) / 1000)
 
     await dispatch(
@@ -533,7 +547,7 @@ export default function ExamMode() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => setShowSubmitModal(true)}
+                      onClick={handleOpenSubmitModal}
                       className="btn btn-success"
                     >
                       Submit Exam
@@ -569,7 +583,7 @@ export default function ExamMode() {
                 <div className="grid grid-cols-5 gap-2 max-h-96 overflow-y-auto">
                   {questions.map((_, index) => {
                     const isAnswered = answers.some(
-                      (a) => a.questionId === questions[index].id
+                      (a) => a.question_id === questions[index].id
                     )
                     const isCurrent = index === currentQuestionIndex
 
@@ -592,7 +606,7 @@ export default function ExamMode() {
                 </div>
 
                 <button
-                  onClick={() => setShowSubmitModal(true)}
+                  onClick={handleOpenSubmitModal}
                   className="btn btn-success btn-block mt-4"
                 >
                   Submit Exam
