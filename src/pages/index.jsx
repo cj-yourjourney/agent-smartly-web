@@ -65,7 +65,7 @@ export default function Home() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
+          
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body items-center text-center">
                 <div className="bg-primary text-primary-content rounded-full w-16 h-16 flex items-center justify-center mb-4">
