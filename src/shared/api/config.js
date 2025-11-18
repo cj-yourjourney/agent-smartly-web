@@ -23,6 +23,8 @@ export const API_CONFIG = {
     // Practice endpoints
     PRACTICE: '/api/practice',
     TOPICS: '/api/practice/topics/',
+    SUBTOPICS: '/api/practice/subtopics/',
+    TOPIC_STRUCTURE: '/api/practice/topic-structure/',
     QUESTIONS: '/api/practice/questions/',
 
     // Auth endpoints
