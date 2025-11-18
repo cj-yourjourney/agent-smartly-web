@@ -4,7 +4,6 @@ import { API_CONFIG, api } from '../../../shared/api/config'
 // Import the centralized recordQuestionAttempt action
 import { recordQuestionAttempt } from '../../progress/state/progressSlice'
 
-
 // Export the shared action for use in practice components
 export { recordQuestionAttempt }
 
@@ -21,12 +20,39 @@ export const fetchTopics = createAsyncThunk(
   }
 )
 
+export const fetchTopicStructure = createAsyncThunk(
+  'practice/fetchTopicStructure',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.TOPIC_STRUCTURE)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 export const fetchQuestionsByTopic = createAsyncThunk(
   'practice/fetchQuestionsByTopic',
   async (topic, { rejectWithValue }) => {
     try {
       const data = await api.get(API_CONFIG.ENDPOINTS.QUESTIONS, { topic })
       return { questions: data, topic }
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchQuestionsBySubtopic = createAsyncThunk(
+  'practice/fetchQuestionsBySubtopic',
+  async ({ topic, subtopic }, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.QUESTIONS, {
+        topic,
+        subtopic
+      })
+      return { questions: data, topic, subtopic }
     } catch (error) {
       return rejectWithValue(error.message)
     }
@@ -48,12 +74,12 @@ export const checkAnswer = createAsyncThunk(
   }
 )
 
-
-
 // Initial state
 const initialState = {
   topics: [],
+  topicStructure: [],
   selectedTopic: null,
+  selectedSubtopic: null,
   questions: [],
   currentQuestionIndex: 0,
   selectedAnswer: '',
@@ -99,6 +125,7 @@ const practiceSlice = createSlice({
     },
     resetToTopicSelection: (state) => {
       state.selectedTopic = null
+      state.selectedSubtopic = null
       state.questions = []
       state.currentQuestionIndex = 0
       state.selectedAnswer = ''
@@ -124,6 +151,19 @@ const practiceSlice = createSlice({
         state.loading = false
         state.error = action.payload
       })
+      // Fetch topic structure
+      .addCase(fetchTopicStructure.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchTopicStructure.fulfilled, (state, action) => {
+        state.loading = false
+        state.topicStructure = action.payload
+      })
+      .addCase(fetchTopicStructure.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
       // Fetch questions by topic
       .addCase(fetchQuestionsByTopic.pending, (state) => {
         state.loading = true
@@ -133,12 +173,32 @@ const practiceSlice = createSlice({
         state.loading = false
         state.questions = action.payload.questions
         state.selectedTopic = action.payload.topic
+        state.selectedSubtopic = null
         state.currentQuestionIndex = 0
         state.selectedAnswer = ''
         state.answerResult = null
         state.startTime = Date.now()
       })
       .addCase(fetchQuestionsByTopic.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch questions by subtopic
+      .addCase(fetchQuestionsBySubtopic.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchQuestionsBySubtopic.fulfilled, (state, action) => {
+        state.loading = false
+        state.questions = action.payload.questions
+        state.selectedTopic = action.payload.topic
+        state.selectedSubtopic = action.payload.subtopic
+        state.currentQuestionIndex = 0
+        state.selectedAnswer = ''
+        state.answerResult = null
+        state.startTime = Date.now()
+      })
+      .addCase(fetchQuestionsBySubtopic.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })

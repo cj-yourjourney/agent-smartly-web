@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchTopics,
+  fetchTopicStructure,
   fetchQuestionsByTopic,
+  fetchQuestionsBySubtopic,
   checkAnswer,
   setSelectedAnswer,
   goToNextQuestion,
@@ -25,7 +27,9 @@ export default function PracticeMode() {
   const dispatch = useDispatch()
   const {
     topics,
+    topicStructure,
     selectedTopic,
+    selectedSubtopic,
     questions,
     currentQuestionIndex,
     selectedAnswer,
@@ -34,13 +38,11 @@ export default function PracticeMode() {
     startTime
   } = useSelector((state) => state.practice)
 
-  const [topicStructure, setTopicStructure] = useState([])
   const [expandedTopic, setExpandedTopic] = useState(null)
-  const [selectedSubtopic, setSelectedSubtopic] = useState(null)
 
   useEffect(() => {
     dispatch(fetchTopics())
-    fetchTopicStructure()
+    dispatch(fetchTopicStructure())
   }, [dispatch])
 
   useEffect(() => {
@@ -49,42 +51,14 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
-  const fetchTopicStructure = async () => {
-    try {
-      const response = await fetch(
-        'http://localhost:8000/api/practice/topic-structure/'
-      )
-      const data = await response.json()
-      setTopicStructure(data)
-    } catch (error) {
-      console.error('Error fetching topic structure:', error)
-    }
-  }
-
   const handleTopicSelect = (topicValue) => {
-    setSelectedSubtopic(null)
     dispatch(fetchQuestionsByTopic(topicValue))
   }
 
   const handleSubtopicSelect = (topicValue, subtopicValue) => {
-    setSelectedSubtopic(subtopicValue)
-    // Fetch questions filtered by both topic and subtopic
-    fetchQuestionsBySubtopic(topicValue, subtopicValue)
-  }
-
-  const fetchQuestionsBySubtopic = async (topic, subtopic) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8000/api/practice/questions/?topic=${topic}&subtopic=${subtopic}`
-      )
-      const data = await response.json()
-      dispatch({
-        type: 'practice/fetchQuestionsByTopic/fulfilled',
-        payload: { questions: data, topic }
-      })
-    } catch (error) {
-      console.error('Error fetching questions:', error)
-    }
+    dispatch(
+      fetchQuestionsBySubtopic({ topic: topicValue, subtopic: subtopicValue })
+    )
   }
 
   const toggleTopic = (topicValue) => {
@@ -127,7 +101,6 @@ export default function PracticeMode() {
 
   const handleBackToTopics = () => {
     dispatch(resetToTopicSelection())
-    setSelectedSubtopic(null)
     setExpandedTopic(null)
   }
 
