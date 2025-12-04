@@ -19,8 +19,9 @@ import {
   ChevronRight,
   ChevronLeft,
   ArrowLeft,
-  Info,
-  BookOpen
+  ChevronDown,
+  PlayCircle,
+  Info
 } from 'lucide-react'
 
 export default function PracticeMode() {
@@ -29,7 +30,6 @@ export default function PracticeMode() {
     topics,
     topicStructure,
     selectedTopic,
-    selectedSubtopic,
     questions,
     currentQuestionIndex,
     selectedAnswer,
@@ -51,9 +51,9 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
-  const handleTopicSelect = (topicValue) => {
+  // --- Handlers ---
+  const handleTopicSelect = (topicValue) =>
     dispatch(fetchQuestionsByTopic(topicValue))
-  }
 
   const handleSubtopicSelect = (topicValue, subtopicValue) => {
     dispatch(
@@ -66,22 +66,16 @@ export default function PracticeMode() {
   }
 
   const handleAnswerSelect = (answer) => {
-    dispatch(setSelectedAnswer(answer))
+    if (!answerResult) dispatch(setSelectedAnswer(answer))
   }
 
   const handleSubmitAnswer = async () => {
-    if (!selectedAnswer) {
-      alert('Please select an answer')
-      return
-    }
-
+    if (!selectedAnswer) return
     const currentQuestion = questions[currentQuestionIndex]
     const timeSpent = Math.floor((Date.now() - startTime) / 1000)
-
     await dispatch(
       checkAnswer({ questionId: currentQuestion.id, answer: selectedAnswer })
     )
-
     dispatch(
       recordQuestionAttempt({
         questionId: currentQuestion.id,
@@ -91,156 +85,157 @@ export default function PracticeMode() {
     )
   }
 
-  const handleNextQuestion = () => {
-    dispatch(goToNextQuestion())
-  }
-
-  const handlePreviousQuestion = () => {
-    dispatch(goToPreviousQuestion())
-  }
+  const handleNextQuestion = () => dispatch(goToNextQuestion())
+  const handlePreviousQuestion = () => dispatch(goToPreviousQuestion())
 
   const handleBackToTopics = () => {
     dispatch(resetToTopicSelection())
     setExpandedTopic(null)
   }
 
+  // --- Loading State ---
   if (loading && topics.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex justify-center items-center min-h-screen bg-white">
+        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
-  // Topic selection screen
+  // --- Topic Selection Screen (Improved Guidance) ---
   if (!selectedTopic) {
     return (
-      <div className="min-h-screen bg-base-200 py-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <div className="flex items-center gap-3 mb-2">
-                <BookOpen className="w-8 h-8 text-primary" />
-                <h1 className="card-title text-3xl">
-                  California Real Estate Practice Quiz
-                </h1>
-              </div>
-
-              <div className="alert alert-info mb-6">
-                <Info className="w-5 h-5" />
-                <div className="text-sm">
-                  <p className="font-semibold">How to practice:</p>
-                  <ul className="list-disc list-inside mt-1 space-y-1">
-                    <li>
-                      Click on a <strong>topic</strong> to practice all
-                      questions in that area
-                    </li>
-                    <li>
-                      Click <strong>"View Subtopics"</strong> to drill down and
-                      practice specific subtopics
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {topicStructure.map((item) => (
-                  <div
-                    key={item.topic.value}
-                    className="border-2 border-base-300 rounded-lg overflow-hidden hover:border-primary transition-colors"
-                  >
-                    <div className="flex items-stretch">
-                      <button
-                        onClick={() => handleTopicSelect(item.topic.value)}
-                        className="flex-1 btn btn-ghost justify-start text-left h-auto py-5 px-6 rounded-none hover:bg-primary hover:text-primary-content group"
-                      >
-                        <BookOpen className="w-5 h-5 mr-3 flex-shrink-0 opacity-60 group-hover:opacity-100" />
-                        <span className="font-medium">{item.topic.label}</span>
-                      </button>
-
-                      {item.subtopics.length > 0 && (
-                        <button
-                          onClick={() => toggleTopic(item.topic.value)}
-                          className="btn btn-ghost border-l-2 border-base-300 rounded-none px-6 hover:bg-base-200 flex items-center gap-2"
-                        >
-                          <span className="text-sm font-medium">
-                            {expandedTopic === item.topic.value
-                              ? 'Hide'
-                              : 'View'}{' '}
-                            Subtopics
-                          </span>
-                          <ChevronRight
-                            className={`w-4 h-4 transition-transform ${
-                              expandedTopic === item.topic.value
-                                ? 'rotate-90'
-                                : ''
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
-
-                    {expandedTopic === item.topic.value &&
-                      item.subtopics.length > 0 && (
-                        <div className="bg-base-200 border-t-2 border-base-300">
-                          <div className="p-4">
-                            <p className="text-xs font-semibold text-base-content/60 uppercase tracking-wide mb-3 px-2">
-                              Choose a Subtopic:
-                            </p>
-                            <div className="grid grid-cols-1 gap-2">
-                              {item.subtopics.map((subtopic) => (
-                                <button
-                                  key={subtopic.value}
-                                  onClick={() =>
-                                    handleSubtopicSelect(
-                                      item.topic.value,
-                                      subtopic.value
-                                    )
-                                  }
-                                  className="w-full text-left py-3 px-4 bg-base-100 hover:bg-primary hover:text-primary-content rounded-lg transition-all text-sm flex items-center gap-3 group border border-base-300 hover:border-primary"
-                                >
-                                  <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                                  <span>{subtopic.label}</span>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                ))}
+      <div className="min-h-screen bg-white text-slate-800 p-6 md:p-12">
+        <div className="max-w-3xl mx-auto">
+          {/* Header with Minimal Guide */}
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold text-slate-900 mb-3">
+              Practice Quiz
+            </h1>
+            <div className="flex items-start gap-3 text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <Info className="w-5 h-5 flex-shrink-0 text-indigo-500 mt-0.5" />
+              <div className="text-sm leading-relaxed">
+                <p>
+                  <span className="font-semibold text-slate-700">
+                    Quick Start:
+                  </span>{' '}
+                  Click the topic name to practice all questions.
+                </p>
+                <p>
+                  <span className="font-semibold text-slate-700">
+                    Deep Dive:
+                  </span>{' '}
+                  Use the arrow on the right to drill down into specific
+                  subtopics.
+                </p>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            {topicStructure.map((item) => (
+              <div
+                key={item.topic.value}
+                className={`
+                  border rounded-xl bg-white transition-all duration-200
+                  ${
+                    expandedTopic === item.topic.value
+                      ? 'border-indigo-200 shadow-md'
+                      : 'border-slate-200 hover:border-indigo-300 hover:shadow-sm'
+                  }
+                `}
+              >
+                {/* Split Button Container */}
+                <div className="flex items-stretch min-h-[64px]">
+                  {/* Left Side: Start Main Topic */}
+                  <button
+                    onClick={() => handleTopicSelect(item.topic.value)}
+                    className="flex-1 text-left px-6 py-4 flex items-center justify-between group rounded-l-xl hover:bg-slate-50 transition-colors relative overflow-hidden"
+                  >
+                    <span className="font-medium text-lg text-slate-700 group-hover:text-indigo-700 transition-colors z-10">
+                      {item.topic.label}
+                    </span>
+
+                    {/* Hover Hint Pill */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0 flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">
+                      <PlayCircle className="w-4 h-4" />
+                      <span>Start Practice</span>
+                    </div>
+                  </button>
+
+                  {/* Vertical Divider */}
+                  {item.subtopics.length > 0 && (
+                    <div className="w-[1px] bg-slate-100 my-3"></div>
+                  )}
+
+                  {/* Right Side: Expand/Collapse */}
+                  {item.subtopics.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleTopic(item.topic.value)
+                      }}
+                      className="px-5 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-r-xl transition-colors flex items-center justify-center"
+                      title="View Subtopics"
+                    >
+                      <ChevronDown
+                        className={`w-5 h-5 transition-transform duration-300 ${
+                          expandedTopic === item.topic.value
+                            ? 'rotate-180 text-indigo-600'
+                            : ''
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
+
+                {/* Expanded Subtopics Area */}
+                <div
+                  className={`
+                  overflow-hidden transition-[max-height] duration-300 ease-in-out
+                  ${
+                    expandedTopic === item.topic.value
+                      ? 'max-h-[500px] border-t border-slate-100'
+                      : 'max-h-0'
+                  }
+                `}
+                >
+                  <div className="bg-slate-50/50 p-2 space-y-1">
+                    {item.subtopics.map((subtopic) => (
+                      <button
+                        key={subtopic.value}
+                        onClick={() =>
+                          handleSubtopicSelect(item.topic.value, subtopic.value)
+                        }
+                        className="w-full text-left py-3 px-6 text-sm text-slate-600 hover:text-indigo-700 hover:bg-white hover:shadow-sm rounded-lg transition-all flex items-center gap-3 group"
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-indigo-500 transition-colors" />
+                        {subtopic.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     )
   }
 
-  // No questions available
+  // --- No Questions State ---
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-base-200 py-8">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <div className="alert alert-info">
-                <Info className="w-6 h-6" />
-                <span>
-                  No questions available yet for this{' '}
-                  {selectedSubtopic ? 'subtopic' : 'topic'}.
-                </span>
-              </div>
-              <button
-                onClick={handleBackToTopics}
-                className="btn btn-primary mt-4"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Topics
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <p className="text-slate-600 mb-4">
+          No questions available for this section.
+        </p>
+        <button
+          onClick={handleBackToTopics}
+          className="flex items-center gap-2 text-indigo-600 hover:underline font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Topics
+        </button>
       </div>
     )
   }
@@ -249,121 +244,161 @@ export default function PracticeMode() {
   const currentTopicLabel =
     topics.find((t) => t.value === selectedTopic)?.label || selectedTopic
 
-  // Quiz screen
+  // --- Quiz UI (Minimal) ---
   return (
-    <div className="min-h-screen bg-base-200 py-8">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <div className="flex justify-between items-start mb-4">
-              <h1 className="card-title text-2xl">Practice Quiz</h1>
-              <button
-                onClick={handleBackToTopics}
-                className="btn btn-sm btn-outline"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Change Topic
-              </button>
-            </div>
-
-            <div className="badge badge-secondary mb-2">
-              {currentTopicLabel}
-            </div>
-
-            <div className="flex justify-between items-center mb-6">
-              <div className="badge badge-primary badge-lg">
-                Question {currentQuestionIndex + 1} of {questions.length}
-              </div>
-              <progress
-                className="progress progress-primary w-56"
-                value={currentQuestionIndex + 1}
-                max={questions.length}
-              ></progress>
-            </div>
-
-            <h2 className="text-xl font-semibold mb-6">
-              {currentQuestion.question_text}
-            </h2>
-
-            <div className="space-y-3 mb-6">
-              {['a', 'b', 'c', 'd'].map((choice) => (
-                <div key={choice} className="form-control">
-                  <label className="label cursor-pointer justify-start gap-4 p-4 border rounded-lg hover:bg-base-200 transition-colors">
-                    <input
-                      type="radio"
-                      name="answer"
-                      className="radio radio-primary"
-                      value={choice}
-                      checked={selectedAnswer === choice}
-                      onChange={() => handleAnswerSelect(choice)}
-                      disabled={answerResult !== null}
-                    />
-                    <span className="label-text text-base">
-                      {choice.toUpperCase()}){' '}
-                      {currentQuestion[`choice_${choice}`]}
-                    </span>
-                  </label>
-                </div>
-              ))}
-            </div>
-
-            {!answerResult && (
-              <button
-                className="btn btn-primary btn-block"
-                onClick={handleSubmitAnswer}
-              >
-                Submit Answer
-              </button>
-            )}
-
-            {answerResult && (
-              <div className="space-y-4">
-                {answerResult.is_correct ? (
-                  <div className="alert alert-success">
-                    <CheckCircle2 className="w-6 h-6" />
-                    <div>
-                      <h3 className="font-bold">Correct!</h3>
-                      <p className="text-sm">{answerResult.explanation}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="alert alert-error">
-                    <XCircle className="w-6 h-6" />
-                    <div>
-                      <h3 className="font-bold">Incorrect</h3>
-                      <p className="text-sm">
-                        The correct answer is:{' '}
-                        <span className="font-bold">
-                          {answerResult.correct_answer.toUpperCase()}
-                        </span>
-                      </p>
-                      <p className="text-sm mt-2">{answerResult.explanation}</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2 justify-between">
-                  <button
-                    className="btn btn-outline"
-                    onClick={handlePreviousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleNextQuestion}
-                    disabled={currentQuestionIndex === questions.length - 1}
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-white text-slate-800 flex flex-col items-center py-8 px-4 md:px-6">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Practice Quiz</h1>
+          <button
+            onClick={handleBackToTopics}
+            className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors border border-slate-200 px-3 py-1.5 rounded-md"
+          >
+            <ArrowLeft className="w-4 h-4" /> Change Topic
+          </button>
         </div>
+
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <span className="bg-pink-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+            {currentTopicLabel}
+          </span>
+          <span className="bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </span>
+        </div>
+
+        {/* Question Text */}
+        <h2 className="text-xl md:text-2xl font-semibold text-slate-900 leading-snug mb-8">
+          {currentQuestion.question_text}
+        </h2>
+
+        {/* Options */}
+        <div className="space-y-3 mb-8">
+          {['a', 'b', 'c', 'd'].map((choice) => {
+            const isSelected = selectedAnswer === choice
+            const optionText = currentQuestion[`choice_${choice}`]
+
+            return (
+              <div
+                key={choice}
+                onClick={() => handleAnswerSelect(choice)}
+                className={`
+                  group relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200
+                  ${
+                    isSelected
+                      ? 'border-indigo-600 bg-indigo-50/30'
+                      : 'border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
+                  }
+                  ${answerResult ? 'cursor-default opacity-80' : ''}
+                `}
+              >
+                <div
+                  className={`
+                  w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 flex-shrink-0 transition-colors
+                  ${
+                    isSelected
+                      ? 'border-indigo-600'
+                      : 'border-slate-300 group-hover:border-indigo-400'
+                  }
+                `}
+                >
+                  {isSelected && (
+                    <div className="w-3 h-3 rounded-full bg-indigo-600" />
+                  )}
+                </div>
+
+                <span className="text-base text-slate-700 font-medium">
+                  {optionText}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Action Button / Result */}
+        {!answerResult ? (
+          <button
+            onClick={handleSubmitAnswer}
+            disabled={!selectedAnswer}
+            className={`
+              w-full py-3.5 rounded-lg font-bold text-white transition-all
+              ${
+                selectedAnswer
+                  ? 'bg-indigo-700 hover:bg-indigo-800 shadow-md hover:shadow-lg'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }
+            `}
+          >
+            Submit Answer
+          </button>
+        ) : (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div
+              className={`p-5 rounded-lg border mb-6 ${
+                answerResult.is_correct
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-red-50 border-red-200'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                {answerResult.is_correct ? (
+                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-red-600" />
+                )}
+                <h3
+                  className={`font-bold ${
+                    answerResult.is_correct ? 'text-green-800' : 'text-red-800'
+                  }`}
+                >
+                  {answerResult.is_correct ? 'Correct!' : 'Incorrect'}
+                </h3>
+              </div>
+
+              {!answerResult.is_correct && (
+                <p className="text-red-700 mb-2">
+                  Correct answer:{' '}
+                  <span className="font-semibold">
+                    {answerResult.correct_answer.toUpperCase()}
+                  </span>
+                </p>
+              )}
+
+              <p className="text-slate-700 text-sm leading-relaxed border-t border-black/5 pt-2 mt-2">
+                {answerResult.explanation}
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={handlePreviousQuestion}
+                disabled={currentQuestionIndex === 0}
+                className="flex-1 py-3 px-4 rounded-lg border border-slate-300 text-slate-600 font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+              >
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </button>
+              <button
+                onClick={handleNextQuestion}
+                disabled={currentQuestionIndex === questions.length - 1}
+                className="flex-1 py-3 px-4 rounded-lg bg-indigo-700 text-white font-medium hover:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm"
+              >
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-slate-100 z-50">
+        <div
+          className="h-full bg-indigo-600 transition-all duration-500 ease-out"
+          style={{
+            width: `${((currentQuestionIndex + 1) / questions.length) * 100}%`
+          }}
+        />
       </div>
     </div>
   )
