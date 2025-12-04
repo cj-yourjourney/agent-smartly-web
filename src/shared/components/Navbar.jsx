@@ -16,6 +16,7 @@ import {
   FileText,
   Users
 } from 'lucide-react'
+import ROUTES from '../constants/routes'
 
 const Navbar = () => {
   const router = useRouter()
@@ -43,7 +44,7 @@ const Navbar = () => {
       <div className="navbar bg-base-100 shadow-lg px-4 lg:px-8">
         <div className="navbar-start">
           <button
-            onClick={() => handleNavigation('/')}
+            onClick={() => handleNavigation(ROUTES.HOME)}
             className="btn btn-ghost normal-case text-xl font-bold"
           >
             <span className="text-primary">Agent</span>
@@ -58,7 +59,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout())
-    router.push('/')
+    router.push(ROUTES.HOME)
     setIsMobileMenuOpen(false)
   }
 
@@ -76,7 +77,7 @@ const Navbar = () => {
       <div className="navbar-start">
         {/* Logo */}
         <button
-          onClick={() => handleNavigation('/')}
+          onClick={() => handleNavigation(ROUTES.HOME)}
           className="btn btn-ghost normal-case text-xl font-bold"
         >
           <span className="text-primary">Agent</span>
@@ -91,8 +92,8 @@ const Navbar = () => {
             <>
               <li>
                 <button
-                  onClick={() => handleNavigation('/learning/practice')}
-                  className={isActive('/learning/practice') ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
+                  className={isActive(ROUTES.LEARNING.PRACTICE) ? 'active' : ''}
                 >
                   <BookOpen className="h-5 w-5" />
                   Practice
@@ -100,8 +101,8 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation('/learning/progress')}
-                  className={isActive('/learning/progress') ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.LEARNING.PROGRESS)}
+                  className={isActive(ROUTES.LEARNING.PROGRESS) ? 'active' : ''}
                 >
                   <BarChart3 className="h-5 w-5" />
                   Progress
@@ -109,8 +110,10 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation('/community/study-group')}
-                  className={isActive('/community/study-group') ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)}
+                  className={
+                    isActive(ROUTES.COMMUNITY.STUDY_GROUP) ? 'active' : ''
+                  }
                 >
                   <Users className="h-5 w-5" />
                   Study Group
@@ -121,8 +124,8 @@ const Navbar = () => {
             <>
               <li>
                 <button
-                  onClick={() => handleNavigation('/')}
-                  className={isActive('/') ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.HOME)}
+                  className={isActive(ROUTES.HOME) ? 'active' : ''}
                 >
                   <Home className="h-5 w-5" />
                   Home
@@ -130,8 +133,10 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation('/community/study-group')}
-                  className={isActive('/community/study-group') ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)}
+                  className={
+                    isActive(ROUTES.COMMUNITY.STUDY_GROUP) ? 'active' : ''
+                  }
                 >
                   <Users className="h-5 w-5" />
                   Study Group
@@ -171,21 +176,23 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/learning/practice')}
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
                   >
                     <BookOpen className="h-4 w-4" />
                     Practice
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation('/learning/exam')}>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.LEARNING.EXAM)}
+                  >
                     <FileText className="h-4 w-4" />
                     Exam
                   </button>
                 </li>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/learning/progress')}
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PROGRESS)}
                   >
                     <BarChart3 className="h-4 w-4" />
                     Progress
@@ -193,7 +200,9 @@ const Navbar = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/community/study-group')}
+                    onClick={() =>
+                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
+                    }
                   >
                     <Users className="h-4 w-4" />
                     Study Group
@@ -229,7 +238,7 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/learning/practice')}
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
                   >
                     <BookOpen className="h-4 w-4" />
                     Practice
@@ -237,7 +246,7 @@ const Navbar = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/learning/progress')}
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PROGRESS)}
                   >
                     <BarChart3 className="h-4 w-4" />
                     Progress
@@ -245,7 +254,9 @@ const Navbar = () => {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/community/study-group')}
+                    onClick={() =>
+                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
+                    }
                   >
                     <Users className="h-4 w-4" />
                     Study Group
@@ -266,13 +277,13 @@ const Navbar = () => {
             {/* Not Authenticated - Desktop */}
             <div className="hidden lg:flex gap-2">
               <button
-                onClick={() => handleNavigation('/auth/login')}
+                onClick={() => handleNavigation(ROUTES.AUTH.LOGIN)}
                 className="btn btn-ghost"
               >
                 Login
               </button>
               <button
-                onClick={() => handleNavigation('/auth/signup')}
+                onClick={() => handleNavigation(ROUTES.AUTH.SIGNUP)}
                 className="btn btn-primary"
               >
                 Sign Up
@@ -289,14 +300,16 @@ const Navbar = () => {
                 className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
               >
                 <li>
-                  <button onClick={() => handleNavigation('/')}>
+                  <button onClick={() => handleNavigation(ROUTES.HOME)}>
                     <Home className="h-4 w-4" />
                     Home
                   </button>
                 </li>
                 <li>
                   <button
-                    onClick={() => handleNavigation('/community/study-group')}
+                    onClick={() =>
+                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
+                    }
                   >
                     <Users className="h-4 w-4" />
                     Study Group
@@ -304,12 +317,12 @@ const Navbar = () => {
                 </li>
                 <div className="divider my-0"></div>
                 <li>
-                  <button onClick={() => handleNavigation('/auth/login')}>
+                  <button onClick={() => handleNavigation(ROUTES.AUTH.LOGIN)}>
                     Login
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleNavigation('/auth/signup')}>
+                  <button onClick={() => handleNavigation(ROUTES.AUTH.SIGNUP)}>
                     Sign Up
                   </button>
                 </li>

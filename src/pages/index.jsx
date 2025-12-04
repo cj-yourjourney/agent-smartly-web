@@ -1,6 +1,7 @@
 // pages/index.jsx
 import { useRouter } from 'next/router'
 import { useSelector } from 'react-redux'
+import { ROUTES } from '@/shared/constants/routes'
 
 export default function Home() {
   const router = useRouter()
@@ -24,13 +25,13 @@ export default function Home() {
               {isAuthenticated ? (
                 <>
                   <button
-                    onClick={() => router.push('/practice')}
+                    onClick={() => router.push(ROUTES.LEARNING.PRACTICE)}
                     className="btn btn-primary btn-lg"
                   >
                     Start Practicing
                   </button>
                   <button
-                    onClick={() => router.push('/progress')}
+                    onClick={() => router.push(ROUTES.LEARNING.PROGRESS)}
                     className="btn btn-outline btn-lg"
                   >
                     View Progress
@@ -39,13 +40,13 @@ export default function Home() {
               ) : (
                 <>
                   <button
-                    onClick={() => router.push('/signup')}
+                    onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
                     className="btn btn-primary btn-lg"
                   >
                     Get Started Free
                   </button>
                   <button
-                    onClick={() => router.push('/login')}
+                    onClick={() => router.push(ROUTES.AUTH.LOGIN)}
                     className="btn btn-outline btn-lg"
                   >
                     Sign In
@@ -65,7 +66,6 @@ export default function Home() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
             <div className="card bg-base-200 shadow-lg">
               <div className="card-body items-center text-center">
                 <div className="bg-primary text-primary-content rounded-full w-16 h-16 flex items-center justify-center mb-4">
@@ -195,14 +195,14 @@ export default function Home() {
           </p>
           {isAuthenticated ? (
             <button
-              onClick={() => router.push('/practice')}
+              onClick={() => router.push(ROUTES.LEARNING.PRACTICE)}
               className="btn btn-primary btn-lg"
             >
               Continue Practicing
             </button>
           ) : (
             <button
-              onClick={() => router.push('/signup')}
+              onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
               className="btn btn-primary btn-lg"
             >
               Start Practicing Now
