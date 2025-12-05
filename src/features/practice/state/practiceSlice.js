@@ -1,10 +1,8 @@
 // features/practice/state/practiceSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG, api } from '../../../shared/api/config'
-// Import the centralized recordQuestionAttempt action
 import { recordQuestionAttempt } from '../../progress/state/progressSlice'
 
-// Export the shared action for use in practice components
 export { recordQuestionAttempt }
 
 // Async thunks
@@ -59,6 +57,18 @@ export const fetchQuestionsBySubtopic = createAsyncThunk(
   }
 )
 
+export const fetchPracticeQuizQuestions = createAsyncThunk(
+  'practice/fetchPracticeQuizQuestions',
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await api.get(API_CONFIG.ENDPOINTS.PRACTICE_EXAM)
+      return { questions: data }
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 export const checkAnswer = createAsyncThunk(
   'practice/checkAnswer',
   async ({ questionId, answer }, { rejectWithValue }) => {
@@ -86,7 +96,8 @@ const initialState = {
   answerResult: null,
   loading: false,
   error: null,
-  startTime: null
+  startTime: null,
+  isPracticeQuiz: false
 }
 
 // Slice
@@ -131,6 +142,7 @@ const practiceSlice = createSlice({
       state.selectedAnswer = ''
       state.answerResult = null
       state.startTime = null
+      state.isPracticeQuiz = false
     },
     setStartTime: (state) => {
       state.startTime = Date.now()
@@ -178,6 +190,7 @@ const practiceSlice = createSlice({
         state.selectedAnswer = ''
         state.answerResult = null
         state.startTime = Date.now()
+        state.isPracticeQuiz = false
       })
       .addCase(fetchQuestionsByTopic.rejected, (state, action) => {
         state.loading = false
@@ -197,8 +210,29 @@ const practiceSlice = createSlice({
         state.selectedAnswer = ''
         state.answerResult = null
         state.startTime = Date.now()
+        state.isPracticeQuiz = false
       })
       .addCase(fetchQuestionsBySubtopic.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Fetch practice quiz questions
+      .addCase(fetchPracticeQuizQuestions.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchPracticeQuizQuestions.fulfilled, (state, action) => {
+        state.loading = false
+        state.questions = action.payload.questions
+        state.selectedTopic = 'practice_quiz'
+        state.selectedSubtopic = null
+        state.currentQuestionIndex = 0
+        state.selectedAnswer = ''
+        state.answerResult = null
+        state.startTime = Date.now()
+        state.isPracticeQuiz = true
+      })
+      .addCase(fetchPracticeQuizQuestions.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })

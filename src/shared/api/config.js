@@ -27,6 +27,9 @@ export const API_CONFIG = {
     TOPIC_STRUCTURE: '/api/practice/topic-structure/',
     QUESTIONS: '/api/practice/questions/',
 
+    
+    PRACTICE_EXAM: '/api/practice/practice-exam/',
+
     // Auth endpoints
     TOKEN_OBTAIN: '/api/users/token/',
     TOKEN_REFRESH: '/api/users/token/refresh/',

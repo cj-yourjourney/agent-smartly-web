@@ -5,6 +5,7 @@ import {
   fetchTopicStructure,
   fetchQuestionsByTopic,
   fetchQuestionsBySubtopic,
+  fetchPracticeQuizQuestions,
   checkAnswer,
   setSelectedAnswer,
   goToNextQuestion,
@@ -19,7 +20,8 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Info
+  Info,
+  Clock
 } from 'lucide-react'
 
 export default function PracticeMode() {
@@ -33,10 +35,14 @@ export default function PracticeMode() {
     selectedAnswer,
     answerResult,
     loading,
-    startTime
+    startTime,
+    isPracticeQuiz
   } = useSelector((state) => state.practice)
 
   const [expandedTopic, setExpandedTopic] = useState(null)
+  const [elapsedTime, setElapsedTime] = useState(0)
+  const [sessionStartTime, setSessionStartTime] = useState(null)
+  const [showTimeUpAlert, setShowTimeUpAlert] = useState(false)
 
   useEffect(() => {
     dispatch(fetchTopics())
@@ -49,6 +55,42 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
+  // Timer for comprehensive practice
+  useEffect(() => {
+    if (isPracticeQuiz && selectedTopic && !sessionStartTime) {
+      setSessionStartTime(Date.now())
+      setShowTimeUpAlert(false)
+    }
+
+    if (isPracticeQuiz && sessionStartTime) {
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
+        setElapsedTime(elapsed)
+
+        // Show alert when time is up
+        if (elapsed >= timeLimit && !showTimeUpAlert) {
+          setShowTimeUpAlert(true)
+        }
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
+  }, [isPracticeQuiz, sessionStartTime, selectedTopic, showTimeUpAlert])
+
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  // Calculate time remaining (90 minutes = 5400 seconds)
+  const timeLimit = 90 * 60
+  const timeRemaining = Math.max(0, timeLimit - elapsedTime)
+  const isTimeUp = elapsedTime >= timeLimit
+  const isTimeWarning = timeRemaining <= 10 * 60 && timeRemaining > 5 * 60
+  const isTimeCritical = timeRemaining <= 5 * 60 && timeRemaining > 0
+
   // --- Handlers ---
   const handleTopicSelect = (topicValue) =>
     dispatch(fetchQuestionsByTopic(topicValue))
@@ -57,6 +99,12 @@ export default function PracticeMode() {
     dispatch(
       fetchQuestionsBySubtopic({ topic: topicValue, subtopic: subtopicValue })
     )
+  }
+
+  const handlePracticeQuizSelect = () => {
+    dispatch(fetchPracticeQuizQuestions())
+    setElapsedTime(0)
+    setSessionStartTime(null)
   }
 
   const toggleTopic = (topicValue) => {
@@ -89,6 +137,9 @@ export default function PracticeMode() {
   const handleBackToTopics = () => {
     dispatch(resetToTopicSelection())
     setExpandedTopic(null)
+    setElapsedTime(0)
+    setSessionStartTime(null)
+    setShowTimeUpAlert(false)
   }
 
   // --- Loading State ---
@@ -107,20 +158,45 @@ export default function PracticeMode() {
         <div className="max-w-3xl mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-base-content mb-2">
-              Practice Quiz
+              Practice Mode
             </h1>
             <p className="text-base-content/70">
-              Select a <span className="font-semibold">topic</span> to practice
-              all questions, or expand to choose a specific{' '}
-              <span className="font-semibold">subtopic</span>.
+              Choose your practice format: take a full practice exam or study
+              specific topics.
             </p>
           </div>
 
-          <div className="flex items-start gap-2 p-3 bg-info/10 border border-info/20 rounded-lg mb-6">
-            <Info className="w-5 h-5 text-info shrink-0 mt-0.5" />
-            <span className="text-sm text-base-content/80">
-              Each quiz contains 20 questions to help you practice effectively.
-            </span>
+          {/* Practice Exam Button */}
+          <div className="mb-8">
+            <button
+              onClick={handlePracticeQuizSelect}
+              className="w-full p-5 bg-gradient-to-r from-primary to-secondary text-primary-content rounded-lg hover:shadow-lg transition-all group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-6 h-6" />
+                  <div className="text-left">
+                    <div className="text-lg font-bold">Practice Exam</div>
+                    <div className="text-sm opacity-90">
+                      75 questions • 90 minutes • All topics
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          </div>
+
+          <div className="divider text-base-content/50">OR</div>
+
+          {/* Topic Practice Section */}
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-base-content mb-1">
+              Study by Topic
+            </h2>
+            <p className="text-sm text-base-content/60">
+              20 questions per topic • No time limit
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -193,7 +269,7 @@ export default function PracticeMode() {
             No questions available for this section.
           </p>
           <button onClick={handleBackToTopics} className="btn btn-link">
-            Back to Topics
+            Back to Practice Mode
           </button>
         </div>
       </div>
@@ -201,30 +277,98 @@ export default function PracticeMode() {
   }
 
   const currentQuestion = questions[currentQuestionIndex]
-  const currentTopicLabel =
-    topics.find((t) => t.value === selectedTopic)?.label || selectedTopic
+  const currentTopicLabel = isPracticeQuiz
+    ? 'Practice Exam'
+    : topics.find((t) => t.value === selectedTopic)?.label || selectedTopic
 
   // --- Quiz UI ---
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4 py-6">
       <div className="w-full max-w-2xl">
-        {/* Minimal Header */}
+        {/* Header */}
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold text-primary px-2 py-1 bg-primary/10 rounded">
+            <span
+              className={`text-xs font-semibold px-2 py-1 rounded ${
+                isPracticeQuiz
+                  ? 'text-secondary bg-secondary/10'
+                  : 'text-primary bg-primary/10'
+              }`}
+            >
               {currentTopicLabel}
             </span>
             <span className="text-sm font-medium text-base-content/50">
               {currentQuestionIndex + 1} / {questions.length}
             </span>
           </div>
-          <button
-            onClick={handleBackToTopics}
-            className="text-xs text-base-content/50 hover:text-base-content transition-colors"
-          >
-            Change Topic
-          </button>
+
+          <div className="flex items-center gap-3">
+            {isPracticeQuiz && (
+              <div
+                className={`flex items-center gap-1.5 text-sm font-medium px-2 py-1 rounded ${
+                  isTimeUp
+                    ? 'text-error bg-error/10'
+                    : isTimeCritical
+                    ? 'text-error bg-error/10'
+                    : isTimeWarning
+                    ? 'text-warning bg-warning/10'
+                    : 'text-base-content/70 bg-base-200'
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                <span>{isTimeUp ? 'Overtime' : formatTime(timeRemaining)}</span>
+              </div>
+            )}
+            <button
+              onClick={handleBackToTopics}
+              className="text-xs text-base-content/50 hover:text-base-content transition-colors"
+            >
+              Exit
+            </button>
+          </div>
         </div>
+
+        {/* Time up alert */}
+        {isPracticeQuiz && showTimeUpAlert && (
+          <div className="alert alert-error mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div>
+              <h3 className="font-bold">Time's Up!</h3>
+              <div className="text-sm">
+                In the real exam, time would be over. You can continue
+                practicing, but this is now overtime.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Time warning */}
+        {isPracticeQuiz && isTimeWarning && !showTimeUpAlert && (
+          <div
+            className={`alert mb-4 ${
+              isTimeCritical ? 'alert-error' : 'alert-warning'
+            }`}
+          >
+            <Info className="w-5 h-5" />
+            <span className="text-sm">
+              {isTimeCritical
+                ? 'Less than 5 minutes remaining!'
+                : '10 minutes remaining'}
+            </span>
+          </div>
+        )}
 
         {/* Question */}
         <h2 className="text-2xl font-semibold text-base-content mb-5 leading-tight">
