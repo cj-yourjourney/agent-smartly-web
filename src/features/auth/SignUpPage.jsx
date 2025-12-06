@@ -7,6 +7,7 @@ import {
   clearError,
   clearRegisterSuccess
 } from './state/authSlice'
+import ROUTES from '@/shared/constants/routes'
 
 const SignUpPage = () => {
   const dispatch = useDispatch()
@@ -29,7 +30,7 @@ const SignUpPage = () => {
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated && registerSuccess) {
-      router.push('/practice')
+      router.push(ROUTES.LEARNING.PRACTICE)
     }
   }, [isAuthenticated, registerSuccess, router])
 
@@ -143,9 +144,7 @@ const SignUpPage = () => {
           <h2 className="card-title text-3xl font-bold text-center justify-center mb-2">
             Create Account
           </h2>
-          <p className="text-center text-base-content/70 mb-6">
-           
-          </p>
+          <p className="text-center text-base-content/70 mb-6">Join us today</p>
 
           {getGeneralError() && (
             <div className="alert alert-error mb-4">
@@ -365,11 +364,11 @@ const SignUpPage = () => {
             <p className="text-sm">
               Already have an account?{' '}
               <a
-                href="/login"
+                href={ROUTES.AUTH.LOGIN}
                 className="link link-primary font-semibold"
                 onClick={(e) => {
                   e.preventDefault()
-                  router.push('/login')
+                  router.push(ROUTES.AUTH.LOGIN)
                 }}
               >
                 Sign In

@@ -181,7 +181,7 @@ export default function LoginPage() {
             <p className="text-sm">
               Don't have an account?{' '}
               <a
-                href="auth/signup"
+                href={ROUTES.AUTH.SIGNUP}
                 className="link link-primary font-semibold"
                 onClick={(e) => {
                   e.preventDefault()
