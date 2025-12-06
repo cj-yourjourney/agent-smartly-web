@@ -1,16 +1,12 @@
-// shared/api/config.js
+// shared/api/config.js - Enhanced with automatic token refresh
 
 /**
  * Get the API base URL based on the environment
- * @returns {string} The API base URL
  */
 export const getApiUrl = () => {
-  // Check if we're in development mode
   if (process.env.NODE_ENV === 'development') {
     return 'http://localhost:8000'
   }
-
-  // Production URL
   return 'https://api.codifymate.com'
 }
 
@@ -26,8 +22,6 @@ export const API_CONFIG = {
     SUBTOPICS: '/api/practice/subtopics/',
     TOPIC_STRUCTURE: '/api/practice/topic-structure/',
     QUESTIONS: '/api/practice/questions/',
-
-    
     PRACTICE_EXAM: '/api/practice/practice-exam/',
 
     // Auth endpoints
@@ -55,7 +49,6 @@ export const API_CONFIG = {
 
 /**
  * Get access token from localStorage
- * @returns {string|null} Access token
  */
 export const getAccessToken = () => {
   if (typeof window !== 'undefined') {
@@ -66,7 +59,6 @@ export const getAccessToken = () => {
 
 /**
  * Get refresh token from localStorage
- * @returns {string|null} Refresh token
  */
 export const getRefreshToken = () => {
   if (typeof window !== 'undefined') {
@@ -77,13 +69,11 @@ export const getRefreshToken = () => {
 
 /**
  * Save tokens to localStorage
- * @param {string} access - Access token
- * @param {string} refresh - Refresh token
  */
 export const saveTokens = (access, refresh) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('accessToken', access)
-    localStorage.setItem('refreshToken', refresh)
+    if (refresh) localStorage.setItem('refreshToken', refresh)
   }
 }
 
@@ -99,7 +89,6 @@ export const removeTokens = () => {
 
 /**
  * Get authorization header with access token
- * @returns {Object} Authorization header object
  */
 export const getAuthHeader = () => {
   const token = getAccessToken()
@@ -112,8 +101,45 @@ export const getAuthHeader = () => {
 }
 
 /**
+ * Check if token is expired or about to expire
+ */
+const isTokenExpired = (token) => {
+  if (!token) return true
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    const exp = payload.exp * 1000
+    const now = Date.now()
+
+    // Token expired if it expires in less than 10 seconds
+    return exp - now < 10000
+  } catch (error) {
+    console.error('Error checking token expiration:', error)
+    return true
+  }
+}
+
+// Track if we're currently refreshing to prevent multiple simultaneous refreshes
+let isRefreshing = false
+let refreshSubscribers = []
+
+/**
+ * Subscribe to token refresh
+ */
+const subscribeTokenRefresh = (callback) => {
+  refreshSubscribers.push(callback)
+}
+
+/**
+ * Notify all subscribers when token is refreshed
+ */
+const onTokenRefreshed = (token) => {
+  refreshSubscribers.forEach((callback) => callback(token))
+  refreshSubscribers = []
+}
+
+/**
  * Refresh the access token
- * @returns {Promise<string>} New access token
  */
 export const refreshAccessToken = async () => {
   const refreshToken = getRefreshToken()
@@ -123,6 +149,8 @@ export const refreshAccessToken = async () => {
   }
 
   try {
+    console.log('🔄 Refreshing access token...')
+
     const response = await fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TOKEN_REFRESH}`,
       {
@@ -141,12 +169,12 @@ export const refreshAccessToken = async () => {
     const data = await response.json()
 
     // Save the new access token
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('accessToken', data.access)
-    }
+    saveTokens(data.access, refreshToken)
+    console.log('✅ Token refreshed successfully')
 
     return data.access
   } catch (error) {
+    console.error('❌ Token refresh failed:', error)
     // If refresh fails, clear tokens and redirect to login
     removeTokens()
     if (typeof window !== 'undefined') {
@@ -158,10 +186,6 @@ export const refreshAccessToken = async () => {
 
 /**
  * Make an authenticated API request with automatic token refresh
- * @param {string} endpoint - The API endpoint (from API_CONFIG.ENDPOINTS)
- * @param {Object} options - Fetch options
- * @param {boolean} retry - Internal flag for retry logic
- * @returns {Promise<Response>} Fetch response
  */
 export const authenticatedFetch = async (
   endpoint,
@@ -169,9 +193,46 @@ export const authenticatedFetch = async (
   retry = true
 ) => {
   const url = `${API_CONFIG.BASE_URL}${endpoint}`
+  let token = getAccessToken()
+
+  // Check if token needs refresh before making request
+  if (token && isTokenExpired(token) && retry) {
+    console.log('🔄 Token expired, refreshing before request...')
+
+    // If already refreshing, wait for it to complete
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((newToken) => {
+          // Retry with new token
+          const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${newToken}`,
+            ...options.headers
+          }
+
+          fetch(url, { ...options, headers })
+            .then(resolve)
+            .catch(reject)
+        })
+      })
+    }
+
+    // Start refreshing
+    isRefreshing = true
+
+    try {
+      token = await refreshAccessToken()
+      onTokenRefreshed(token)
+    } catch (error) {
+      throw error
+    } finally {
+      isRefreshing = false
+    }
+  }
+
   const headers = {
     'Content-Type': 'application/json',
-    ...getAuthHeader(),
+    Authorization: token ? `Bearer ${token}` : '',
     ...options.headers
   }
 
@@ -183,13 +244,44 @@ export const authenticatedFetch = async (
 
     // If unauthorized and we haven't retried yet, try to refresh token
     if (response.status === 401 && retry) {
+      console.log('🔄 Got 401, attempting to refresh token...')
+
+      // If already refreshing, wait for it
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh(async (newToken) => {
+            try {
+              const retryHeaders = {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${newToken}`,
+                ...options.headers
+              }
+
+              const retryResponse = await fetch(url, {
+                ...options,
+                headers: retryHeaders
+              })
+              resolve(retryResponse)
+            } catch (error) {
+              reject(error)
+            }
+          })
+        })
+      }
+
+      // Start refreshing
+      isRefreshing = true
+
       try {
-        await refreshAccessToken()
+        const newToken = await refreshAccessToken()
+        onTokenRefreshed(newToken)
+
         // Retry the request with new token
         return authenticatedFetch(endpoint, options, false)
       } catch (refreshError) {
-        // Token refresh failed, throw the original 401 error
         throw new Error('Authentication failed')
+      } finally {
+        isRefreshing = false
       }
     }
 
@@ -201,9 +293,6 @@ export const authenticatedFetch = async (
 
 /**
  * Generic API call wrapper with error handling
- * @param {string} endpoint - The API endpoint (from API_CONFIG.ENDPOINTS)
- * @param {Object} options - Fetch options
- * @returns {Promise<Object>} Parsed JSON response
  */
 export const apiCall = async (endpoint, options = {}) => {
   try {
@@ -239,12 +328,6 @@ export const apiCall = async (endpoint, options = {}) => {
  * API helper methods for common HTTP operations
  */
 export const api = {
-  /**
-   * GET request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} params - Query parameters
-   * @returns {Promise<Object>}
-   */
   get: async (endpoint, params = {}) => {
     const queryString = new URLSearchParams(params).toString()
     const url = queryString ? `${endpoint}?${queryString}` : endpoint
@@ -254,12 +337,6 @@ export const api = {
     })
   },
 
-  /**
-   * POST request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @returns {Promise<Object>}
-   */
   post: async (endpoint, data = {}) => {
     return apiCall(endpoint, {
       method: 'POST',
@@ -267,12 +344,6 @@ export const api = {
     })
   },
 
-  /**
-   * PUT request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @returns {Promise<Object>}
-   */
   put: async (endpoint, data = {}) => {
     return apiCall(endpoint, {
       method: 'PUT',
@@ -280,12 +351,6 @@ export const api = {
     })
   },
 
-  /**
-   * PATCH request
-   * @param {string} endpoint - API endpoint
-   * @param {Object} data - Request body
-   * @returns {Promise<Object>}
-   */
   patch: async (endpoint, data = {}) => {
     return apiCall(endpoint, {
       method: 'PATCH',
@@ -293,11 +358,6 @@ export const api = {
     })
   },
 
-  /**
-   * DELETE request
-   * @param {string} endpoint - API endpoint
-   * @returns {Promise<Object>}
-   */
   delete: async (endpoint) => {
     return apiCall(endpoint, {
       method: 'DELETE'

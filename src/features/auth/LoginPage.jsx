@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import { loginUser, clearError } from './state/authSlice'
+import ROUTES from '@/shared/constants/routes'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ export default function LoginPage() {
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated) {
-      router.push('/practice')
+      router.push(ROUTES.LEARNING.PRACTICE)
     }
   }, [isAuthenticated, router])
 
@@ -180,11 +181,11 @@ export default function LoginPage() {
             <p className="text-sm">
               Don't have an account?{' '}
               <a
-                href="/signup"
+                href="auth/signup"
                 className="link link-primary font-semibold"
                 onClick={(e) => {
                   e.preventDefault()
-                  router.push('/signup')
+                  router.push(ROUTES.AUTH.SIGNUP)
                 }}
               >
                 Sign Up
