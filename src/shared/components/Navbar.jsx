@@ -182,14 +182,7 @@ const Navbar = () => {
                     Practice
                   </button>
                 </li>
-                <li>
-                  <button
-                    onClick={() => handleNavigation(ROUTES.LEARNING.EXAM)}
-                  >
-                    <FileText className="h-4 w-4" />
-                    Exam
-                  </button>
-                </li>
+
                 <li>
                   <button
                     onClick={() => handleNavigation(ROUTES.LEARNING.PROGRESS)}
