@@ -40,10 +40,6 @@ export const API_CONFIG = {
     WEAK_AREAS: '/api/progress/weak-areas/',
     RECENT_ACTIVITY: '/api/progress/recent-activity/',
 
-    // Exam endpoints
-    EXAM_QUESTIONS: '/api/practice/exam/questions/',
-    EXAM_SUBMIT: '/api/practice/exam/submit/',
-    EXAM_STATS: '/api/practice/exam/stats/'
   }
 }
 
