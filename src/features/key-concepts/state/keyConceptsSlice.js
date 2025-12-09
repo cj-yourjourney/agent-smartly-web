@@ -28,30 +28,12 @@ const EXAM_TOPICS = [
   { code: 'contracts', name: 'Contracts', percentage: '12%' }
 ]
 
-// Mock LLM responses for demonstration
-const MOCK_LLM_RESPONSES = {
-  default: {
-    explanation:
-      'This is a fundamental concept in California real estate law. It involves understanding the legal principles and practical applications that govern property rights and transactions.',
-    memoryTricks: [
-      'Think of the first letter of each key term to create a memorable acronym',
-      "Connect this concept to a real-world example you've experienced",
-      'Create a mental image or story that links the concept to something familiar'
-    ],
-    keyPoints: [
-      'Understanding the legal definition and implications',
-      'Recognizing how it applies in different scenarios',
-      'Knowing the exceptions and special cases'
-    ]
-  }
-}
-
 // Async thunk for fetching key concepts
 export const fetchKeyConcepts = createAsyncThunk(
   'keyConcepts/fetchKeyConcepts',
   async (_, { rejectWithValue }) => {
     try {
-      const data = await api.get('/api/key-concepts/')
+      const data = await api.get(API_CONFIG.ENDPOINTS.KEY_CONCEPTS)
       return data
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch key concepts')
@@ -59,38 +41,33 @@ export const fetchKeyConcepts = createAsyncThunk(
   }
 )
 
-// Async thunk for asking LLM about a concept (mock for now)
+// Async thunk for getting AI explanation of a concept
 export const askLLMAboutConcept = createAsyncThunk(
   'keyConcepts/askLLMAboutConcept',
   async ({ conceptName, subtopicName, topicName }, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // TODO: Replace with actual API call when endpoint is ready
-      // const response = await api.post('/api/key-concepts/explain/', {
-      //   concept: conceptName,
-      //   subtopic: subtopicName,
-      //   topic: topicName
-      // })
-
-      // Mock response
-      const mockResponse = {
-        concept: conceptName,
+      const response = await api.post(API_CONFIG.ENDPOINTS.EXPLAIN_CONCEPT, {
+        main_topic: topicName,
         subtopic: subtopicName,
-        topic: topicName,
-        explanation: `${conceptName} is a key concept within ${subtopicName}. ${MOCK_LLM_RESPONSES.default.explanation}`,
-        memoryTricks: MOCK_LLM_RESPONSES.default.memoryTricks.map(
-          (trick) => `For "${conceptName}": ${trick}`
-        ),
-        keyPoints: MOCK_LLM_RESPONSES.default.keyPoints,
-        examples: [
-          `A practical example of ${conceptName} would be in a typical residential transaction...`,
-          `Another scenario where ${conceptName} applies is when dealing with commercial properties...`
-        ]
+        key_concept: conceptName
+      })
+
+      // Check if the response was successful
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to get explanation')
       }
 
-      return mockResponse
+      // Transform the response to match our frontend structure
+      return {
+        concept: response.concept,
+        subtopic: response.subtopic,
+        topic: response.main_topic,
+        simpleExplanation: response.explanation.simple_explanation,
+        keyPoints: response.explanation.key_points,
+        memoryTricks: response.explanation.memory_tricks,
+        realWorldExample: response.explanation.real_world_example,
+        examTip: response.explanation.exam_tip
+      }
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to get explanation')
     }
@@ -167,11 +144,11 @@ const keyConceptsSlice = createSlice({
       .addCase(askLLMAboutConcept.pending, (state) => {
         state.llmDialog.loading = true
         state.llmDialog.error = null
+        state.llmDialog.isOpen = true
       })
       .addCase(askLLMAboutConcept.fulfilled, (state, action) => {
         state.llmDialog.loading = false
         state.llmDialog.data = action.payload
-        state.llmDialog.isOpen = true
       })
       .addCase(askLLMAboutConcept.rejected, (state, action) => {
         state.llmDialog.loading = false

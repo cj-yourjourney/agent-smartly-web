@@ -24,6 +24,10 @@ export const API_CONFIG = {
     QUESTIONS: '/api/practice/questions/',
     PRACTICE_EXAM: '/api/practice/practice-exam/',
 
+    // Key Concepts endpoints
+    KEY_CONCEPTS: '/api/key-concepts/',
+    EXPLAIN_CONCEPT: '/api/key-concepts/explain/',
+
     // Auth endpoints
     TOKEN_OBTAIN: '/api/users/token/',
     TOKEN_REFRESH: '/api/users/token/refresh/',
@@ -38,8 +42,7 @@ export const API_CONFIG = {
     PROGRESS_TOPICS: '/api/progress/topics/',
     PROGRESS_SUBTOPICS: '/api/progress/subtopics/',
     WEAK_AREAS: '/api/progress/weak-areas/',
-    RECENT_ACTIVITY: '/api/progress/recent-activity/',
-
+    RECENT_ACTIVITY: '/api/progress/recent-activity/'
   }
 }
 

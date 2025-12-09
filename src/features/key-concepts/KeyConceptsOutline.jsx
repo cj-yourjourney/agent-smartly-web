@@ -13,7 +13,7 @@ import {
   selectLLMDialog
 } from './state/keyConceptsSlice'
 import LLMExplanationModal from './components/LLMExplanationModal'
-import { Sparkles } from 'lucide-react'
+import { Brain, ChevronRight } from 'lucide-react'
 
 export default function KeyConceptsOutline() {
   const dispatch = useDispatch()
@@ -45,16 +45,16 @@ export default function KeyConceptsOutline() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+        <span className="loading loading-spinner loading-lg text-primary"></span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 max-w-5xl">
+      <div className="container mx-auto max-w-4xl p-6">
         <div className="alert alert-error">
-          <span>Error loading concepts: {error}</span>
+          <span>Error: {error}</span>
         </div>
       </div>
     )
@@ -62,32 +62,25 @@ export default function KeyConceptsOutline() {
 
   return (
     <>
-      <div className="container mx-auto p-4 max-w-5xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-1">
-            CA Real Estate Study Guide
-          </h1>
-          <p className="text-sm text-base-content/70">
-            Key concepts organized by exam outline. Click the{' '}
-            <Sparkles className="w-4 h-4 inline text-primary" /> icon to get AI
-            explanations and memory tricks!
-          </p>
-        </div>
-
-        <div className="stats shadow mb-6 w-full">
-          <div className="stat">
-            <div className="stat-title">Total Concepts</div>
-            <div className="stat-value text-primary">{concepts.length}</div>
-          </div>
-          <div className="stat">
-            <div className="stat-title">Topics Covered</div>
-            <div className="stat-value">
-              {organizedConcepts.filter((t) => t.subtopics.length > 0).length}/7
-            </div>
+      <div className="container mx-auto max-w-4xl p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Key Concepts</h1>
+          <div className="flex items-center gap-2 text-sm text-base-content/60">
+            <span>{concepts.length} concepts</span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              Hover and click
+              <kbd className="kbd kbd-xs">
+                <Brain className="w-3 h-3" />
+              </kbd>
+              Explain for AI help
+            </span>
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* Topics List */}
+        <div className="space-y-4">
           {organizedConcepts.map((topic) => {
             const isExpanded = expandedTopics.includes(topic.code)
             const count = topic.subtopics.reduce(
@@ -95,102 +88,85 @@ export default function KeyConceptsOutline() {
               0
             )
 
-            return (
-              <div key={topic.code} className="collapse bg-base-200">
-                <input
-                  type="checkbox"
-                  checked={isExpanded}
-                  onChange={() => handleToggleTopic(topic.code)}
-                />
-                <div className="collapse-title flex items-center gap-4 cursor-pointer">
-                  <span className="font-semibold flex-1">{topic.name}</span>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <div className="badge badge-primary whitespace-nowrap">
-                      {topic.percentage}
-                    </div>
-                    <div className="badge badge-ghost whitespace-nowrap">
-                      {count}
-                    </div>
-                  </div>
-                  <svg
-                    className="w-5 h-5 flex-shrink-0 transition-transform duration-200"
-                    style={{
-                      transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
-                    }}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
+            if (count === 0) return null
 
-                <div className="collapse-content">
-                  {count === 0 ? (
-                    <div className="alert alert-warning">
-                      <span>No concepts added yet</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {topic.subtopics.map((subtopic) => (
-                        <div key={subtopic.code} className="card bg-base-100">
-                          <div className="card-body p-4">
-                            <h3 className="font-medium text-sm mb-2">
-                              {subtopic.name}
-                              <span className="badge badge-sm ml-2">
-                                {subtopic.concepts.length}
-                              </span>
-                            </h3>
-                            <ul className="space-y-1">
-                              {subtopic.concepts.map((concept) => (
-                                <li
-                                  key={concept.id}
-                                  className="flex items-center gap-2 text-sm group hover:bg-base-200 p-2 rounded transition-colors"
-                                >
-                                  <button
-                                    onClick={() =>
-                                      handleAskLLM(
-                                        concept,
-                                        subtopic.name,
-                                        topic.name
-                                      )
-                                    }
-                                    className="btn btn-xs btn-circle btn-ghost opacity-0 group-hover:opacity-100 transition-opacity"
-                                    disabled={llmDialog.loading}
-                                    title="Ask AI about this concept"
-                                  >
-                                    <Sparkles className="w-3 h-3 text-primary" />
-                                  </button>
-                                  <span>•</span>
-                                  <span className="flex-1">
-                                    {concept.name}
-                                    {concept.page_number && (
-                                      <span className="text-xs text-base-content/60 ml-2">
-                                        {concept.page_number}
-                                      </span>
-                                    )}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+            return (
+              <div
+                key={topic.code}
+                className="card bg-base-100 border border-base-300 shadow-sm"
+              >
+                {/* Topic Header */}
+                <button
+                  onClick={() => handleToggleTopic(topic.code)}
+                  className="card-body p-5 flex-row items-center gap-3 hover:bg-base-200/50 transition-colors"
+                >
+                  <ChevronRight
+                    className={`w-5 h-5 transition-transform flex-shrink-0 ${
+                      isExpanded ? 'rotate-90' : ''
+                    }`}
+                  />
+                  <span className="font-semibold flex-1 text-left">
+                    {topic.name}
+                  </span>
+                  <div className="badge badge-ghost">{count}</div>
+                </button>
+
+                {/* Subtopics & Concepts */}
+                {isExpanded && (
+                  <div className="border-t border-base-300">
+                    {topic.subtopics.map((subtopic, idx) => (
+                      <div
+                        key={subtopic.code}
+                        className={`px-5 py-4 ${
+                          idx !== topic.subtopics.length - 1
+                            ? 'border-b border-base-200'
+                            : ''
+                        }`}
+                      >
+                        <div className="text-xs font-semibold text-base-content/60 uppercase tracking-wide mb-3">
+                          {subtopic.name}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        <div className="space-y-2">
+                          {subtopic.concepts.map((concept) => (
+                            <div
+                              key={concept.id}
+                              className="flex items-center gap-3 py-1 group"
+                            >
+                              <button
+                                onClick={() =>
+                                  handleAskLLM(
+                                    concept,
+                                    subtopic.name,
+                                    topic.name
+                                  )
+                                }
+                                disabled={llmDialog.loading}
+                                className="btn btn-primary btn-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Brain className="w-3 h-3" />
+                                Explain
+                              </button>
+                              <span className="text-sm flex-1">
+                                {concept.name}
+                              </span>
+                              {concept.page_number && (
+                                <div className="badge badge-ghost badge-sm">
+                                  p.{concept.page_number}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* LLM Explanation Modal */}
       <LLMExplanationModal />
     </>
   )
