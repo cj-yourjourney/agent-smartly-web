@@ -150,8 +150,8 @@ export default function KeyConceptsOutline() {
                                 {concept.name}
                               </span>
                               {concept.page_number && (
-                                <div className="badge badge-ghost badge-sm">
-                                  p.{concept.page_number}
+                                <div className="">
+                                  
                                 </div>
                               )}
                             </div>
