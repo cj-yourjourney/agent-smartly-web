@@ -18,7 +18,8 @@ export const ROUTES = {
   // Learning routes
   LEARNING: {
     PRACTICE: '/learning/practice',
-    PROGRESS: '/learning/progress'
+    PROGRESS: '/learning/progress',
+    KEY_CONCEPTS: '/learning/key-concepts'
   },
 
   // Community routes

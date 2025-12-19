@@ -92,10 +92,21 @@ const Navbar = () => {
             <>
               <li>
                 <button
+                  onClick={() => handleNavigation(ROUTES.LEARNING.KEY_CONCEPTS)}
+                  className={
+                    isActive(ROUTES.LEARNING.KEY_CONCEPTS) ? 'active' : ''
+                  }
+                >
+                  <BookOpen className="h-5 w-5" />
+                  Key Concepts
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
                   className={isActive(ROUTES.LEARNING.PRACTICE) ? 'active' : ''}
                 >
-                  <BookOpen className="h-5 w-5" />
+                  <FileText className="h-5 w-5" />
                   Practice
                 </button>
               </li>
@@ -176,13 +187,22 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
+                    onClick={() =>
+                      handleNavigation(ROUTES.LEARNING.KEY_CONCEPTS)
+                    }
                   >
                     <BookOpen className="h-4 w-4" />
+                    Key Concepts
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
+                  >
+                    <FileText className="h-4 w-4" />
                     Practice
                   </button>
                 </li>
-
                 <li>
                   <button
                     onClick={() => handleNavigation(ROUTES.LEARNING.PROGRESS)}
@@ -231,9 +251,19 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
+                    onClick={() =>
+                      handleNavigation(ROUTES.LEARNING.KEY_CONCEPTS)
+                    }
                   >
                     <BookOpen className="h-4 w-4" />
+                    Key Concepts
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.LEARNING.PRACTICE)}
+                  >
+                    <FileText className="h-4 w-4" />
                     Practice
                   </button>
                 </li>
