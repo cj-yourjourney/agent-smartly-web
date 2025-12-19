@@ -44,13 +44,26 @@ export const fetchKeyConcepts = createAsyncThunk(
 // Async thunk for getting AI explanation of a concept
 export const askLLMAboutConcept = createAsyncThunk(
   'keyConcepts/askLLMAboutConcept',
-  async ({ conceptName, subtopicName, topicName }, { rejectWithValue }) => {
+  async (
+    { conceptName, subtopicName, topicName, description },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await api.post(API_CONFIG.ENDPOINTS.EXPLAIN_CONCEPT, {
+      const requestBody = {
         main_topic: topicName,
         subtopic: subtopicName,
         key_concept: conceptName
-      })
+      }
+
+      // Only include description if it exists
+      if (description) {
+        requestBody.description = description
+      }
+
+      const response = await api.post(
+        API_CONFIG.ENDPOINTS.EXPLAIN_CONCEPT,
+        requestBody
+      )
 
       // Check if the response was successful
       if (!response.success) {

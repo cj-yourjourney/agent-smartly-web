@@ -13,7 +13,7 @@ import {
   selectLLMDialog
 } from './state/keyConceptsSlice'
 import LLMExplanationModal from './components/LLMExplanationModal'
-import { Brain, ChevronRight } from 'lucide-react'
+import { Brain, ChevronRight, Info } from 'lucide-react'
 
 export default function KeyConceptsOutline() {
   const dispatch = useDispatch()
@@ -37,7 +37,8 @@ export default function KeyConceptsOutline() {
       askLLMAboutConcept({
         conceptName: concept.name,
         subtopicName,
-        topicName
+        topicName,
+        description: concept.description // Include description
       })
     )
   }
@@ -126,11 +127,11 @@ export default function KeyConceptsOutline() {
                         <div className="text-xs font-semibold text-base-content/60 uppercase tracking-wide mb-3">
                           {subtopic.name}
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {subtopic.concepts.map((concept) => (
                             <div
                               key={concept.id}
-                              className="flex items-center gap-3 py-1 group"
+                              className="flex items-start gap-3 py-1 group"
                             >
                               <button
                                 onClick={() =>
@@ -141,19 +142,34 @@ export default function KeyConceptsOutline() {
                                   )
                                 }
                                 disabled={llmDialog.loading}
-                                className="btn btn-primary btn-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="btn btn-primary btn-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
                               >
                                 <Brain className="w-3 h-3" />
                                 Explain
                               </button>
-                              <span className="text-sm flex-1">
-                                {concept.name}
-                              </span>
-                              {concept.page_number && (
-                                <div className="">
-                                  
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">
+                                    {concept.name}
+                                  </span>
+                                  {concept.page_number && (
+                                    <span className="">
+                                      {/* {concept.page_number} */}
+                                    </span>
+                                  )}
                                 </div>
-                              )}
+
+                                {/* Display description if exists */}
+                                {concept.description && (
+                                  <div className="flex items-start gap-1.5 mt-1.5">
+                                    <Info className="w-3.5 h-3.5 text-info flex-shrink-0 mt-0.5" />
+                                    <p className="text-xs text-base-content/70 leading-relaxed">
+                                      {concept.description}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
