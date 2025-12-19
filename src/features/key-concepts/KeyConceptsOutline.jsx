@@ -38,7 +38,7 @@ export default function KeyConceptsOutline() {
         conceptName: concept.name,
         subtopicName,
         topicName,
-        description: concept.description // Include description
+        description: concept.description
       })
     )
   }
@@ -153,22 +153,33 @@ export default function KeyConceptsOutline() {
                                   <span className="text-sm font-medium">
                                     {concept.name}
                                   </span>
+
+                                  {/* Custom readable tooltip with Tailwind */}
+                                  {concept.description && (
+                                    <div className="relative group/tooltip inline-block">
+                                      <Info className="w-3.5 h-3.5 text-info cursor-help" />
+
+                                      {/* Tooltip content */}
+                                      <div className="absolute left-0 top-6 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 z-50 pointer-events-none">
+                                        <div className="bg-white text-gray-800 text-sm rounded-lg shadow-2xl border-2 border-gray-200 p-4 w-96 max-w-[calc(100vw-2rem)]">
+                                          {/* Arrow pointing up */}
+                                          <div className="absolute -top-2 left-4 w-4 h-4 bg-white border-l-2 border-t-2 border-gray-200 transform rotate-45"></div>
+
+                                          {/* Content */}
+                                          <p className="text-gray-700 leading-relaxed relative z-10">
+                                            {concept.description}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
                                   {concept.page_number && (
-                                    <span className="">
+                                    <span className="text-xs text-base-content/50">
                                       {/* {concept.page_number} */}
                                     </span>
                                   )}
                                 </div>
-
-                                {/* Display description if exists */}
-                                {concept.description && (
-                                  <div className="flex items-start gap-1.5 mt-1.5">
-                                    <Info className="w-3.5 h-3.5 text-info flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-base-content/70 leading-relaxed">
-                                      {concept.description}
-                                    </p>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           ))}
