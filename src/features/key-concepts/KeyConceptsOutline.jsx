@@ -124,7 +124,7 @@ export default function KeyConceptsOutline() {
                             : ''
                         }`}
                       >
-                        <div className="text-xs font-semibold text-base-content/60 uppercase tracking-wide mb-3">
+                        <div className="text-xs font-semibold text-base-content/60 tracking-wide mb-3">
                           {subtopic.name}
                         </div>
                         <div className="space-y-3">
