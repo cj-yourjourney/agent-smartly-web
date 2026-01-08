@@ -14,7 +14,7 @@ export default function Home() {
         <div className="hero-content text-center">
           <div className="max-w-4xl">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Ace Your California Real Estate Agent Exam
+              Ace Your California Real Estate Salesperson Exam
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-base-content/80">
               Master all 7 topics with{' '}
