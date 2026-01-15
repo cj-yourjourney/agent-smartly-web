@@ -30,6 +30,7 @@ export default function PracticeMode() {
     topics,
     topicStructure,
     selectedTopic,
+    selectedSubtopic,
     questions,
     currentQuestionIndex,
     selectedAnswer,
@@ -92,8 +93,9 @@ export default function PracticeMode() {
   const isTimeCritical = timeRemaining <= 5 * 60 && timeRemaining > 0
 
   // --- Handlers ---
-  const handleTopicSelect = (topicValue) =>
+  const handleTopicSelect = (topicValue) => {
     dispatch(fetchQuestionsByTopic(topicValue))
+  }
 
   const handleSubtopicSelect = (topicValue, subtopicValue) => {
     dispatch(
@@ -155,64 +157,99 @@ export default function PracticeMode() {
   if (!selectedTopic) {
     return (
       <div className="min-h-screen bg-base-100 p-6 md:p-12">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-base-content mb-2">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold text-base-content mb-3">
               Practice Mode
             </h1>
-            <p className="text-base-content/70">
-              Choose your practice format: take a full practice exam or study
-              specific topics.
+            <p className="text-lg text-base-content/60">
+              Choose your practice style
             </p>
           </div>
 
-          {/* Practice Exam Button */}
-          <div className="mb-8">
-            <button
-              onClick={handlePracticeQuizSelect}
-              className="w-full p-5 bg-gradient-to-r from-primary to-secondary text-primary-content rounded-lg hover:shadow-lg transition-all group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-lg font-bold">Practice Exam</div>
-                    <div className="text-sm opacity-90">
-                      75 questions • 90 minutes • All topics
-                    </div>
-                  </div>
+          {/* Full Practice Exam Card */}
+          <button
+            onClick={handlePracticeQuizSelect}
+            className="w-full p-6 border-2 border-primary/30 rounded-xl hover:border-primary hover:shadow-lg transition-all group text-left mb-8"
+            title="Start a full 75-question practice exam with 90-minute timer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Clock className="w-6 h-6 text-primary" />
                 </div>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <div>
+                  <h2 className="text-xl font-bold text-base-content mb-1">
+                    Full Practice Exam
+                  </h2>
+                  <p className="text-sm text-base-content/60">
+                    Simulate the real exam experience with timed questions
+                    covering all topics
+                  </p>
+                </div>
               </div>
-            </button>
-          </div>
+              <ChevronRight className="w-5 h-5 text-base-content/40 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs mt-4">
+              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+                75 questions
+              </span>
+              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+                90 minutes
+              </span>
+              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+                All topics
+              </span>
+            </div>
+          </button>
 
-          <div className="divider text-base-content/50">OR</div>
-
-          {/* Topic Practice Section */}
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-base-content mb-1">
-              Study by Topic
-            </h2>
-            <p className="text-sm text-base-content/60">
-              20 questions per topic • No time limit
-            </p>
+          {/* Study by Topic Section */}
+          <div className="mb-3">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-base-content">
+                  Study by Topic
+                </h2>
+                <p className="text-sm text-base-content/60">
+                  Click a topic to start, or expand{' '}
+                  <ChevronDown className="w-3.5 h-3.5 inline mx-0.5" /> for
+                  subtopics • 20 questions • No time limit
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
             {topicStructure.map((item) => (
               <div
                 key={item.topic.value}
-                className={`border rounded-lg transition-colors ${
+                className={`border rounded-lg transition-all ${
                   expandedTopic === item.topic.value
-                    ? 'border-primary/40 bg-base-200/50'
-                    : 'border-base-300 bg-base-100'
+                    ? 'border-primary/40 bg-base-200/50 shadow-sm'
+                    : 'border-base-300 bg-base-100 hover:border-base-400'
                 }`}
               >
                 <div className="flex items-stretch">
                   <button
                     onClick={() => handleTopicSelect(item.topic.value)}
-                    className="flex-1 text-left px-4 py-2.5 font-medium text-base-content hover:text-primary transition-colors"
+                    className="flex-1 text-left px-4 py-3 font-medium text-base-content hover:text-primary transition-colors group"
+                    title={`Practice ${item.topic.label} (20 questions)`}
                   >
                     {item.topic.label}
                   </button>
@@ -222,9 +259,17 @@ export default function PracticeMode() {
                       <div className="w-px bg-base-300"></div>
                       <button
                         onClick={() => toggleTopic(item.topic.value)}
-                        className="px-3 text-base-content/40 hover:text-primary transition-colors"
+                        className="px-4 text-base-content/40 hover:text-primary hover:bg-base-200/50 transition-all flex items-center gap-1.5 relative group"
+                        title={
+                          expandedTopic === item.topic.value
+                            ? 'Hide subtopics'
+                            : `Show ${item.subtopics.length} subtopics`
+                        }
                         aria-label="Toggle subtopics"
                       >
+                        <span className="text-xs font-medium">
+                          {item.subtopics.length}
+                        </span>
                         <ChevronDown
                           className={`w-4 h-4 transition-transform ${
                             expandedTopic === item.topic.value
@@ -237,21 +282,29 @@ export default function PracticeMode() {
                   )}
                 </div>
 
-                {expandedTopic === item.topic.value && (
-                  <div className="border-t border-base-300 bg-base-200/30 p-1.5">
-                    {item.subtopics.map((subtopic) => (
-                      <button
-                        key={subtopic.value}
-                        onClick={() =>
-                          handleSubtopicSelect(item.topic.value, subtopic.value)
-                        }
-                        className="w-full text-left py-2 px-3 text-sm text-base-content/70 hover:text-primary hover:bg-base-100 rounded transition-colors"
-                      >
-                        {subtopic.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {expandedTopic === item.topic.value &&
+                  item.subtopics.length > 0 && (
+                    <div className="border-t border-base-300 bg-base-200/30 px-2 py-2">
+                      <div className="space-y-1">
+                        {item.subtopics.map((subtopic) => (
+                          <button
+                            key={subtopic.value}
+                            onClick={() =>
+                              handleSubtopicSelect(
+                                item.topic.value,
+                                subtopic.value
+                              )
+                            }
+                            className="w-full text-left py-2.5 px-3 text-sm text-base-content/70 hover:text-primary hover:bg-base-100 rounded transition-all flex items-center group"
+                            title={`Practice ${subtopic.label} (20 questions)`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-base-content/20 group-hover:bg-primary mr-2.5 shrink-0"></span>
+                            {subtopic.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             ))}
           </div>
@@ -277,9 +330,25 @@ export default function PracticeMode() {
   }
 
   const currentQuestion = questions[currentQuestionIndex]
-  const currentTopicLabel = isPracticeQuiz
-    ? 'Practice Exam'
-    : topics.find((t) => t.value === selectedTopic)?.label || selectedTopic
+
+  // Determine the label to display
+  let currentTopicLabel
+  if (isPracticeQuiz) {
+    currentTopicLabel = 'Practice Exam'
+  } else if (selectedSubtopic) {
+    // Find the subtopic label
+    const topicItem = topicStructure.find(
+      (item) => item.topic.value === selectedTopic
+    )
+    const subtopicItem = topicItem?.subtopics.find(
+      (sub) => sub.value === selectedSubtopic
+    )
+    currentTopicLabel = subtopicItem?.label || selectedSubtopic
+  } else {
+    // Just the topic
+    currentTopicLabel =
+      topics.find((t) => t.value === selectedTopic)?.label || selectedTopic
+  }
 
   // --- Quiz UI ---
   return (
