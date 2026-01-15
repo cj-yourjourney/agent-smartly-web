@@ -158,58 +158,58 @@ export default function PracticeMode() {
     return (
       <div className="min-h-screen bg-base-100 p-6 md:p-12">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-10">
-            <h1 className="text-3xl font-bold text-base-content mb-3">
+          <div className="mb-12">
+            <h1 className="text-4xl font-bold text-base-content mb-2">
               Practice Mode
             </h1>
-            <p className="text-lg text-base-content/60">
-              Choose your practice style
+            <p className="text-base-content/60">
+              Choose how you want to practice
             </p>
           </div>
 
           {/* Full Practice Exam Card */}
           <button
             onClick={handlePracticeQuizSelect}
-            className="w-full p-6 border-2 border-primary/30 rounded-xl hover:border-primary hover:shadow-lg transition-all group text-left mb-8"
+            className="w-full p-6 border-2 border-base-300 rounded-xl hover:border-primary hover:shadow-md transition-all group text-left mb-12 bg-base-100"
             title="Start a full 75-question practice exam with 90-minute timer"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Clock className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-base-content mb-1">
-                    Full Practice Exam
-                  </h2>
-                  <p className="text-sm text-base-content/60">
-                    Simulate the real exam experience with timed questions
-                    covering all topics
-                  </p>
-                </div>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                <Clock className="w-7 h-7 text-primary" />
               </div>
-              <ChevronRight className="w-5 h-5 text-base-content/40 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-base-content mb-1 group-hover:text-primary transition-colors">
+                  Full Practice Exam
+                </h2>
+                <p className="text-base-content/60">
+                  Complete exam simulation with timer
+                </p>
+              </div>
+              <ChevronRight className="w-6 h-6 text-base-content/30 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
             </div>
-            <div className="flex flex-wrap gap-2 text-xs mt-4">
-              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+            <div className="flex items-center gap-4 text-sm text-base-content/70 pl-[72px]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-base-content/40"></span>
                 75 questions
               </span>
-              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-base-content/40"></span>
                 90 minutes
               </span>
-              <span className="px-2 py-1 bg-base-200 text-base-content/70 rounded">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-base-content/40"></span>
                 All topics
               </span>
             </div>
           </button>
 
           {/* Study by Topic Section */}
-          <div className="mb-3">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <div>
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 text-primary"
+                  className="w-7 h-7 text-primary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -223,90 +223,90 @@ export default function PracticeMode() {
                 </svg>
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-base-content">
+                <h2 className="text-2xl font-bold text-base-content mb-1">
                   Study by Topic
                 </h2>
-                <p className="text-sm text-base-content/60">
-                  Click a topic to start, or expand{' '}
-                  <ChevronDown className="w-3.5 h-3.5 inline mx-0.5" /> for
-                  subtopics • 20 questions • No time limit
+                <p className="text-base-content/60">
+                  Click any topic, or use{' '}
+                  <ChevronDown className="w-3.5 h-3.5 inline mx-0.5 -mt-0.5" />{' '}
+                  to see subtopics • 20 questions each • Untimed
                 </p>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            {topicStructure.map((item) => (
-              <div
-                key={item.topic.value}
-                className={`border rounded-lg transition-all ${
-                  expandedTopic === item.topic.value
-                    ? 'border-primary/40 bg-base-200/50 shadow-sm'
-                    : 'border-base-300 bg-base-100 hover:border-base-400'
-                }`}
-              >
-                <div className="flex items-stretch">
-                  <button
-                    onClick={() => handleTopicSelect(item.topic.value)}
-                    className="flex-1 text-left px-4 py-3 font-medium text-base-content hover:text-primary transition-colors group"
-                    title={`Practice ${item.topic.label} (20 questions)`}
-                  >
-                    {item.topic.label}
-                  </button>
+            <div className="space-y-2.5 pl-[72px]">
+              {topicStructure.map((item) => (
+                <div
+                  key={item.topic.value}
+                  className={`border rounded-lg transition-all ${
+                    expandedTopic === item.topic.value
+                      ? 'border-primary/50 bg-primary/5 shadow-sm'
+                      : 'border-base-300 bg-base-100 hover:border-base-400'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => handleTopicSelect(item.topic.value)}
+                      className="flex-1 text-left px-4 py-3.5 font-medium text-base-content hover:text-primary transition-colors"
+                      title={`Practice ${item.topic.label} (20 questions)`}
+                    >
+                      {item.topic.label}
+                    </button>
 
-                  {item.subtopics.length > 0 && (
-                    <>
-                      <div className="w-px bg-base-300"></div>
-                      <button
-                        onClick={() => toggleTopic(item.topic.value)}
-                        className="px-4 text-base-content/40 hover:text-primary hover:bg-base-200/50 transition-all flex items-center gap-1.5 relative group"
-                        title={
-                          expandedTopic === item.topic.value
-                            ? 'Hide subtopics'
-                            : `Show ${item.subtopics.length} subtopics`
-                        }
-                        aria-label="Toggle subtopics"
-                      >
-                        <span className="text-xs font-medium">
-                          {item.subtopics.length}
-                        </span>
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform ${
+                    {item.subtopics.length > 0 && (
+                      <>
+                        <div className="w-px h-8 bg-base-300"></div>
+                        <button
+                          onClick={() => toggleTopic(item.topic.value)}
+                          className="px-5 py-3.5 text-base-content/50 hover:text-primary hover:bg-base-200/50 transition-all flex items-center gap-2"
+                          title={
                             expandedTopic === item.topic.value
-                              ? 'rotate-180'
-                              : ''
-                          }`}
-                        />
-                      </button>
-                    </>
-                  )}
-                </div>
+                              ? 'Hide subtopics'
+                              : `Show ${item.subtopics.length} subtopics`
+                          }
+                          aria-label="Toggle subtopics"
+                        >
+                          <span className="text-xs font-semibold min-w-[1rem] text-center">
+                            {item.subtopics.length}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform ${
+                              expandedTopic === item.topic.value
+                                ? 'rotate-180'
+                                : ''
+                            }`}
+                          />
+                        </button>
+                      </>
+                    )}
+                  </div>
 
-                {expandedTopic === item.topic.value &&
-                  item.subtopics.length > 0 && (
-                    <div className="border-t border-base-300 bg-base-200/30 px-2 py-2">
-                      <div className="space-y-1">
-                        {item.subtopics.map((subtopic) => (
-                          <button
-                            key={subtopic.value}
-                            onClick={() =>
-                              handleSubtopicSelect(
-                                item.topic.value,
-                                subtopic.value
-                              )
-                            }
-                            className="w-full text-left py-2.5 px-3 text-sm text-base-content/70 hover:text-primary hover:bg-base-100 rounded transition-all flex items-center group"
-                            title={`Practice ${subtopic.label} (20 questions)`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-base-content/20 group-hover:bg-primary mr-2.5 shrink-0"></span>
-                            {subtopic.label}
-                          </button>
-                        ))}
+                  {expandedTopic === item.topic.value &&
+                    item.subtopics.length > 0 && (
+                      <div className="border-t border-base-300/60">
+                        <div className="p-2 space-y-0.5">
+                          {item.subtopics.map((subtopic) => (
+                            <button
+                              key={subtopic.value}
+                              onClick={() =>
+                                handleSubtopicSelect(
+                                  item.topic.value,
+                                  subtopic.value
+                                )
+                              }
+                              className="w-full text-left py-2.5 px-3 text-sm text-base-content/70 hover:text-primary hover:bg-base-100 rounded-md transition-all flex items-center group"
+                              title={`Practice ${subtopic.label} (20 questions)`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary mr-3 shrink-0"></span>
+                              {subtopic.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-              </div>
-            ))}
+                    )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
