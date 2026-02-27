@@ -24,7 +24,7 @@ export const ROUTES = {
 
   // Community routes
   COMMUNITY: {
-    STUDY_GROUP: '/community/study-group'
+    
   }
 }
 

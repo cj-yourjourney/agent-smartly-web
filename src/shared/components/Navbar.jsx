@@ -119,17 +119,7 @@ const Navbar = () => {
                   Progress
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)}
-                  className={
-                    isActive(ROUTES.COMMUNITY.STUDY_GROUP) ? 'active' : ''
-                  }
-                >
-                  <Users className="h-5 w-5" />
-                  Study Group
-                </button>
-              </li>
+             
             </>
           ) : (
             <>
@@ -140,17 +130,6 @@ const Navbar = () => {
                 >
                   <Home className="h-5 w-5" />
                   Home
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)}
-                  className={
-                    isActive(ROUTES.COMMUNITY.STUDY_GROUP) ? 'active' : ''
-                  }
-                >
-                  <Users className="h-5 w-5" />
-                  Study Group
                 </button>
               </li>
             </>
@@ -211,16 +190,7 @@ const Navbar = () => {
                     Progress
                   </button>
                 </li>
-                <li>
-                  <button
-                    onClick={() =>
-                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
-                    }
-                  >
-                    <Users className="h-4 w-4" />
-                    Study Group
-                  </button>
-                </li>
+          
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={handleLogout} className="text-error">
@@ -275,16 +245,7 @@ const Navbar = () => {
                     Progress
                   </button>
                 </li>
-                <li>
-                  <button
-                    onClick={() =>
-                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
-                    }
-                  >
-                    <Users className="h-4 w-4" />
-                    Study Group
-                  </button>
-                </li>
+             
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={handleLogout} className="text-error">
@@ -328,16 +289,7 @@ const Navbar = () => {
                     Home
                   </button>
                 </li>
-                <li>
-                  <button
-                    onClick={() =>
-                      handleNavigation(ROUTES.COMMUNITY.STUDY_GROUP)
-                    }
-                  >
-                    <Users className="h-4 w-4" />
-                    Study Group
-                  </button>
-                </li>
+              
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={() => handleNavigation(ROUTES.AUTH.LOGIN)}>
