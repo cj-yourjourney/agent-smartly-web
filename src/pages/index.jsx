@@ -78,7 +78,7 @@ const features = [
 
 const testimonials = [
   {
-    text: 'I passed with an 82% on my first attempt. The practice questions were incredibly close to what showed up on the real exam — especially the Contracts and Agency sections.',
+    text: 'I passed on my first attempt. The practice questions were incredibly close to what showed up on the real exam — especially the Contracts and Agency sections.',
     author: 'Marcus T.',
     detail: 'Passed March 2025'
   },
@@ -88,7 +88,7 @@ const testimonials = [
     detail: 'Passed January 2025'
   },
   {
-    text: 'I loved seeing my progress by topic. When I saw my Property Ownership score was 76%, I knew exactly where to focus. Ended up mastering every category before exam day.',
+    text: 'I loved seeing my progress by topic. When I saw my Property Ownership accuracy was low, I knew exactly where to focus. Felt confident walking into the exam.',
     author: 'Diana R.',
     detail: 'Passed February 2025'
   }
@@ -105,12 +105,15 @@ export default function Home() {
         <div className="hero-content text-center max-w-3xl flex-col gap-6">
           <div className="badge badge-outline badge-primary gap-2 py-3 px-4">
             <span className="badge badge-success badge-xs" />
-            Free California Real Estate Exam Prep
+            Free CA Real Estate Salesperson Exam Prep
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-            Pass Your CA Real Estate Exam on the{' '}
-            <span className="text-primary italic">First Try</span>
+          <h1 className="font-display text-5xl md:text-6xl leading-tight">
+            Pass Your CA Real Estate{' '}
+            <span className="font-display-italic text-primary">
+              Salesperson
+            </span>{' '}
+            Exam on the First Try
           </h1>
 
           <p className="text-lg md:text-xl text-base-content/70 max-w-xl">
@@ -182,12 +185,12 @@ export default function Home() {
           <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
             How It Works
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
+          <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
             Everything You Need to Pass
           </h2>
           <p className="text-center text-base-content/60 text-lg mb-16 max-w-xl mx-auto">
-            Three tools, working together, aligned to the official DRE exam
-            blueprint.
+            Three tools, working together, aligned to the official DRE
+            salesperson exam blueprint.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -225,8 +228,8 @@ export default function Home() {
           <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
             Exam Blueprint
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            All 7 DRE Exam Topics Covered
+          <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
+            All 7 DRE Salesperson Exam Topics
           </h2>
           <p className="text-center text-base-content/60 text-lg mb-14 max-w-xl mx-auto">
             Questions weighted to match the real exam. Focus where it counts
@@ -265,8 +268,8 @@ export default function Home() {
           <p className="text-center font-bold tracking-widest text-xs uppercase mb-3 text-neutral-content/40">
             Results
           </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Trusted by CA Exam Takers
+          <h2 className="font-display text-4xl md:text-5xl text-center mb-4 text-neutral-content">
+            Trusted by CA Salesperson Exam Takers
           </h2>
           <p className="text-center text-neutral-content/45 text-lg mb-14 max-w-xl mx-auto">
             Real people who used Agent Smartly to pass on the first try.
@@ -305,12 +308,12 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <div className="card bg-primary text-primary-content shadow-2xl">
             <div className="card-body items-center text-center gap-5 py-16 px-8">
-              <h2 className="card-title text-3xl md:text-4xl font-bold">
-                Ready to Pass Your Exam?
+              <h2 className="font-display text-3xl md:text-4xl">
+                Ready to Pass Your Salesperson Exam?
               </h2>
               <p className="text-primary-content/75 text-lg max-w-md">
-                Join hundreds of successful California real estate agents. Start
-                practicing today — completely free.
+                Join hundreds of successful California real estate salespersons
+                who prepared with Agent Smartly — completely free.
               </p>
               {isAuthenticated ? (
                 <button
@@ -342,7 +345,7 @@ export default function Home() {
             <span className="text-primary">Agent</span> Smartly
           </p>
           <p className="text-base-content/50 text-sm">
-            California Real Estate Exam Prep
+            California Real Estate Salesperson Exam Prep
           </p>
           <p className="text-base-content/40 text-xs mt-2">
             © {new Date().getFullYear()} Agent Smartly. All rights reserved.

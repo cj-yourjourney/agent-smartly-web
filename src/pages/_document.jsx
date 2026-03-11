@@ -6,7 +6,7 @@ export default function Document() {
     <Html lang="en" data-theme="light">
       <Head>
         {/* Add any global meta tags, fonts, or icons here */}
-        {/* Google Fonts: Manrope */}
+        {/* Google Fonts: Manrope + Instrument Serif */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -14,7 +14,7 @@ export default function Document() {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Instrument+Serif:ital@0;1&display=swap"
           rel="stylesheet"
         />
         {/* PostHog Analytics */}
