@@ -14,7 +14,10 @@ import {
   LogOut,
   Menu,
   FileText,
-  Users
+  Users,
+  Sparkles,
+  LogIn,
+  UserPlus
 } from 'lucide-react'
 import ROUTES from '../constants/routes'
 
@@ -27,18 +30,15 @@ const Navbar = () => {
 
   useEffect(() => {
     setIsMounted(true)
-    // Initialize auth state from localStorage after component mounts
     dispatch(initializeAuth())
   }, [dispatch])
 
   useEffect(() => {
-    // Fetch user details if authenticated but user data not loaded
     if (isMounted && isAuthenticated && !user && !loading) {
       dispatch(fetchUserDetails())
     }
   }, [isMounted, isAuthenticated, user, loading, dispatch])
 
-  // Prevent hydration mismatch by not rendering auth-dependent content until mounted
   if (!isMounted) {
     return (
       <div className="navbar bg-base-100 shadow-lg px-4 lg:px-8">
@@ -119,7 +119,15 @@ const Navbar = () => {
                   Progress
                 </button>
               </li>
-             
+              <li>
+                <button
+                  onClick={() => handleNavigation(ROUTES.ABOUT)}
+                  className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                >
+                  <Sparkles className="h-5 w-5" />
+                  About
+                </button>
+              </li>
             </>
           ) : (
             <>
@@ -130,6 +138,15 @@ const Navbar = () => {
                 >
                   <Home className="h-5 w-5" />
                   Home
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavigation(ROUTES.ABOUT)}
+                  className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                >
+                  <Sparkles className="h-5 w-5" />
+                  About
                 </button>
               </li>
             </>
@@ -190,7 +207,12 @@ const Navbar = () => {
                     Progress
                   </button>
                 </li>
-          
+                <li>
+                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
+                    <Sparkles className="h-4 w-4" />
+                    About
+                  </button>
+                </li>
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={handleLogout} className="text-error">
@@ -245,7 +267,12 @@ const Navbar = () => {
                     Progress
                   </button>
                 </li>
-             
+                <li>
+                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
+                    <Sparkles className="h-4 w-4" />
+                    About
+                  </button>
+                </li>
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={handleLogout} className="text-error">
@@ -264,12 +291,14 @@ const Navbar = () => {
                 onClick={() => handleNavigation(ROUTES.AUTH.LOGIN)}
                 className="btn btn-ghost"
               >
+                <LogIn className="h-4 w-4" />
                 Login
               </button>
               <button
                 onClick={() => handleNavigation(ROUTES.AUTH.SIGNUP)}
                 className="btn btn-primary"
               >
+                <UserPlus className="h-4 w-4" />
                 Sign Up
               </button>
             </div>
@@ -289,15 +318,22 @@ const Navbar = () => {
                     Home
                   </button>
                 </li>
-              
+                <li>
+                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
+                    <Sparkles className="h-4 w-4" />
+                    About
+                  </button>
+                </li>
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={() => handleNavigation(ROUTES.AUTH.LOGIN)}>
+                    <LogIn className="h-4 w-4" />
                     Login
                   </button>
                 </li>
                 <li>
                   <button onClick={() => handleNavigation(ROUTES.AUTH.SIGNUP)}>
+                    <UserPlus className="h-4 w-4" />
                     Sign Up
                   </button>
                 </li>

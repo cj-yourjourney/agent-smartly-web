@@ -8,6 +8,7 @@
 // Public routes
 export const ROUTES = {
   HOME: '/',
+  ABOUT: '/about',
 
   // Auth routes
   AUTH: {
@@ -23,9 +24,7 @@ export const ROUTES = {
   },
 
   // Community routes
-  COMMUNITY: {
-    
-  }
+  COMMUNITY: {}
 }
 
 // Helper function to check if a route is active
