@@ -1,4 +1,3 @@
-// features/key-concepts/KeyConceptsOutline.jsx
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -32,12 +31,21 @@ export default function KeyConceptsOutline() {
     dispatch(toggleTopic(code))
   }
 
-  const handleAskLLM = (concept, subtopicName, topicName) => {
+  // Pass both display names (for the modal UI) and codes (for the API record call)
+  const handleAskLLM = (
+    concept,
+    subtopicName,
+    topicName,
+    topicCode,
+    subtopicCode
+  ) => {
     dispatch(
       askLLMAboutConcept({
         conceptName: concept.name,
         subtopicName,
         topicName,
+        topicCode,
+        subtopicCode,
         description: concept.description
       })
     )
@@ -138,7 +146,9 @@ export default function KeyConceptsOutline() {
                                   handleAskLLM(
                                     concept,
                                     subtopic.name,
-                                    topic.name
+                                    topic.name,
+                                    topic.code, // ← code for API
+                                    subtopic.code // ← code for API
                                   )
                                 }
                                 disabled={llmDialog.loading}
@@ -154,18 +164,12 @@ export default function KeyConceptsOutline() {
                                     {concept.name}
                                   </span>
 
-                                  {/* Custom readable tooltip with Tailwind */}
                                   {concept.description && (
                                     <div className="relative group/tooltip inline-block">
                                       <Info className="w-3.5 h-3.5 text-info cursor-help" />
-
-                                      {/* Tooltip content */}
                                       <div className="absolute left-0 top-6 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 z-50 pointer-events-none">
                                         <div className="bg-white text-gray-800 text-sm rounded-lg shadow-2xl border-2 border-gray-200 p-4 w-96 max-w-[calc(100vw-2rem)]">
-                                          {/* Arrow pointing up */}
                                           <div className="absolute -top-2 left-4 w-4 h-4 bg-white border-l-2 border-t-2 border-gray-200 transform rotate-45"></div>
-
-                                          {/* Content */}
                                           <p className="text-gray-700 leading-relaxed relative z-10">
                                             {concept.description}
                                           </p>

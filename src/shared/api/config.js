@@ -27,6 +27,7 @@ export const API_CONFIG = {
     // Key Concepts endpoints
     KEY_CONCEPTS: '/api/key-concepts/',
     EXPLAIN_CONCEPT: '/api/key-concepts/explain/',
+    KEY_CONCEPT_VIEW: '/api/progress/key-concept-view/',
 
     // Auth endpoints
     TOKEN_OBTAIN: '/api/users/token/',

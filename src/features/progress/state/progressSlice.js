@@ -114,7 +114,10 @@ const initialState = {
     questions_last_7_days: 0,
     current_streak_days: 0,
     longest_streak_days: 0,
-    last_practice_date: null
+    last_practice_date: null,
+    exam_readiness_score: 0,    // ← new
+    exam_readiness_label: 'Not started',  // ← new
+    exam_coverage: 0            // ← new
   },
   topicProgress: [],
   subtopicProgress: [],

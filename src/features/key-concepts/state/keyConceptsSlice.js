@@ -1,4 +1,3 @@
-// features/key-concepts/state/keyConceptsSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG, api } from '../../../shared/api/config'
 
@@ -28,24 +27,28 @@ const EXAM_TOPICS = [
   { code: 'contracts', name: 'Contracts', percentage: '12%' }
 ]
 
-// Async thunk for fetching key concepts
 export const fetchKeyConcepts = createAsyncThunk(
   'keyConcepts/fetchKeyConcepts',
   async (_, { rejectWithValue }) => {
     try {
-      const data = await api.get(API_CONFIG.ENDPOINTS.KEY_CONCEPTS)
-      return data
+      return await api.get(API_CONFIG.ENDPOINTS.KEY_CONCEPTS)
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to fetch key concepts')
     }
   }
 )
 
-// Async thunk for getting AI explanation of a concept
 export const askLLMAboutConcept = createAsyncThunk(
   'keyConcepts/askLLMAboutConcept',
   async (
-    { conceptName, subtopicName, topicName, description },
+    {
+      conceptName,
+      subtopicName,
+      topicName,
+      topicCode,
+      subtopicCode,
+      description
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -55,7 +58,6 @@ export const askLLMAboutConcept = createAsyncThunk(
         key_concept: conceptName
       }
 
-      // Only include description if it exists
       if (description) {
         requestBody.description = description
       }
@@ -65,12 +67,10 @@ export const askLLMAboutConcept = createAsyncThunk(
         requestBody
       )
 
-      // Check if the response was successful
       if (!response.success) {
         throw new Error(response.error || 'Failed to get explanation')
       }
 
-      // Transform the response to match our frontend structure
       return {
         concept: response.concept,
         subtopic: response.subtopic,
@@ -87,6 +87,26 @@ export const askLLMAboutConcept = createAsyncThunk(
   }
 )
 
+export const recordConceptView = createAsyncThunk(
+  'keyConcepts/recordConceptView',
+  async (
+    { conceptName, topic, subtopic, timeSpentSeconds },
+    { rejectWithValue }
+  ) => {
+    try {
+      await api.post(API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW, {
+        concept_name: conceptName,
+        topic,
+        subtopic,
+        time_spent_seconds: timeSpentSeconds
+      })
+    } catch (error) {
+      console.warn('Failed to record concept view:', error.message)
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 const initialState = {
   concepts: [],
   examTopics: EXAM_TOPICS,
@@ -97,7 +117,9 @@ const initialState = {
     isOpen: false,
     loading: false,
     error: null,
-    data: null
+    data: null,
+    viewStartTime: null,
+    pendingConcept: null
   }
 }
 
@@ -108,7 +130,6 @@ const keyConceptsSlice = createSlice({
     toggleTopic: (state, action) => {
       const topicCode = action.payload
       const index = state.expandedTopics.indexOf(topicCode)
-
       if (index > -1) {
         state.expandedTopics.splice(index, 1)
       } else {
@@ -121,13 +142,12 @@ const keyConceptsSlice = createSlice({
     collapseAllTopics: (state) => {
       state.expandedTopics = []
     },
-    openLLMDialog: (state) => {
-      state.llmDialog.isOpen = true
-    },
     closeLLMDialog: (state) => {
       state.llmDialog.isOpen = false
       state.llmDialog.data = null
       state.llmDialog.error = null
+      state.llmDialog.viewStartTime = null
+      state.llmDialog.pendingConcept = null
     },
     resetKeyConcepts: (state) => {
       state.concepts = []
@@ -153,11 +173,20 @@ const keyConceptsSlice = createSlice({
         state.loading = false
         state.error = action.payload
       })
+
       // Ask LLM
-      .addCase(askLLMAboutConcept.pending, (state) => {
+      .addCase(askLLMAboutConcept.pending, (state, action) => {
         state.llmDialog.loading = true
         state.llmDialog.error = null
         state.llmDialog.isOpen = true
+        state.llmDialog.viewStartTime = Date.now()
+        // Store codes (not display names) so the record POST passes Django validation
+        const { conceptName, topicCode, subtopicCode } = action.meta.arg
+        state.llmDialog.pendingConcept = {
+          conceptName,
+          topic: topicCode, // e.g. "property_ownership"
+          subtopic: subtopicCode // e.g. "land_use"
+        }
       })
       .addCase(askLLMAboutConcept.fulfilled, (state, action) => {
         state.llmDialog.loading = false
@@ -166,6 +195,11 @@ const keyConceptsSlice = createSlice({
       .addCase(askLLMAboutConcept.rejected, (state, action) => {
         state.llmDialog.loading = false
         state.llmDialog.error = action.payload
+      })
+
+      // Record concept view (fire-and-forget, no state changes needed)
+      .addCase(recordConceptView.rejected, (state, action) => {
+        console.warn('recordConceptView failed silently:', action.payload)
       })
   }
 })
@@ -178,7 +212,6 @@ export const selectLoading = (state) => state.keyConcepts.loading
 export const selectError = (state) => state.keyConcepts.error
 export const selectLLMDialog = (state) => state.keyConcepts.llmDialog
 
-// Selector to organize concepts by topic and subtopic
 export const selectOrganizedConcepts = (state) => {
   const { concepts, examTopics } = state.keyConcepts
 
@@ -204,7 +237,6 @@ export const selectOrganizedConcepts = (state) => {
   })
 }
 
-// Selector to check if topic is expanded
 export const selectIsTopicExpanded = (topicCode) => (state) => {
   return state.keyConcepts.expandedTopics.includes(topicCode)
 }
@@ -213,7 +245,6 @@ export const {
   toggleTopic,
   expandAllTopics,
   collapseAllTopics,
-  openLLMDialog,
   closeLLMDialog,
   resetKeyConcepts
 } = keyConceptsSlice.actions

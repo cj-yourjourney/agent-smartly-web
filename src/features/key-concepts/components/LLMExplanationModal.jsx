@@ -1,13 +1,29 @@
-// features/key-concepts/components/LLMExplanationModal.jsx
 import { useDispatch, useSelector } from 'react-redux'
-import { closeLLMDialog, selectLLMDialog } from '../state/keyConceptsSlice'
+import {
+  closeLLMDialog,
+  recordConceptView,
+  selectLLMDialog
+} from '../state/keyConceptsSlice'
 import { X, Lightbulb, Target } from 'lucide-react'
 
 export default function LLMExplanationModal() {
   const dispatch = useDispatch()
-  const { isOpen, loading, error, data } = useSelector(selectLLMDialog)
+  const { isOpen, loading, error, data, viewStartTime, pendingConcept } =
+    useSelector(selectLLMDialog)
 
   const handleClose = () => {
+    // Record the view duration if we have a concept and a start time
+    if (pendingConcept && viewStartTime) {
+      const timeSpentSeconds = Math.round((Date.now() - viewStartTime) / 1000)
+      dispatch(
+        recordConceptView({
+          conceptName: pendingConcept.conceptName,
+          topic: pendingConcept.topic,
+          subtopic: pendingConcept.subtopic,
+          timeSpentSeconds
+        })
+      )
+    }
     dispatch(closeLLMDialog())
   }
 
