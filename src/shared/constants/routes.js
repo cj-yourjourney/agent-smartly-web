@@ -9,6 +9,7 @@
 export const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
+  ONBOARDING: '/onboarding', 
 
   // Auth routes
   AUTH: {
@@ -23,8 +24,6 @@ export const ROUTES = {
     KEY_CONCEPTS: '/learning/key-concepts'
   },
 
-  // Community routes
-  COMMUNITY: {}
 }
 
 // Helper function to check if a route is active

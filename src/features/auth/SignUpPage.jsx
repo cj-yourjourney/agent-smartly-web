@@ -30,7 +30,7 @@ const SignUpPage = () => {
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated && registerSuccess) {
-      router.push(ROUTES.LEARNING.PRACTICE)
+      router.push(ROUTES.ONBOARDING)
     }
   }, [isAuthenticated, registerSuccess, router])
 

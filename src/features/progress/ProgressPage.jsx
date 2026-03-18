@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
+import ROUTES from '@/shared/constants/routes'
 import {
   TrendingUp,
   Target,
@@ -67,7 +68,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
           description:
             'You need 300+ questions to build a reliable readiness score. Start now!',
           action: 'Go to Practice',
-          onClick: () => router.push('/practice')
+          onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
         },
         {
           type: 'info',
@@ -76,7 +77,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
           description:
             'Build a foundation by reviewing key concepts before jumping into questions.',
           action: 'View Key Concepts',
-          onClick: () => router.push('/key-concepts')
+          onClick: () => router.push(ROUTES.LEARNING.KEY_CONCEPTS)
         }
       ]
     }
@@ -89,7 +90,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         title: `${remaining} more questions to reach the target`,
         description: `Students who pass typically answer 300+ questions. You've done ${totalQ} so far.`,
         action: 'Keep Practicing',
-        onClick: () => router.push('/practice')
+        onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
     }
 
@@ -105,7 +106,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         description:
           'The CA exam tests all 7 topic areas equally — gaps here will hurt your score.',
         action: 'Practice All Topics',
-        onClick: () => router.push('/practice')
+        onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
     }
 
@@ -117,7 +118,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         description:
           'Review the key concepts for your weakest topics to improve your hit rate.',
         action: 'Review Key Concepts',
-        onClick: () => router.push('/key-concepts')
+        onClick: () => router.push(ROUTES.LEARNING.KEY_CONCEPTS)
       })
     }
 
@@ -130,7 +131,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         description:
           'This subtopic is dragging down your score. Focus here next.',
         action: 'View Weak Areas',
-        onClick: () => router.push('/practice')
+        onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
     }
 
@@ -141,7 +142,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         title: 'Great accuracy — now build volume',
         description: `You're hitting ${accuracy}% accuracy across all topics. Keep answering to solidify your score.`,
         action: 'Keep Practicing',
-        onClick: () => router.push('/practice')
+        onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
     }
 
@@ -153,7 +154,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         description:
           '300+ questions, 75%+ accuracy, all topics covered. Do a final weak-area review.',
         action: 'Final Review',
-        onClick: () => router.push('/practice')
+        onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
     }
 
