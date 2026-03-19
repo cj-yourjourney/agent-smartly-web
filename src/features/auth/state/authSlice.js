@@ -146,6 +146,54 @@ export const verifyEmail = createAsyncThunk(
   }
 )
 
+// Async thunk for requesting a password reset email
+export const requestPasswordReset = createAsyncThunk(
+  'auth/requestPasswordReset',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PASSWORD_RESET_REQUEST}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        }
+      )
+      const data = await response.json()
+      if (!response.ok) return rejectWithValue(data)
+      return data
+    } catch (error) {
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
+    }
+  }
+)
+
+// Async thunk for confirming a password reset with token + new password
+export const confirmPasswordReset = createAsyncThunk(
+  'auth/confirmPasswordReset',
+  async ({ token, password, password2 }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PASSWORD_RESET_CONFIRM}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password, password2 })
+        }
+      )
+      const data = await response.json()
+      if (!response.ok) return rejectWithValue(data)
+      return data
+    } catch (error) {
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
+    }
+  }
+)
+
 // Async thunk for token refresh
 export const refreshAccessToken = createAsyncThunk(
   'auth/refresh',
@@ -374,6 +422,34 @@ const authSlice = createSlice({
           action.payload?.detail ||
           'Verification failed'
         state.isAuthenticated = false
+      })
+      // Request password reset cases
+      .addCase(requestPasswordReset.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(requestPasswordReset.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(requestPasswordReset.rejected, (state, action) => {
+        state.loading = false
+        state.error =
+          action.payload?.error || action.payload?.detail || 'Request failed'
+      })
+      // Confirm password reset cases
+      .addCase(confirmPasswordReset.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(confirmPasswordReset.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(confirmPasswordReset.rejected, (state, action) => {
+        state.loading = false
+        state.error =
+          action.payload?.error || action.payload?.detail || 'Reset failed'
       })
       // Refresh token cases
       .addCase(refreshAccessToken.pending, (state) => {

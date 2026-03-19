@@ -36,6 +36,8 @@ export const API_CONFIG = {
     USER_AUTH: '/api/users/auth/',
     REGISTER: '/api/users/register/',
     VERIFY_EMAIL: '/api/users/verify-email/',
+    PASSWORD_RESET_REQUEST: '/api/users/password-reset/request/',
+    PASSWORD_RESET_CONFIRM: '/api/users/password-reset/confirm/',
 
     // Progress endpoints
     PROGRESS: '/api/progress',
