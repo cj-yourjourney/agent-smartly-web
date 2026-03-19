@@ -9,12 +9,14 @@
 export const ROUTES = {
   HOME: '/',
   ABOUT: '/about',
-  ONBOARDING: '/onboarding', 
+  ONBOARDING: '/onboarding',
 
   // Auth routes
   AUTH: {
     LOGIN: '/auth/login',
-    SIGNUP: '/auth/signup'
+    SIGNUP: '/auth/signup',
+
+    VERIFY_EMAIL: '/auth/verify-email' // was '/users/verify-email/'
   },
 
   // Learning routes
@@ -22,8 +24,7 @@ export const ROUTES = {
     PRACTICE: '/learning/practice',
     PROGRESS: '/learning/progress',
     KEY_CONCEPTS: '/learning/key-concepts'
-  },
-
+  }
 }
 
 // Helper function to check if a route is active

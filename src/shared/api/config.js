@@ -35,6 +35,7 @@ export const API_CONFIG = {
     USER_DETAIL: '/api/users/detail/',
     USER_AUTH: '/api/users/auth/',
     REGISTER: '/api/users/register/',
+    VERIFY_EMAIL: '/api/users/verify-email/',
 
     // Progress endpoints
     PROGRESS: '/api/progress',

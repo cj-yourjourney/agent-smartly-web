@@ -111,6 +111,31 @@ export const registerUser = createAsyncThunk(
         return rejectWithValue(data)
       }
 
+      // No tokens yet — user must verify email first
+      return data
+    } catch (error) {
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
+    }
+  }
+)
+
+// Async thunk for email verification (magic link)
+export const verifyEmail = createAsyncThunk(
+  'auth/verifyEmail',
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VERIFY_EMAIL}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        }
+      )
+      const data = await response.json()
+      if (!response.ok) return rejectWithValue(data)
       saveTokensToStorage(data.access, data.refresh)
       return data
     } catch (error) {
@@ -317,20 +342,38 @@ const authSlice = createSlice({
         state.error = null
         state.registerSuccess = false
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false
-        state.accessToken = action.payload.access
-        state.refreshToken = action.payload.refresh
-        state.user = action.payload.user
-        state.isAuthenticated = true
+        state.isAuthenticated = false // Not authenticated yet — email unverified
         state.error = null
-        state.registerSuccess = true
+        state.registerSuccess = true // Triggers "check your inbox" UI in SignUpPage
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
         state.isAuthenticated = false
         state.registerSuccess = false
+      })
+      // Email verification cases
+      .addCase(verifyEmail.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(verifyEmail.fulfilled, (state, action) => {
+        state.loading = false
+        state.accessToken = action.payload.access
+        state.refreshToken = action.payload.refresh
+        state.user = action.payload.user
+        state.isAuthenticated = true
+        state.error = null
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.loading = false
+        state.error =
+          action.payload?.error ||
+          action.payload?.detail ||
+          'Verification failed'
+        state.isAuthenticated = false
       })
       // Refresh token cases
       .addCase(refreshAccessToken.pending, (state) => {
