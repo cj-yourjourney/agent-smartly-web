@@ -37,9 +37,12 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
   const coverage = summary.exam_coverage || 0
   const totalQ = summary.total_questions_attempted || 0
   const accuracy = summary.overall_accuracy || 0
+  const conceptCoverage = summary.key_concept_coverage || 0
+  const uniqueConceptsViewed = Math.round((conceptCoverage / 100) * 134)
 
   const QUESTION_TARGET = 300
   const ACCURACY_TARGET = 75
+  const KEY_CONCEPT_TARGET = 134
 
   const volumePct = Math.min((totalQ / QUESTION_TARGET) * 100, 100)
   const accuracyPct = Math.min((accuracy / ACCURACY_TARGET) * 100, 100)
@@ -122,6 +125,18 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
       })
     }
 
+    if (conceptCoverage < 100) {
+      const remaining = KEY_CONCEPT_TARGET - uniqueConceptsViewed
+      items.push({
+        type: conceptCoverage < 50 ? 'warning' : 'info',
+        icon: <BookOpen className="w-4 h-4" />,
+        title: `${remaining} key concept${remaining !== 1 ? 's' : ''} not yet reviewed`,
+        description: `You've reviewed ${uniqueConceptsViewed} of ${KEY_CONCEPT_TARGET} key concepts. Understanding these makes exam questions feel much easier.`,
+        action: 'Review Key Concepts',
+        onClick: () => router.push(ROUTES.LEARNING.KEY_CONCEPTS)
+      })
+    }
+
     if (weakAreas.length > 0) {
       const topWeak = weakAreas[0]
       items.push({
@@ -152,7 +167,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
         icon: <CheckCircle className="w-4 h-4" />,
         title: "You're exam ready!",
         description:
-          '300+ questions, 75%+ accuracy, all topics covered. Do a final weak-area review.',
+          '300+ questions, 75%+ accuracy, all topics covered, and key concepts reviewed. Do a final weak-area review.',
         action: 'Final Review',
         onClick: () => router.push(ROUTES.LEARNING.PRACTICE)
       })
@@ -222,8 +237,8 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
           <div className="flex-1 space-y-3">
             <p className="text-sm text-base-content/60 mb-4">
               {totalQ === 0
-                ? 'Score is based on 300+ questions, 75%+ accuracy, and all 7 topics covered.'
-                : 'Score is weighted across accuracy (50%), question volume (30%), and topic coverage (20%).'}
+                ? 'Score is based on 300+ questions, 75%+ accuracy, all 7 topics, and all 134 key concepts reviewed.'
+                : 'Score is weighted across accuracy (45%), question volume (25%), topic coverage (15%), and key concept coverage (15%).'}
             </p>
             {guidance.map((item, i) => (
               <div key={i} className={`alert ${alertClass[item.type]} py-3`}>
@@ -246,18 +261,18 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
           </div>
         </div>
 
-        {/* Three pillars */}
+        {/* Four pillars */}
         <div className="mt-6 pt-6 border-t border-base-200">
           <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wide mb-4">
-            The 3 pillars of exam readiness
+            The 4 pillars of exam readiness
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-base-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold">Question Volume</span>
                 <span className="ml-auto text-xs text-base-content/50">
-                  30% of score
+                  25%
                 </span>
               </div>
               <div className="flex justify-between text-xs text-base-content/50 mb-1">
@@ -283,7 +298,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
                 <Award className="w-4 h-4 text-secondary" />
                 <span className="text-sm font-semibold">Accuracy</span>
                 <span className="ml-auto text-xs text-base-content/50">
-                  50% of score
+                  45%
                 </span>
               </div>
               <div className="flex justify-between text-xs text-base-content/50 mb-1">
@@ -309,7 +324,7 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
                 <BookOpen className="w-4 h-4 text-accent" />
                 <span className="text-sm font-semibold">Topic Coverage</span>
                 <span className="ml-auto text-xs text-base-content/50">
-                  20% of score
+                  15%
                 </span>
               </div>
               <div className="flex justify-between text-xs text-base-content/50 mb-1">
@@ -333,6 +348,34 @@ function ExamReadinessCard({ summary, topicProgress, weakAreas, router }) {
                 {coveragePct >= 100
                   ? '✓ All topics covered'
                   : `${7 - topicProgress.filter((t) => t.questions_attempted > 0).length} topics remaining`}
+              </p>
+            </div>
+
+            <div className="bg-base-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-4 h-4 text-warning" />
+                <span className="text-sm font-semibold">Key Concepts</span>
+                <span className="ml-auto text-xs text-base-content/50">
+                  15%
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-base-content/50 mb-1">
+                <span>
+                  {uniqueConceptsViewed} of {KEY_CONCEPT_TARGET} reviewed
+                </span>
+                <span>target: all 134</span>
+              </div>
+              <progress
+                className={`progress w-full h-2 ${conceptCoverage >= 100 ? 'progress-success' : 'progress-warning'}`}
+                value={conceptCoverage}
+                max="100"
+              />
+              <p
+                className={`text-xs mt-1 font-medium ${conceptCoverage >= 100 ? 'text-success' : 'text-base-content/40'}`}
+              >
+                {conceptCoverage >= 100
+                  ? '✓ All concepts reviewed'
+                  : `${KEY_CONCEPT_TARGET - uniqueConceptsViewed} concepts remaining`}
               </p>
             </div>
           </div>
