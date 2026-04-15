@@ -14,7 +14,9 @@ import {
   Loader2,
   AlertTriangle,
   BarChart2,
-  Hash
+  Hash,
+  ListChecks,
+  Percent
 } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -74,7 +76,9 @@ function AttemptRow({ attempt, index }) {
         <p className="font-medium line-clamp-2 mb-1.5 leading-snug">
           {attempt.question_text}
         </p>
-        <div className="flex flex-wrap gap-1.5">
+
+        {/* Meta badges */}
+        <div className="flex flex-wrap gap-1.5 mb-2">
           <span className="badge badge-xs badge-ghost gap-1">
             <BookOpen className="w-2.5 h-2.5" />
             {attempt.topic_display || attempt.topic}
@@ -91,15 +95,35 @@ function AttemptRow({ attempt, index }) {
               {attempt.time_spent_seconds}s
             </span>
           )}
-          {attempt.user_answer && (
-            <span className="badge badge-xs badge-ghost gap-1 font-mono">
-              Your answer: {attempt.user_answer}
-            </span>
-          )}
         </div>
+
+        {/* ── Answer display ── */}
+        {attempt.is_correct ? (
+          // Correct: just show the right answer with a checkmark
+          <div className="flex items-start gap-1.5 text-xs text-success font-medium">
+            <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+            <span>{attempt.correct_answer}</span>
+          </div>
+        ) : (
+          // Wrong: show what they picked (red) then the correct answer (green)
+          <div className="space-y-1">
+            {attempt.user_answer && (
+              <div className="flex items-start gap-1.5 text-xs text-error font-medium">
+                <XCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                <span>Your answer: {attempt.user_answer}</span>
+              </div>
+            )}
+            {attempt.correct_answer && (
+              <div className="flex items-start gap-1.5 text-xs text-success font-medium">
+                <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                <span>Correct answer: {attempt.correct_answer}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Result */}
+      {/* Result icon */}
       <div className="flex-shrink-0 mt-0.5">
         {attempt.is_correct ? (
           <CheckCircle className="w-5 h-5 text-success" />
@@ -138,8 +162,6 @@ function SessionCard({ session }) {
     setLoading(true)
     setFetchError(null)
     try {
-      // authenticatedFetch prepends API_CONFIG.BASE_URL and injects the JWT
-      // from localStorage automatically — no token plumbing needed here.
       const endpoint = `${API_CONFIG.ENDPOINTS.SESSIONS}${session.id}/`
       const res = await authenticatedFetch(endpoint)
       if (!res.ok)
@@ -308,6 +330,76 @@ function SessionCard({ session }) {
   )
 }
 
+// ── Stats Header ──────────────────────────────────────────────────────────────
+
+function SessionsStatsHeader({ sessions }) {
+  const totalSessions = sessions.length
+
+  const totalQuestions = sessions.reduce(
+    (sum, s) => sum + (s.questions_attempted || 0),
+    0
+  )
+
+  // Avg accuracy across completed sessions that have at least 1 attempt
+  const scoredSessions = sessions.filter(
+    (s) => s.status === 'completed' && s.questions_attempted > 0
+  )
+  const avgAccuracy =
+    scoredSessions.length > 0
+      ? Math.round(
+          scoredSessions.reduce((sum, s) => sum + (s.accuracy || 0), 0) /
+            scoredSessions.length
+        )
+      : 0
+
+  const stats = [
+    {
+      label: 'Total sessions',
+      value: totalSessions,
+      icon: <ClipboardList className="w-5 h-5 text-primary" />
+    },
+    {
+      label: 'Questions practiced',
+      value: totalQuestions,
+      icon: <ListChecks className="w-5 h-5 text-secondary" />
+    },
+    {
+      label: 'Avg accuracy',
+      value: scoredSessions.length > 0 ? `${avgAccuracy}%` : '—',
+      icon: <Percent className="w-5 h-5 text-accent" />,
+      valueColor:
+        avgAccuracy >= 70
+          ? 'text-success'
+          : avgAccuracy >= 40
+            ? 'text-warning'
+            : avgAccuracy > 0
+              ? 'text-error'
+              : ''
+    }
+  ]
+
+  return (
+    <div className="grid grid-cols-3 gap-3 mb-6">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="bg-base-200 rounded-xl p-4 flex flex-col gap-1"
+        >
+          <div className="flex items-center gap-1.5 text-xs text-base-content/50 font-medium">
+            {stat.icon}
+            {stat.label}
+          </div>
+          <p
+            className={`text-2xl font-bold leading-tight ${stat.valueColor || ''}`}
+          >
+            {stat.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Main Tab Component ────────────────────────────────────────────────────────
 
 export default function SessionsActivityTab({ sessions }) {
@@ -321,6 +413,11 @@ export default function SessionsActivityTab({ sessions }) {
         <p className="text-sm text-base-content/50 mb-4">
           Click any session to review every question you answered.
         </p>
+
+        {/* ── Stats summary ── */}
+        {sessions && sessions.length > 0 && (
+          <SessionsStatsHeader sessions={sessions} />
+        )}
 
         {!sessions || sessions.length === 0 ? (
           <div className="alert alert-info">
