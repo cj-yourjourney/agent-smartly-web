@@ -99,24 +99,29 @@ function AttemptRow({ attempt, index }) {
 
         {/* ── Answer display ── */}
         {attempt.is_correct ? (
-          // Correct: just show the right answer with a checkmark
+          // Correct: just show the right answer text with a checkmark
           <div className="flex items-start gap-1.5 text-xs text-success font-medium">
             <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-            <span>{attempt.correct_answer}</span>
+            <span>{attempt.correct_answer_text || attempt.correct_answer}</span>
           </div>
         ) : (
-          // Wrong: show what they picked (red) then the correct answer (green)
+          // Wrong: show their wrong answer text (red) then the correct answer text (green)
           <div className="space-y-1">
             {attempt.user_answer && (
               <div className="flex items-start gap-1.5 text-xs text-error font-medium">
                 <XCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                <span>Your answer: {attempt.user_answer}</span>
+                <span>
+                  Your answer: {attempt.user_answer_text || attempt.user_answer}
+                </span>
               </div>
             )}
             {attempt.correct_answer && (
               <div className="flex items-start gap-1.5 text-xs text-success font-medium">
                 <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                <span>Correct answer: {attempt.correct_answer}</span>
+                <span>
+                  Correct answer:{' '}
+                  {attempt.correct_answer_text || attempt.correct_answer}
+                </span>
               </div>
             )}
           </div>
