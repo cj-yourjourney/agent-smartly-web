@@ -5,15 +5,13 @@ import {
   TrendingUp,
   Activity,
   BookOpen,
-  Clock,
-  AlertTriangle,
-  ClipboardList // Added new icon
+  ClipboardList,
+  AlertTriangle
 } from 'lucide-react'
 
 import OverviewTab from './components/OverviewTab'
 import TopicsTab from './components/TopicsTab'
-import ActivityTab from './components/ActivityTab'
-import SessionsTab from './components/SessionsTab' // Imported new component
+import SessionsActivityTab from './components/SessionsActivityTab' // ← new combined tab
 
 import {
   fetchProgressSummary,
@@ -21,7 +19,7 @@ import {
   fetchSubtopicProgress,
   fetchWeakAreas,
   fetchRecentActivity,
-  fetchSessions, // Added new Redux action
+  fetchSessions,
   setSelectedTopic
 } from './state/progressSlice'
 
@@ -36,8 +34,7 @@ export default function ProgressPage() {
     topicProgress,
     subtopicProgress,
     weakAreas,
-    recentActivity,
-    sessions, // Added sessions state
+    sessions,
     loading,
     error,
     selectedTopic
@@ -53,7 +50,7 @@ export default function ProgressPage() {
       dispatch(fetchTopicProgress())
       dispatch(fetchWeakAreas())
       dispatch(fetchRecentActivity())
-      dispatch(fetchSessions()) // Fetch the sessions data
+      dispatch(fetchSessions())
     }
   }, [dispatch, isAuthenticated])
 
@@ -121,13 +118,6 @@ export default function ProgressPage() {
             <ClipboardList className="w-4 h-4" />
             Practice Sessions
           </button>
-          <button
-            className={`tab gap-2 tab-lg px-6 whitespace-nowrap ${activeTab === 'activity' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('activity')}
-          >
-            <Clock className="w-4 h-4" />
-            Recent Activity
-          </button>
         </div>
 
         {/* Tab Content */}
@@ -148,9 +138,8 @@ export default function ProgressPage() {
             onTopicClick={handleTopicClick}
           />
         )}
-        {activeTab === 'sessions' && <SessionsTab sessions={sessions || []} />}
-        {activeTab === 'activity' && (
-          <ActivityTab recentActivity={recentActivity} />
+        {activeTab === 'sessions' && (
+          <SessionsActivityTab sessions={sessions || []} />
         )}
       </div>
     </div>
