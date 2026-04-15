@@ -29,9 +29,14 @@ const TABS = [
   { id: 'sessions', label: 'Sessions', icon: ClipboardList }
 ]
 
+const VALID_TABS = TABS.map((t) => t.id)
+
 export default function ProgressPage() {
   const dispatch = useDispatch()
   const router = useRouter()
+
+  // Read the initial tab from ?tab= query param (e.g. from the session complete screen).
+  // Default to 'overview' if the param is absent or invalid.
   const [activeTab, setActiveTab] = useState('overview')
 
   const { isAuthenticated, isInitialized } = useSelector((s) => s.auth)
@@ -45,6 +50,15 @@ export default function ProgressPage() {
     error,
     selectedTopic
   } = useSelector((s) => s.progress)
+
+  // Sync active tab with ?tab= query param once the router is ready
+  useEffect(() => {
+    if (!router.isReady) return
+    const tabParam = router.query.tab
+    if (tabParam && VALID_TABS.includes(tabParam)) {
+      setActiveTab(tabParam)
+    }
+  }, [router.isReady, router.query.tab])
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) router.push('/login')
@@ -70,6 +84,16 @@ export default function ProgressPage() {
       dispatch(fetchSubtopicProgress())
     } else {
       dispatch(setSelectedTopic(topic))
+    }
+  }
+
+  // When the user manually switches tabs, clean up the URL param
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    if (router.query.tab) {
+      router.replace({ pathname: router.pathname }, undefined, {
+        shallow: true
+      })
     }
   }
 
@@ -108,7 +132,7 @@ export default function ProgressPage() {
             <button
               key={id}
               className={`tab gap-1.5 px-5 ${activeTab === id ? 'tab-active' : ''}`}
-              onClick={() => setActiveTab(id)}
+              onClick={() => handleTabChange(id)}
             >
               <Icon className="w-4 h-4" />
               {label}
