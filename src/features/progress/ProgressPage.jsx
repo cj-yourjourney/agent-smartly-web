@@ -11,7 +11,7 @@ import {
 
 import OverviewTab from './components/OverviewTab'
 import TopicsTab from './components/TopicsTab'
-import SessionsActivityTab from './components/SessionsActivityTab' // ← new combined tab
+import SessionsActivityTab from './components/SessionsActivityTab'
 
 import {
   fetchProgressSummary,
@@ -23,12 +23,18 @@ import {
   setSelectedTopic
 } from './state/progressSlice'
 
+const TABS = [
+  { id: 'overview', label: 'Overview', icon: Activity },
+  { id: 'topics', label: 'Topics', icon: BookOpen },
+  { id: 'sessions', label: 'Sessions', icon: ClipboardList }
+]
+
 export default function ProgressPage() {
   const dispatch = useDispatch()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
-  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth)
+  const { isAuthenticated, isInitialized } = useSelector((s) => s.auth)
   const {
     summary,
     topicProgress,
@@ -38,7 +44,7 @@ export default function ProgressPage() {
     loading,
     error,
     selectedTopic
-  } = useSelector((state) => state.progress)
+  } = useSelector((s) => s.progress)
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) router.push('/login')
@@ -70,57 +76,47 @@ export default function ProgressPage() {
   if (!isInitialized || (loading && !summary?.total_questions_attempted)) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+        <span className="loading loading-spinner loading-md" />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-base-200 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-bold">Your Progress</h1>
+      <div className="container mx-auto px-4 max-w-5xl">
+        {/* Page header */}
+        <div className="mb-6 flex items-center gap-3">
+          <TrendingUp className="w-7 h-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold leading-tight">Your Progress</h1>
+            <p className="text-sm text-base-content/50">
+              Track your learning and identify areas for improvement
+            </p>
           </div>
-          <p className="text-base-content/70 ml-13">
-            Track your learning journey and identify areas for improvement
-          </p>
         </div>
 
         {error && (
-          <div className="alert alert-error mb-6">
-            <AlertTriangle className="w-6 h-6" />
-            <span>{error}</span>
+          <div className="alert alert-error mb-4 py-2">
+            <AlertTriangle className="w-5 h-5" />
+            <span className="text-sm">{error}</span>
           </div>
         )}
 
-        {/* Tab Controls */}
-        <div className="tabs tabs-boxed mb-6 bg-base-100 p-2 overflow-x-auto flex-nowrap">
-          <button
-            className={`tab gap-2 tab-lg px-6 whitespace-nowrap ${activeTab === 'overview' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <Activity className="w-4 h-4" />
-            Overview
-          </button>
-          <button
-            className={`tab gap-2 tab-lg px-6 whitespace-nowrap ${activeTab === 'topics' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('topics')}
-          >
-            <BookOpen className="w-4 h-4" />
-            Topics & Weak Areas
-          </button>
-          <button
-            className={`tab gap-2 tab-lg px-6 whitespace-nowrap ${activeTab === 'sessions' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('sessions')}
-          >
-            <ClipboardList className="w-4 h-4" />
-            Practice Sessions
-          </button>
+        {/* Tabs */}
+        <div className="tabs tabs-boxed bg-base-100 p-1 mb-5 w-fit">
+          {TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              className={`tab gap-1.5 px-5 ${activeTab === id ? 'tab-active' : ''}`}
+              onClick={() => setActiveTab(id)}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
         </div>
 
-        {/* Tab Content */}
+        {/* Tab content */}
         {activeTab === 'overview' && (
           <OverviewTab
             summary={summary}
