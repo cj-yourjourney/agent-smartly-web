@@ -97,7 +97,8 @@ const initialState = {
   loading: false,
   error: null,
   startTime: null,
-  isPracticeQuiz: false
+  isPracticeQuiz: false,
+  
 }
 
 // Slice

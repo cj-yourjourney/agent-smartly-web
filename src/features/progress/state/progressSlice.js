@@ -67,6 +67,20 @@ export const fetchRecentActivity = createAsyncThunk(
   }
 )
 
+// NEW: Fetch Practice Sessions
+export const fetchSessions = createAsyncThunk(
+  'progress/fetchSessions',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Assuming you add SESSIONS to your API_CONFIG.ENDPOINTS
+      const data = await api.get(API_CONFIG.ENDPOINTS.SESSIONS)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 /**
  * Centralized action for recording question attempts
  * Used by both practice and exam modules
@@ -79,7 +93,8 @@ export const fetchRecentActivity = createAsyncThunk(
 export const recordQuestionAttempt = createAsyncThunk(
   'progress/recordQuestionAttempt',
   async (
-    { questionId, userAnswer, timeSpent, isCorrect },
+    // 1. Add sessionId to the destructured arguments
+    { questionId, userAnswer, timeSpent, isCorrect, sessionId },
     { rejectWithValue }
   ) => {
     try {
@@ -89,7 +104,11 @@ export const recordQuestionAttempt = createAsyncThunk(
         time_spent_seconds: timeSpent
       }
 
-      // Include isCorrect only if provided (for exam submissions)
+      // 2. Map it to the exact key your Django serializer expects
+      if (sessionId) {
+        payload.session_id = sessionId
+      }
+
       if (isCorrect !== undefined) {
         payload.is_correct = isCorrect
       }
@@ -97,7 +116,6 @@ export const recordQuestionAttempt = createAsyncThunk(
       const data = await api.post(API_CONFIG.ENDPOINTS.ATTEMPTS, payload)
       return data
     } catch (error) {
-      // Log error but don't break the user flow
       console.error('Failed to record question attempt:', error)
       return rejectWithValue(error.message)
     }
@@ -128,6 +146,7 @@ const initialState = {
   subtopicProgress: [],
   weakAreas: [],
   recentActivity: [],
+  sessions: [], // NEW: Added sessions array
   loading: false,
   error: null,
   selectedTopic: null,
@@ -210,6 +229,21 @@ const progressSlice = createSlice({
         state.recentActivity = action.payload
       })
       .addCase(fetchRecentActivity.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // NEW: Fetch Practice Sessions
+      .addCase(fetchSessions.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchSessions.fulfilled, (state, action) => {
+        state.loading = false
+        // Assuming Django DRF's list endpoint returns paginated data (e.g. { results: [...] })
+        // If it's not paginated, use action.payload directly.
+        state.sessions = action.payload.results || action.payload
+      })
+      .addCase(fetchSessions.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
       })

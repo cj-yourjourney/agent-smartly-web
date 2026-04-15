@@ -46,6 +46,7 @@ export const API_CONFIG = {
     PROGRESS_TOPICS: '/api/progress/topics/',
     PROGRESS_SUBTOPICS: '/api/progress/subtopics/',
     WEAK_AREAS: '/api/progress/weak-areas/',
+    SESSIONS: '/api/progress/sessions/',
     RECENT_ACTIVITY: '/api/progress/recent-activity/'
   }
 }
