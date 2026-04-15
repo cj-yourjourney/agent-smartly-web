@@ -12,7 +12,9 @@ import {
   goToPreviousQuestion,
   resetToTopicSelection,
   setStartTime,
-  recordQuestionAttempt
+  recordQuestionAttempt,
+  createSession, // NEW
+  completeSession // NEW
 } from './state/practiceSlice'
 import {
   CheckCircle2,
@@ -37,7 +39,8 @@ export default function PracticeMode() {
     answerResult,
     loading,
     startTime,
-    isPracticeQuiz
+    isPracticeQuiz,
+    sessionId // NEW
   } = useSelector((state) => state.practice)
 
   const [expandedTopic, setExpandedTopic] = useState(null)
@@ -95,11 +98,28 @@ export default function PracticeMode() {
   // --- Handlers ---
   const handleTopicSelect = (topicValue) => {
     dispatch(fetchQuestionsByTopic(topicValue))
+    // NEW: Create a backend session for topic-based practice (20 questions)
+    dispatch(
+      createSession({
+        sessionType: 'topic',
+        topic: topicValue,
+        totalQuestions: 20
+      })
+    )
   }
 
   const handleSubtopicSelect = (topicValue, subtopicValue) => {
     dispatch(
       fetchQuestionsBySubtopic({ topic: topicValue, subtopic: subtopicValue })
+    )
+    // NEW: Create a backend session for subtopic-based practice (20 questions)
+    dispatch(
+      createSession({
+        sessionType: 'subtopic',
+        topic: topicValue,
+        subtopic: subtopicValue,
+        totalQuestions: 20
+      })
     )
   }
 
@@ -107,6 +127,13 @@ export default function PracticeMode() {
     dispatch(fetchPracticeQuizQuestions())
     setElapsedTime(0)
     setSessionStartTime(null)
+    // NEW: Create a backend session for the full practice exam (75 questions)
+    dispatch(
+      createSession({
+        sessionType: 'practice_exam',
+        totalQuestions: 75
+      })
+    )
   }
 
   const toggleTopic = (topicValue) => {
@@ -128,7 +155,8 @@ export default function PracticeMode() {
       recordQuestionAttempt({
         questionId: currentQuestion.id,
         userAnswer: selectedAnswer,
-        timeSpent
+        timeSpent,
+        sessionId: sessionId || undefined // NEW: link attempt to the active session
       })
     )
   }
@@ -137,6 +165,10 @@ export default function PracticeMode() {
   const handlePreviousQuestion = () => dispatch(goToPreviousQuestion())
 
   const handleBackToTopics = () => {
+    // NEW: Mark the session as completed before resetting state
+    if (sessionId) {
+      dispatch(completeSession(sessionId))
+    }
     dispatch(resetToTopicSelection())
     setExpandedTopic(null)
     setElapsedTime(0)
@@ -382,10 +414,10 @@ export default function PracticeMode() {
                   isTimeUp
                     ? 'text-error bg-error/10'
                     : isTimeCritical
-                    ? 'text-error bg-error/10'
-                    : isTimeWarning
-                    ? 'text-warning bg-warning/10'
-                    : 'text-base-content/70 bg-base-200'
+                      ? 'text-error bg-error/10'
+                      : isTimeWarning
+                        ? 'text-warning bg-warning/10'
+                        : 'text-base-content/70 bg-base-200'
                 }`}
               >
                 <Clock className="w-4 h-4" />

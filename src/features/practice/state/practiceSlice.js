@@ -84,6 +84,46 @@ export const checkAnswer = createAsyncThunk(
   }
 )
 
+// NEW: Create a practice session on the backend when the user starts practicing.
+// session_type should match what your Django model expects, e.g. 'topic', 'subtopic', 'practice_exam'.
+export const createSession = createAsyncThunk(
+  'practice/createSession',
+  async (
+    { sessionType, topic, subtopic, totalQuestions },
+    { rejectWithValue }
+  ) => {
+    try {
+      const payload = {
+        session_type: sessionType,
+        total_questions_planned: totalQuestions
+      }
+      if (topic) payload.topic = topic
+      if (subtopic) payload.subtopic = subtopic
+      const data = await api.post(API_CONFIG.ENDPOINTS.SESSIONS, payload)
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+// NEW: Mark the current session as completed when the user exits or finishes.
+// Calls a custom DRF action: POST /api/sessions/{id}/complete/
+export const completeSession = createAsyncThunk(
+  'practice/completeSession',
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const data = await api.post(
+        `${API_CONFIG.ENDPOINTS.SESSIONS}${sessionId}/complete/`,
+        {}
+      )
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 // Initial state
 const initialState = {
   topics: [],
@@ -98,7 +138,7 @@ const initialState = {
   error: null,
   startTime: null,
   isPracticeQuiz: false,
-  
+  sessionId: null // NEW: tracks the active backend session ID
 }
 
 // Slice
@@ -144,6 +184,7 @@ const practiceSlice = createSlice({
       state.answerResult = null
       state.startTime = null
       state.isPracticeQuiz = false
+      state.sessionId = null // NEW: clear session on reset
     },
     setStartTime: (state) => {
       state.startTime = Date.now()
@@ -248,6 +289,22 @@ const practiceSlice = createSlice({
       .addCase(checkAnswer.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+      // NEW: Create session — store the returned session ID
+      .addCase(createSession.fulfilled, (state, action) => {
+        state.sessionId = action.payload.id
+      })
+      .addCase(createSession.rejected, (state, action) => {
+        // Silent failure — session tracking is non-critical, practice still works
+        console.error('Failed to create session:', action.payload)
+      })
+      // NEW: Complete session — clear session ID (resetToTopicSelection also clears it)
+      .addCase(completeSession.fulfilled, (state) => {
+        state.sessionId = null
+      })
+      .addCase(completeSession.rejected, (state, action) => {
+        // Silent failure
+        console.error('Failed to complete session:', action.payload)
       })
   }
 })
