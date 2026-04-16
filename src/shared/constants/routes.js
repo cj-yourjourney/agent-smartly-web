@@ -24,7 +24,10 @@ export const ROUTES = {
     PRACTICE: '/learning/practice',
     PROGRESS: '/learning/progress',
     KEY_CONCEPTS: '/learning/key-concepts'
-  }
+  },
+
+  // User routes
+  PROFILE: '/profile'
 }
 
 // Helper function to check if a route is active
