@@ -187,7 +187,7 @@ const Navbar = () => {
                     className={isActive(ROUTES.PROFILE) ? 'active' : ''}
                   >
                     <UserCircle className="h-4 w-4" />
-                    Profile
+                    Account
                   </button>
                 </li>
                 <li>

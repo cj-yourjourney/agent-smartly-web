@@ -39,6 +39,10 @@ export const API_CONFIG = {
     PASSWORD_RESET_REQUEST: '/api/users/password-reset/request/',
     PASSWORD_RESET_CONFIRM: '/api/users/password-reset/confirm/',
 
+    // Profile endpoints
+    PROFILE_DETAILS: '/api/profiles/details/',
+    PROFILE_CREDITS: '/api/profiles/credits/',
+
     // Progress endpoints
     PROGRESS: '/api/progress',
     ATTEMPTS: '/api/progress/attempts/',
@@ -47,7 +51,16 @@ export const API_CONFIG = {
     PROGRESS_SUBTOPICS: '/api/progress/subtopics/',
     WEAK_AREAS: '/api/progress/weak-areas/',
     SESSIONS: '/api/progress/sessions/',
-    RECENT_ACTIVITY: '/api/progress/recent-activity/'
+    RECENT_ACTIVITY: '/api/progress/recent-activity/',
+
+    // Payment endpoints
+    PAYMENT: '/api/payments/pay/',
+    PAYMENT_CONFIRM: '/api/payments/confirm/',
+
+    // Subscription endpoints
+    STRIPE_CONFIG: '/api/payments/stripe-config/',
+    SUBSCRIBE: '/api/payments/subscribe/',
+    SUBSCRIBE_CONFIRM: '/api/payments/subscribe/confirm/'
   }
 }
 
@@ -179,7 +192,6 @@ export const refreshAccessToken = async () => {
     return data.access
   } catch (error) {
     console.error('❌ Token refresh failed:', error)
-    // If refresh fails, clear tokens and redirect to login
     removeTokens()
     if (typeof window !== 'undefined') {
       window.location.href = '/login'
@@ -203,11 +215,9 @@ export const authenticatedFetch = async (
   if (token && isTokenExpired(token) && retry) {
     console.log('🔄 Token expired, refreshing before request...')
 
-    // If already refreshing, wait for it to complete
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         subscribeTokenRefresh((newToken) => {
-          // Retry with new token
           const headers = {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${newToken}`,
@@ -221,7 +231,6 @@ export const authenticatedFetch = async (
       })
     }
 
-    // Start refreshing
     isRefreshing = true
 
     try {
@@ -246,11 +255,9 @@ export const authenticatedFetch = async (
       headers
     })
 
-    // If unauthorized and we haven't retried yet, try to refresh token
     if (response.status === 401 && retry) {
       console.log('🔄 Got 401, attempting to refresh token...')
 
-      // If already refreshing, wait for it
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           subscribeTokenRefresh(async (newToken) => {
@@ -273,14 +280,11 @@ export const authenticatedFetch = async (
         })
       }
 
-      // Start refreshing
       isRefreshing = true
 
       try {
         const newToken = await refreshAccessToken()
         onTokenRefreshed(newToken)
-
-        // Retry the request with new token
         return authenticatedFetch(endpoint, options, false)
       } catch (refreshError) {
         throw new Error('Authentication failed')
@@ -302,10 +306,8 @@ export const apiCall = async (endpoint, options = {}) => {
   try {
     const response = await authenticatedFetch(endpoint, options)
 
-    // Parse JSON response
     const data = await response.json()
 
-    // Check if response is ok
     if (!response.ok) {
       throw {
         status: response.status,
@@ -316,7 +318,6 @@ export const apiCall = async (endpoint, options = {}) => {
 
     return data
   } catch (error) {
-    // Re-throw with consistent error structure
     if (error.status) {
       throw error
     }
