@@ -4,6 +4,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import { fetchUserDetails } from '../auth/state/authSlice'
 import {
+  fetchSubscriptionStatus,
+  setSubscriptionData
+} from '../subscription/state/subscriptionSlice'
+import {
   User,
   Mail,
   Calendar,
@@ -14,7 +18,8 @@ import {
   Lock,
   CheckCircle,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react'
 import { API_CONFIG, authenticatedFetch } from '../../shared/api/config'
 import ROUTES from '../../shared/constants/routes'
@@ -91,6 +96,28 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
+// ─── Upgrade Banner ────────────────────────────────────────────────────────────
+// Shown when the user was redirected here because their trial/subscription expired
+
+function UpgradeBanner() {
+  return (
+    <div
+      role="alert"
+      className="flex items-start gap-3 bg-warning/10 border border-warning/40 rounded-xl px-4 py-3 mb-6"
+    >
+      <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+      <div>
+        <p className="text-sm font-semibold text-warning">
+          Your access has expired
+        </p>
+        <p className="text-xs text-base-content/60 mt-0.5">
+          Subscribe below to continue using practice questions and key concepts.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Stripe Payment Form ───────────────────────────────────────────────────────
 
 function PaymentForm({ onSuccess, isRenewal = false }) {
@@ -110,7 +137,6 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
 
     async function init() {
       try {
-        // Fetch the public key from our backend
         const res = await fetch(
           `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.STRIPE_CONFIG}`
         )
@@ -481,6 +507,9 @@ const ProfilePage = () => {
   const router = useRouter()
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth)
 
+  // Show upgrade banner when user was redirected here due to expired access
+  const showUpgradeBanner = router.query.upgrade === 'true'
+
   // Profile data (subscription, has_access, etc.) fetched separately
   const [profileData, setProfileData] = useState(null)
   const [profileLoading, setProfileLoading] = useState(true)
@@ -507,13 +536,38 @@ const ProfilePage = () => {
       .finally(() => setProfileLoading(false))
   }, [isAuthenticated])
 
-  // Called after a successful subscription payment — refresh profile data
-  const handleSubscriptionActivated = useCallback(() => {
-    authenticatedFetch(API_CONFIG.ENDPOINTS.PROFILE_DETAILS)
-      .then((res) => res.json())
-      .then((data) => setProfileData(data))
-      .catch(() => {})
-  }, [])
+  // Called after a successful subscription payment:
+  // 1. Re-fetches profile for local UI
+  // 2. Re-fetches subscription in Redux so SubscriptionGuard unlocks immediately
+  const handleSubscriptionActivated = useCallback(
+    (paymentData) => {
+      // Optimistically update Redux so guards unlock right away
+      if (paymentData?.expires_at) {
+        dispatch(
+          setSubscriptionData({
+            has_access: true,
+            subscription: {
+              status: 'active',
+              is_active: true,
+              started_at: new Date().toISOString(),
+              expires_at: paymentData.expires_at
+            }
+          })
+        )
+      }
+
+      // Then do a full re-fetch to get the authoritative server state
+      authenticatedFetch(API_CONFIG.ENDPOINTS.PROFILE_DETAILS)
+        .then((res) => res.json())
+        .then((data) => {
+          setProfileData(data)
+          // Keep Redux in sync with fresh server data
+          dispatch(fetchSubscriptionStatus())
+        })
+        .catch(() => {})
+    },
+    [dispatch]
+  )
 
   if (!isAuthenticated) return null
 
@@ -531,6 +585,9 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-base-100">
       <div className="max-w-lg mx-auto px-4 py-12">
+        {/* Upgrade banner — only shown when redirected from a guarded page */}
+        {showUpgradeBanner && !profileData?.has_access && <UpgradeBanner />}
+
         {/* Header */}
         <div className="flex flex-col items-center gap-3 mb-8">
           <AvatarCircle username={user.username} />

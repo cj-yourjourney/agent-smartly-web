@@ -8,6 +8,10 @@ import {
   logout,
   selectTokenExpiryTime
 } from '../state/authSlice'
+import {
+  fetchSubscriptionStatus,
+  resetSubscription
+} from '../../subscription/state/subscriptionSlice'
 
 export default function AuthProvider({ children }) {
   const dispatch = useDispatch()
@@ -16,13 +20,13 @@ export default function AuthProvider({ children }) {
   const tokenExpiryTime = useSelector(selectTokenExpiryTime)
   const refreshTimerRef = useRef(null)
 
-  // First useEffect: Initialize auth from localStorage
+  // ── 1. Bootstrap auth from localStorage ──────────────────────────────────────
   useEffect(() => {
     console.log('🚀 AuthProvider - Initializing auth...')
     dispatch(initializeAuth())
   }, [dispatch])
 
-  // Second useEffect: Fetch user details after initialization if authenticated
+  // ── 2. Fetch user details + subscription status after auth is resolved ────────
   useEffect(() => {
     console.log('🔍 AuthProvider - Auth state:', {
       isInitialized,
@@ -32,22 +36,23 @@ export default function AuthProvider({ children }) {
     })
 
     if (isInitialized && isAuthenticated && accessToken) {
-      console.log('✅ AuthProvider - Fetching user details...')
+      console.log('✅ AuthProvider - Fetching user details and subscription...')
       dispatch(fetchUserDetails())
-    } else {
-      console.log('⏭️ AuthProvider - Skipping fetch user details')
+      dispatch(fetchSubscriptionStatus())
+    } else if (isInitialized && !isAuthenticated) {
+      // Clear subscription state whenever auth is resolved as logged-out
+      dispatch(resetSubscription())
+      console.log('⏭️ AuthProvider - Not authenticated, subscription reset')
     }
   }, [dispatch, isInitialized, isAuthenticated, accessToken])
 
-  // Third useEffect: Set up automatic token refresh
+  // ── 3. Automatic token refresh timer ─────────────────────────────────────────
   useEffect(() => {
-    // Clear any existing timer
     if (refreshTimerRef.current) {
       clearTimeout(refreshTimerRef.current)
       refreshTimerRef.current = null
     }
 
-    // Only set up refresh if authenticated and have tokens
     if (!isAuthenticated || !accessToken || !refreshToken) {
       console.log(
         '⏭️ AuthProvider - No auto-refresh needed (not authenticated)'
@@ -55,16 +60,12 @@ export default function AuthProvider({ children }) {
       return
     }
 
-    // Calculate when to refresh (refresh 10 seconds before expiry)
     const timeUntilRefresh = Math.max(0, tokenExpiryTime - 10000)
 
     console.log(
-      `⏰ AuthProvider - Setting up auto-refresh in ${Math.round(
-        timeUntilRefresh / 1000
-      )}s`
+      `⏰ AuthProvider - Setting up auto-refresh in ${Math.round(timeUntilRefresh / 1000)}s`
     )
 
-    // Set up the refresh timer
     refreshTimerRef.current = setTimeout(async () => {
       console.log('🔄 AuthProvider - Auto-refreshing token...')
       try {
@@ -72,12 +73,11 @@ export default function AuthProvider({ children }) {
         console.log('✅ AuthProvider - Auto-refresh successful')
       } catch (error) {
         console.error('❌ AuthProvider - Auto-refresh failed:', error)
-        // Token refresh failed, logout user
         dispatch(logout())
+        dispatch(resetSubscription())
       }
     }, timeUntilRefresh)
 
-    // Cleanup function
     return () => {
       if (refreshTimerRef.current) {
         clearTimeout(refreshTimerRef.current)
@@ -86,18 +86,13 @@ export default function AuthProvider({ children }) {
     }
   }, [dispatch, isAuthenticated, accessToken, refreshToken, tokenExpiryTime])
 
-  // Fourth useEffect: Handle visibility change to refresh on tab focus
+  // ── 4. Refresh token on tab focus if close to expiry ─────────────────────────
   useEffect(() => {
     if (!isAuthenticated) return
 
     const handleVisibilityChange = async () => {
-      // When tab becomes visible, check if token needs refresh
       if (document.visibilityState === 'visible' && accessToken) {
-        const now = Date.now()
-        const expiresIn = tokenExpiryTime
-
-        // If token expires in less than 30 seconds or already expired, refresh
-        if (expiresIn < 30000) {
+        if (tokenExpiryTime < 30000) {
           console.log('🔄 AuthProvider - Tab focused, refreshing token...')
           try {
             await dispatch(refreshAccessToken()).unwrap()
@@ -105,19 +100,19 @@ export default function AuthProvider({ children }) {
           } catch (error) {
             console.error('❌ AuthProvider - Focus refresh failed:', error)
             dispatch(logout())
+            dispatch(resetSubscription())
           }
         }
       }
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [dispatch, isAuthenticated, accessToken, tokenExpiryTime])
 
-  // Show loading spinner while initializing
+  // ── Render ────────────────────────────────────────────────────────────────────
   if (!isInitialized) {
     console.log('⏳ AuthProvider - Still initializing...')
     return (
