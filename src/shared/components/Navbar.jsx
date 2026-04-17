@@ -14,7 +14,6 @@ import {
   LogOut,
   Menu,
   FileText,
-  Sparkles,
   LogIn,
   UserPlus,
   UserCircle
@@ -121,11 +120,11 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation(ROUTES.ABOUT)}
-                  className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.PROFILE)}
+                  className={isActive(ROUTES.PROFILE) ? 'active' : ''}
                 >
-                  <Sparkles className="h-5 w-5" />
-                  About
+                  <UserCircle className="h-5 w-5" />
+                  Account
                 </button>
               </li>
             </>
@@ -138,15 +137,6 @@ const Navbar = () => {
                 >
                   <Home className="h-5 w-5" />
                   Home
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNavigation(ROUTES.ABOUT)}
-                  className={isActive(ROUTES.ABOUT) ? 'active' : ''}
-                >
-                  <Sparkles className="h-5 w-5" />
-                  About
                 </button>
               </li>
             </>
@@ -216,12 +206,6 @@ const Navbar = () => {
                     Progress
                   </button>
                 </li>
-                <li>
-                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
-                    <Sparkles className="h-4 w-4" />
-                    About
-                  </button>
-                </li>
                 <div className="divider my-0"></div>
                 <li>
                   <button onClick={handleLogout} className="text-error">
@@ -256,7 +240,7 @@ const Navbar = () => {
                     className={isActive(ROUTES.PROFILE) ? 'active' : ''}
                   >
                     <UserCircle className="h-4 w-4" />
-                    Profile
+                    Account
                   </button>
                 </li>
                 <li>
@@ -283,12 +267,6 @@ const Navbar = () => {
                   >
                     <BarChart3 className="h-4 w-4" />
                     Progress
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
-                    <Sparkles className="h-4 w-4" />
-                    About
                   </button>
                 </li>
                 <div className="divider my-0"></div>
@@ -334,12 +312,6 @@ const Navbar = () => {
                   <button onClick={() => handleNavigation(ROUTES.HOME)}>
                     <Home className="h-4 w-4" />
                     Home
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleNavigation(ROUTES.ABOUT)}>
-                    <Sparkles className="h-4 w-4" />
-                    About
                   </button>
                 </li>
                 <div className="divider my-0"></div>
