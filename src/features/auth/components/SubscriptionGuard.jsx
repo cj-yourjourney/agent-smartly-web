@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
+import AccessExpiredModal from './AccessExpiredModal'
 
 /**
  * SubscriptionGuard
@@ -14,9 +15,11 @@ import { useRouter } from 'next/router'
  *                      — when false, only authentication is checked (e.g. Progress page)
  *                      — when true, user must also have an active trial or paid subscription
  *
- * Redirect behaviour:
- *   • Not authenticated  →  /auth/login?next=<current path>
- *   • No subscription    →  /profile?upgrade=true
+ * Behaviour:
+ *   • Not authenticated       →  redirect to /auth/login?next=<current path>
+ *   • Subscription required
+ *     but access has expired  →  render children blurred + <AccessExpiredModal> overlay
+ *                                (no redirect — user can see what they're missing)
  */
 export default function SubscriptionGuard({
   children,
@@ -32,27 +35,14 @@ export default function SubscriptionGuard({
   // True once we have a definitive answer on subscription status
   const subscriptionResolved = isFetched && !isLoading
 
+  // Only redirect for authentication failures — not for expired subscriptions
   useEffect(() => {
     if (!isInitialized) return
 
-    // Not logged in → send to login, preserve intended destination
     if (!isAuthenticated) {
       router.replace(`/auth/login?next=${encodeURIComponent(router.pathname)}`)
-      return
     }
-
-    // Subscription check (only for guarded pages)
-    if (requireSubscription && subscriptionResolved && !hasAccess) {
-      router.replace('/profile?upgrade=true')
-    }
-  }, [
-    isInitialized,
-    isAuthenticated,
-    hasAccess,
-    subscriptionResolved,
-    requireSubscription,
-    router
-  ])
+  }, [isInitialized, isAuthenticated, router])
 
   // ── Loading states ────────────────────────────────────────────────────────────
 
@@ -71,9 +61,23 @@ export default function SubscriptionGuard({
     return <PageSpinner />
   }
 
-  // Access denied — null prevents flash while redirect fires
+  // ── Access expired — show the page blurred with a modal on top ────────────────
   if (requireSubscription && !hasAccess) {
-    return null
+    return (
+      <div className="relative">
+        {/* Page content — rendered but visually locked */}
+        <div
+          className="pointer-events-none select-none"
+          aria-hidden="true"
+          style={{ opacity: 0.9 }}
+        >
+          {children}
+        </div>
+
+        {/* Paywall modal floats over the blurred content */}
+        <AccessExpiredModal />
+      </div>
+    )
   }
 
   // ── All checks passed ─────────────────────────────────────────────────────────
