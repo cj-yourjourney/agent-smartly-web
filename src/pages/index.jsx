@@ -6,8 +6,8 @@ import { ROUTES } from '@/shared/constants/routes'
 
 const faqs = [
   {
-    q: 'Is this really 100% free?',
-    a: 'Yes — completely free, no credit card required, no hidden tiers. Every practice question, key concept, and progress tracking feature is available to all users at no cost.'
+    q: 'How much does it cost?',
+    a: '$9.99 gives you 1 month of full access — no auto-renewal, no subscription. Every new account starts with a free 3-day trial, no credit card required. When your access period ends, you can purchase another month if you need more time.'
   },
   {
     q: 'How many questions should I practice before the exam?',
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: 'Do I need to create an account?',
-    a: 'Yes, a free account is required to track your progress and save your practice history. Sign up takes under a minute — just an email and password, no credit card.'
+    a: 'Yes, a free account is required to track your progress and save your practice history. Sign up takes under a minute — just an email and password, no credit card needed to start your 3-day trial.'
   }
 ]
 
@@ -84,7 +84,7 @@ const stats = [
   { value: '1,300+', label: 'Practice Questions' },
   { value: '134', label: 'Key Concepts' },
   { value: '7', label: 'Exam Topics' },
-  { value: '100%', label: 'Free to Use' }
+  { value: '$9.99', label: '1-Month Access' }
 ]
 
 const features = [
@@ -184,7 +184,7 @@ export default function Home() {
                     className="btn btn-primary btn-lg hero-btn"
                     onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
                   >
-                    Start Practicing Free →
+                    Start Free Trial →
                   </button>
                   <button
                     className="btn btn-ghost btn-lg"
@@ -201,7 +201,7 @@ export default function Home() {
               style={{ animationDelay: '360ms' }}
             >
               <span className="text-success text-base hero-check">✓</span>
-              100% Free — No credit card required
+              3-day free trial, No credit card required — then $9.99 for 1-month access
             </p>
           </div>
 
@@ -229,7 +229,7 @@ export default function Home() {
               { value: '1,300+', label: 'Practice Questions' },
               { value: '134', label: 'Key Concepts' },
               { value: '7', label: 'Exam Topics' },
-              { value: '100%', label: 'Free to Start' }
+              { value: '$9.99', label: '1-Month Access' }
             ].map((s, i) => (
               <div
                 key={i}
@@ -420,10 +420,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                text: 'I passed on my first attempt. The practice questions were incredibly close to what showed up on the real exam — especially the Contracts and Agency sections.',
-                author: 'Marcus T.',
-                detail: 'Passed March 2025',
-                initials: 'MT',
+                text: 'I only spent 1-2 days on AgentSmartly before my first exam and scored 68/70 — so close. I then switched to another prep site and did even worse. Coming back to AgentSmartly and really focusing on the key concepts and progress chart made all the difference. Third time, I passed.',
+                author: 'Gabriel C.',
+                detail: 'Passed March 2026',
+                initials: 'GC',
                 color: 'bg-primary'
               },
               {
@@ -525,7 +525,7 @@ export default function Home() {
 
         <div className="max-w-2xl mx-auto text-center relative z-10 flex flex-col items-center gap-6">
           <div className="badge bg-white/15 text-white border-0 px-4 py-3 text-xs font-semibold tracking-wider uppercase">
-            ✓ No Credit Card Required
+            ✓ 3-Day Free Trial — No Credit Card Required
           </div>
           <h2 className="font-display text-4xl md:text-5xl text-primary-content">
             Ready to Ace Your Exam?
@@ -546,11 +546,11 @@ export default function Home() {
               className="btn btn-lg bg-white text-primary hover:bg-base-200 border-none shadow-xl mt-2"
               onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
             >
-              Create Free Account →
+              Start Free Trial →
             </button>
           )}
           <p className="text-primary-content/40 text-xs">
-            No credit card required.
+            3 days free, then $9.99 for 1-month access. No auto-renewal.
           </p>
         </div>
       </div>
