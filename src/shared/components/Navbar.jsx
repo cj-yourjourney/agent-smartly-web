@@ -16,7 +16,8 @@ import {
   FileText,
   LogIn,
   UserPlus,
-  UserCircle
+  UserCircle,
+  Info
 } from 'lucide-react'
 import ROUTES from '../constants/routes'
 
@@ -139,6 +140,15 @@ const Navbar = () => {
                   Home
                 </button>
               </li>
+              <li>
+                <button
+                  onClick={() => handleNavigation(ROUTES.ABOUT)}
+                  className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                >
+                  <Info className="h-5 w-5" />
+                  About
+                </button>
+              </li>
             </>
           )}
         </ul>
@@ -208,6 +218,16 @@ const Navbar = () => {
                 </li>
                 <div className="divider my-0"></div>
                 <li>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.ABOUT)}
+                    className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                  >
+                    <Info className="h-4 w-4" />
+                    About
+                  </button>
+                </li>
+                <div className="divider my-0"></div>
+                <li>
                   <button onClick={handleLogout} className="text-error">
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -271,6 +291,16 @@ const Navbar = () => {
                 </li>
                 <div className="divider my-0"></div>
                 <li>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.ABOUT)}
+                    className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                  >
+                    <Info className="h-4 w-4" />
+                    About
+                  </button>
+                </li>
+                <div className="divider my-0"></div>
+                <li>
                   <button onClick={handleLogout} className="text-error">
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -312,6 +342,15 @@ const Navbar = () => {
                   <button onClick={() => handleNavigation(ROUTES.HOME)}>
                     <Home className="h-4 w-4" />
                     Home
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleNavigation(ROUTES.ABOUT)}
+                    className={isActive(ROUTES.ABOUT) ? 'active' : ''}
+                  >
+                    <Info className="h-4 w-4" />
+                    About
                   </button>
                 </li>
                 <div className="divider my-0"></div>
