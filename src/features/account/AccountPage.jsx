@@ -1,4 +1,4 @@
-// src/features/profile/ProfilePage.jsx
+// src/features/account/AccountPage.jsx
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
@@ -19,13 +19,14 @@ import {
   CheckCircle,
   AlertCircle,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Info
 } from 'lucide-react'
 import { API_CONFIG, authenticatedFetch } from '../../shared/api/config'
 import ROUTES from '../../shared/constants/routes'
 
 const TRIAL_DAYS = 3
-const SUBSCRIPTION_PRICE = '$9.99'
+const ACCESS_PRICE = '$9.99'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -96,8 +97,27 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
+// ─── One-Time Charge Notice ────────────────────────────────────────────────────
+// Shown wherever a payment form is displayed
+
+function OneTimeChargeNotice() {
+  return (
+    <div className="flex items-start gap-2 bg-info/10 border border-info/30 rounded-lg px-3 py-2.5">
+      <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
+      <div className="text-xs text-base-content/70 leading-relaxed">
+        <span className="font-semibold text-base-content">
+          One-time charge — not a subscription.
+        </span>{' '}
+        Your card is charged once for {ACCESS_PRICE}. There are{' '}
+        <span className="font-semibold">no recurring charges</span> and nothing
+        auto-renews. You can renew manually anytime before your access expires.
+      </div>
+    </div>
+  )
+}
+
 // ─── Upgrade Banner ────────────────────────────────────────────────────────────
-// Shown when the user was redirected here because their trial/subscription expired
+// Shown when the user was redirected here because their trial/access expired
 
 function UpgradeBanner() {
   return (
@@ -111,7 +131,8 @@ function UpgradeBanner() {
           Your access has expired
         </p>
         <p className="text-xs text-base-content/60 mt-0.5">
-          Subscribe below to continue using practice questions and key concepts.
+          Purchase access below to continue using practice questions and key
+          concepts. It's a one-time charge — no auto-renewals.
         </p>
       </div>
     </div>
@@ -218,7 +239,7 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
         throw new Error(stripeError.message)
       }
 
-      // Step 3: Tell our backend to activate the subscription
+      // Step 3: Tell our backend to activate access
       const confirmRes = await authenticatedFetch(
         API_CONFIG.ENDPOINTS.SUBSCRIBE_CONFIRM,
         {
@@ -229,7 +250,7 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
       const confirmData = await confirmRes.json()
 
       if (!confirmRes.ok) {
-        throw new Error(confirmData.error || 'Could not activate subscription')
+        throw new Error(confirmData.error || 'Could not activate access')
       }
 
       onSuccess(confirmData)
@@ -242,6 +263,9 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
 
   return (
     <div className="space-y-4">
+      {/* One-time charge notice */}
+      <OneTimeChargeNotice />
+
       {/* Card input */}
       <div>
         <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
@@ -293,8 +317,8 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
           <>
             <CreditCard className="h-4 w-4" />
             {isRenewal
-              ? `Renew for ${SUBSCRIPTION_PRICE} / month`
-              : `Subscribe for ${SUBSCRIPTION_PRICE} / month`}
+              ? `Extend access — ${ACCESS_PRICE}`
+              : `Get access — ${ACCESS_PRICE}`}
           </>
         )}
       </button>
@@ -304,7 +328,7 @@ function PaymentForm({ onSuccess, isRenewal = false }) {
 
 // ─── Subscription Section ──────────────────────────────────────────────────────
 
-function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
+function AccessSection({ user, profileData, onSubscriptionActivated }) {
   const [showForm, setShowForm] = useState(false)
   const [successData, setSuccessData] = useState(null)
 
@@ -321,29 +345,40 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
     [onSubscriptionActivated]
   )
 
-  // ── Active subscription ────────────────────────────────────────
+  // ── Active access ──────────────────────────────────────────────
   if (subscription?.is_active) {
-    const renewsOn = formatDate(subscription.expires_at)
+    const expiresOn = formatDate(subscription.expires_at)
     return (
       <div className="card bg-base-100 border border-success/30 rounded-xl overflow-hidden">
         <div className="bg-success/10 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-success" />
             <span className="text-sm font-semibold text-success">
-              Active Subscription
+              Full Access Active
             </span>
           </div>
-          <span className="badge badge-success badge-sm">Monthly</span>
+          <span className="badge badge-success badge-sm badge-outline">
+            One-time purchase
+          </span>
         </div>
 
         <div className="card-body p-4 space-y-3">
           <div className="flex justify-between text-sm">
-            <span className="text-base-content/50">Plan</span>
-            <span className="font-medium">{SUBSCRIPTION_PRICE} / month</span>
+            <span className="text-base-content/50">Amount paid</span>
+            <span className="font-medium">{ACCESS_PRICE}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-base-content/50">Renews</span>
-            <span className="font-medium">{renewsOn}</span>
+            <span className="text-base-content/50">Access expires</span>
+            <span className="font-medium">{expiresOn}</span>
+          </div>
+
+          {/* No auto-renewal notice */}
+          <div className="flex items-center gap-1.5 text-xs text-base-content/50 bg-base-200 rounded-lg px-3 py-2">
+            <Info className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              This is <span className="font-semibold">not</span> a recurring
+              subscription — nothing will auto-renew.
+            </span>
           </div>
 
           {/* Renew early option */}
@@ -354,12 +389,13 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
               className="btn btn-sm btn-outline w-full gap-1.5"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              Extend by another month
+              Extend access by another month
             </button>
           ) : (
             <div>
               <p className="text-xs text-base-content/50 mb-3">
-                Paying now will add 30 days from today to your subscription.
+                This is a one-time charge. Paying now extends your access by one
+                month — nothing auto-renews.
               </p>
               <PaymentForm onSuccess={handleSuccess} isRenewal />
               <button
@@ -383,7 +419,7 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
           <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold text-success text-sm">
-              Subscription activated!
+              Access activated!
             </p>
             <p className="text-xs text-base-content/60 mt-0.5">
               You now have full access until{' '}
@@ -427,22 +463,25 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
           </div>
         </div>
 
-        {/* Soft subscribe CTA */}
+        {/* Soft purchase CTA */}
         {!showForm ? (
           <div className="card bg-base-100 border border-base-200 rounded-xl">
             <div className="card-body p-4">
               <p className="text-sm font-medium text-base-content">
                 Get full access after your trial
               </p>
-              <p className="text-xs text-base-content/50 mt-0.5 mb-3">
-                {SUBSCRIPTION_PRICE}/month · cancel anytime · no surprise fees
+              <p className="text-xs text-base-content/50 mt-0.5 mb-1">
+                {ACCESS_PRICE} one-time · no recurring charges · renew anytime
+              </p>
+              <p className="text-xs text-info font-medium mb-3">
+                Not a subscription — you will never be auto-charged.
               </p>
               <button
                 onClick={() => setShowForm(true)}
                 className="btn btn-primary btn-sm w-full gap-2"
               >
                 <CreditCard className="h-4 w-4" />
-                Subscribe now
+                Get full access
               </button>
             </div>
           </div>
@@ -450,10 +489,11 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
           <div className="card bg-base-100 border border-primary/20 rounded-xl">
             <div className="card-body p-4 space-y-1">
               <p className="text-sm font-semibold text-base-content">
-                Subscribe · {SUBSCRIPTION_PRICE}/month
+                Get full access · {ACCESS_PRICE} one-time
               </p>
               <p className="text-xs text-base-content/50 mb-3">
-                Your card will be charged today. You can re-subscribe anytime.
+                Your card is charged once today. Renew manually anytime — no
+                auto-renewals, ever.
               </p>
               <PaymentForm onSuccess={handleSuccess} />
               <button
@@ -469,13 +509,13 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
     )
   }
 
-  // ── Trial ended, no subscription ────────────────────────────────
+  // ── Trial ended, no access ───────────────────────────────────────
   return (
     <div className="card bg-base-100 border border-warning/30 rounded-xl overflow-hidden">
       <div className="bg-warning/10 px-4 py-3 flex items-center gap-2">
         <Zap className="h-4 w-4 text-warning" />
         <span className="text-sm font-semibold text-warning">
-          Trial Ended — Subscribe to Continue
+          Trial Ended — Get Full Access
         </span>
       </div>
       <div className="card-body p-4 space-y-3">
@@ -502,7 +542,7 @@ function SubscriptionSection({ user, profileData, onSubscriptionActivated }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-const ProfilePage = () => {
+const AccountPage = () => {
   const dispatch = useDispatch()
   const router = useRouter()
   const { user, isAuthenticated, loading } = useSelector((state) => state.auth)
@@ -510,9 +550,9 @@ const ProfilePage = () => {
   // Show upgrade banner when user was redirected here due to expired access
   const showUpgradeBanner = router.query.upgrade === 'true'
 
-  // Profile data (subscription, has_access, etc.) fetched separately
-  const [profileData, setProfileData] = useState(null)
-  const [profileLoading, setProfileLoading] = useState(true)
+  // Account data (subscription, has_access, etc.) fetched separately
+  const [accountData, setAccountData] = useState(null)
+  const [accountLoading, setAccountLoading] = useState(true)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -524,22 +564,22 @@ const ProfilePage = () => {
     }
   }, [isAuthenticated, user, dispatch, router])
 
-  // Fetch profile details (subscription, credits, etc.)
+  // Fetch account details (subscription, credits, etc.)
   useEffect(() => {
     if (!isAuthenticated) return
 
-    setProfileLoading(true)
+    setAccountLoading(true)
     authenticatedFetch(API_CONFIG.ENDPOINTS.PROFILE_DETAILS)
       .then((res) => res.json())
-      .then((data) => setProfileData(data))
-      .catch(() => setProfileData(null))
-      .finally(() => setProfileLoading(false))
+      .then((data) => setAccountData(data))
+      .catch(() => setAccountData(null))
+      .finally(() => setAccountLoading(false))
   }, [isAuthenticated])
 
-  // Called after a successful subscription payment:
-  // 1. Re-fetches profile for local UI
+  // Called after a successful one-time payment:
+  // 1. Re-fetches account data for local UI
   // 2. Re-fetches subscription in Redux so SubscriptionGuard unlocks immediately
-  const handleSubscriptionActivated = useCallback(
+  const handleAccessActivated = useCallback(
     (paymentData) => {
       // Optimistically update Redux so guards unlock right away
       if (paymentData?.expires_at) {
@@ -560,7 +600,7 @@ const ProfilePage = () => {
       authenticatedFetch(API_CONFIG.ENDPOINTS.PROFILE_DETAILS)
         .then((res) => res.json())
         .then((data) => {
-          setProfileData(data)
+          setAccountData(data)
           // Keep Redux in sync with fresh server data
           dispatch(fetchSubscriptionStatus())
         })
@@ -571,7 +611,7 @@ const ProfilePage = () => {
 
   if (!isAuthenticated) return null
 
-  if (loading || !user || profileLoading) {
+  if (loading || !user || accountLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <span className="loading loading-spinner loading-md text-primary" />
@@ -580,13 +620,13 @@ const ProfilePage = () => {
   }
 
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ')
-  const credits = profileData?.credits ?? user.credits
+  const credits = accountData?.credits ?? user.credits
 
   return (
     <div className="min-h-screen bg-base-100">
       <div className="max-w-lg mx-auto px-4 py-12">
         {/* Upgrade banner — only shown when redirected from a guarded page */}
-        {showUpgradeBanner && !profileData?.has_access && <UpgradeBanner />}
+        {showUpgradeBanner && !accountData?.has_access && <UpgradeBanner />}
 
         {/* Header */}
         <div className="flex flex-col items-center gap-3 mb-8">
@@ -601,12 +641,12 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Subscription / Trial Section */}
+        {/* Access / Trial Section */}
         <div className="mb-4">
-          <SubscriptionSection
+          <AccessSection
             user={user}
-            profileData={profileData}
-            onSubscriptionActivated={handleSubscriptionActivated}
+            profileData={accountData}
+            onSubscriptionActivated={handleAccessActivated}
           />
         </div>
 
@@ -641,4 +681,4 @@ const ProfilePage = () => {
   )
 }
 
-export default ProfilePage
+export default AccountPage

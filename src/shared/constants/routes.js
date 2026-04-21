@@ -16,7 +16,7 @@ export const ROUTES = {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
 
-    VERIFY_EMAIL: '/auth/verify-email' // was '/users/verify-email/'
+    VERIFY_EMAIL: '/auth/verify-email' // 
   },
 
   // Learning routes
@@ -27,7 +27,7 @@ export const ROUTES = {
   },
 
   // User routes
-  PROFILE: '/profile'
+  ACCOUNT: '/account'
 }
 
 // Helper function to check if a route is active

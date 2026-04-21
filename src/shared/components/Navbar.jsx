@@ -121,8 +121,8 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation(ROUTES.PROFILE)}
-                  className={isActive(ROUTES.PROFILE) ? 'active' : ''}
+                  onClick={() => handleNavigation(ROUTES.ACCOUNT)}
+                  className={isActive(ROUTES.ACCOUNT) ? 'active' : ''}
                 >
                   <UserCircle className="h-5 w-5" />
                   Account
@@ -183,8 +183,8 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation(ROUTES.PROFILE)}
-                    className={isActive(ROUTES.PROFILE) ? 'active' : ''}
+                    onClick={() => handleNavigation(ROUTES.ACCOUNT)}
+                    className={isActive(ROUTES.ACCOUNT) ? 'active' : ''}
                   >
                     <UserCircle className="h-4 w-4" />
                     Account
@@ -256,8 +256,8 @@ const Navbar = () => {
                 <div className="divider my-0"></div>
                 <li>
                   <button
-                    onClick={() => handleNavigation(ROUTES.PROFILE)}
-                    className={isActive(ROUTES.PROFILE) ? 'active' : ''}
+                    onClick={() => handleNavigation(ROUTES.ACCOUNT)}
+                    className={isActive(ROUTES.ACCOUNT) ? 'active' : ''}
                   >
                     <UserCircle className="h-4 w-4" />
                     Account

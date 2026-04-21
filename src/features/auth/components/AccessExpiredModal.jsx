@@ -1,8 +1,9 @@
 // src/features/auth/components/AccessExpiredModal.jsx
 import { useRouter } from 'next/router'
-import { Zap, CheckCircle, ArrowRight } from 'lucide-react'
+import { Zap, CheckCircle, ArrowRight, Info } from 'lucide-react'
+import ROUTES from '../../../shared/constants/routes'
 
-const SUBSCRIPTION_PRICE = '$9.99'
+const ACCESS_PRICE = '$9.99'
 
 const FEATURES = [
   'Unlimited practice questions',
@@ -14,16 +15,16 @@ const FEATURES = [
  * AccessExpiredModal
  *
  * A full-viewport overlay rendered on top of blurred page content when the
- * user's trial or subscription has expired. The underlying page remains
- * visible (but dimmed and blurred) so the user can see what they're missing.
+ * user's trial or access has expired. The underlying page remains visible
+ * (but dimmed and blurred) so the user can see what they're missing.
  *
- * Clicking "Subscribe" navigates to /profile where the Stripe form lives.
+ * Clicking "Get access" navigates to /account where the Stripe form lives.
  */
 export default function AccessExpiredModal() {
   const router = useRouter()
 
-  const handleSubscribe = () => {
-    router.push('/profile?upgrade=true')
+  const handleGetAccess = () => {
+    router.push(`${ROUTES.ACCOUNT}?upgrade=true`)
   }
 
   return (
@@ -44,7 +45,7 @@ export default function AccessExpiredModal() {
             id="expired-modal-title"
             className="text-sm font-semibold text-warning"
           >
-            Trial Ended — Subscribe to Continue
+            Trial Ended — Get Full Access
           </span>
         </div>
 
@@ -62,18 +63,23 @@ export default function AccessExpiredModal() {
 
           <div className="divider my-0" />
 
-          {/* Pricing note */}
-          <p className="text-xs text-base-content/50 text-center">
-            {SUBSCRIPTION_PRICE}&nbsp;/&nbsp;month &middot; cancel anytime
-            &middot; no surprise fees
-          </p>
+          {/* One-time charge notice */}
+          <div className="flex items-start gap-2 bg-info/10 border border-info/30 rounded-lg px-3 py-2.5">
+            <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
+            <p className="text-xs text-base-content/70 leading-relaxed">
+              <span className="font-semibold text-base-content">
+                {ACCESS_PRICE} one-time charge.
+              </span>{' '}
+              Not a subscription — nothing auto-renews. Renew manually anytime.
+            </p>
+          </div>
 
           {/* CTA */}
           <button
-            onClick={handleSubscribe}
+            onClick={handleGetAccess}
             className="btn btn-primary w-full gap-2"
           >
-            Subscribe now
+            Get full access
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

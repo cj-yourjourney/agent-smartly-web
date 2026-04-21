@@ -196,13 +196,19 @@ export default function Home() {
               )}
             </div>
 
-            <p
-              className="text-sm text-base-content/45 flex items-center gap-1.5 hero-fade-up"
+            <div
+              className="flex flex-col gap-1.5 hero-fade-up"
               style={{ animationDelay: '360ms' }}
             >
-              <span className="text-success text-base hero-check">✓</span>
-              3-day free trial, No credit card required — then $9.99 for 1-month access
-            </p>
+              <p className="text-sm text-base-content/45 flex items-center gap-1.5">
+                <span className="text-success text-base hero-check">✓</span>
+                3-day free trial · No credit card required
+              </p>
+              <p className="text-sm text-base-content/45 flex items-center gap-1.5">
+                <span className="text-success text-base hero-check">✓</span>
+                $9.99 for 1-month access · One-time charge · Renew anytime
+              </p>
+            </div>
           </div>
 
           {/* Hero Image — stacked above text on mobile, right column on desktop */}
@@ -542,15 +548,21 @@ export default function Home() {
               Continue Practicing →
             </button>
           ) : (
-            <button
-              className="btn btn-lg bg-white text-primary hover:bg-base-200 border-none shadow-xl mt-2"
-              onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
-            >
-              Start Free Trial →
-            </button>
+            <div className="flex flex-col items-center gap-1.5">
+              <button
+                className="btn btn-lg bg-white text-primary hover:bg-base-200 border-none shadow-xl mt-2"
+                onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
+              >
+                Start Free Trial →
+              </button>
+              <p className="text-primary-content/50 text-xs font-medium">
+                No subscription, ever.
+              </p>
+            </div>
           )}
           <p className="text-primary-content/40 text-xs">
-            3 days free, then $9.99 for 1-month access. No auto-renewal.
+            3 days free · then $9.99 for 1-month access, billed once · no
+            auto-renewal
           </p>
         </div>
       </div>

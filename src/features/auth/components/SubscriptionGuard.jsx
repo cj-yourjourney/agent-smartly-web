@@ -3,21 +3,22 @@ import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import AccessExpiredModal from './AccessExpiredModal'
+import ROUTES from '../../../shared/constants/routes'
 
 /**
  * SubscriptionGuard
  *
- * Wraps any page that requires authentication and/or an active subscription.
+ * Wraps any page that requires authentication and/or an active access period.
  *
  * Props:
  *   children           — page content to render when access is granted
  *   requireSubscription (default: true)
  *                      — when false, only authentication is checked (e.g. Progress page)
- *                      — when true, user must also have an active trial or paid subscription
+ *                      — when true, user must also have an active trial or paid access
  *
  * Behaviour:
- *   • Not authenticated       →  redirect to /auth/login?next=<current path>
- *   • Subscription required
+ *   • Not authenticated       →  redirect to ROUTES.AUTH.LOGIN?next=<current path>
+ *   • Access required
  *     but access has expired  →  render children blurred + <AccessExpiredModal> overlay
  *                                (no redirect — user can see what they're missing)
  */
@@ -32,15 +33,17 @@ export default function SubscriptionGuard({
     (state) => state.subscription
   )
 
-  // True once we have a definitive answer on subscription status
+  // True once we have a definitive answer on access status
   const subscriptionResolved = isFetched && !isLoading
 
-  // Only redirect for authentication failures — not for expired subscriptions
+  // Only redirect for authentication failures — not for expired access
   useEffect(() => {
     if (!isInitialized) return
 
     if (!isAuthenticated) {
-      router.replace(`/auth/login?next=${encodeURIComponent(router.pathname)}`)
+      router.replace(
+        `${ROUTES.AUTH.LOGIN}?next=${encodeURIComponent(router.pathname)}`
+      )
     }
   }, [isInitialized, isAuthenticated, router])
 
@@ -56,7 +59,7 @@ export default function SubscriptionGuard({
     return null
   }
 
-  // Still waiting for subscription status (only relevant when requireSubscription=true)
+  // Still waiting for access status (only relevant when requireSubscription=true)
   if (requireSubscription && !subscriptionResolved) {
     return <PageSpinner />
   }
