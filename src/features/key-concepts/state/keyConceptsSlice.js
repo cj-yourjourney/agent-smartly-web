@@ -299,6 +299,4 @@ export const {
   resetKeyConcepts
 } = keyConceptsSlice.actions
 
-export { updateConceptViewTime }
-
 export default keyConceptsSlice.reducer
