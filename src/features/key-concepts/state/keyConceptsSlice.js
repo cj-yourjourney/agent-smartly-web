@@ -106,14 +106,33 @@ export const recordConceptView = createAsyncThunk(
   ) => {
     const MAX_TIME_SECONDS = 500
     try {
-      await api.post(API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW, {
+      // Returns the created record including its id, which is stored in state
+      // so the modal can PATCH it with the real time on close.
+      const response = await api.post(API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW, {
         concept_name: conceptName,
         topic,
         subtopic,
         time_spent_seconds: Math.min(timeSpentSeconds, MAX_TIME_SECONDS)
       })
+      return response // { id, concept_name, topic, subtopic, time_spent_seconds, viewed_at }
     } catch (error) {
       console.warn('Failed to record concept view:', error.message)
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const updateConceptViewTime = createAsyncThunk(
+  'keyConcepts/updateConceptViewTime',
+  async ({ id, timeSpentSeconds }, { rejectWithValue }) => {
+    const MAX_TIME_SECONDS = 500
+    try {
+      await api.patch(`${API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW}${id}/`, {
+        time_spent_seconds: Math.min(timeSpentSeconds, MAX_TIME_SECONDS)
+      })
+    } catch (error) {
+      // Silent failure — credit was already given on open, time is best-effort
+      console.warn('Failed to update concept view time:', error.message)
       return rejectWithValue(error.message)
     }
   }
@@ -131,7 +150,8 @@ const initialState = {
     error: null,
     data: null,
     viewStartTime: null,
-    pendingConcept: null
+    pendingConcept: null,
+    pendingConceptViewId: null
   }
 }
 
@@ -160,13 +180,22 @@ const keyConceptsSlice = createSlice({
       state.llmDialog.error = null
       state.llmDialog.viewStartTime = null
       state.llmDialog.pendingConcept = null
+      state.llmDialog.pendingConceptViewId = null
     },
     resetKeyConcepts: (state) => {
       state.concepts = []
       state.expandedTopics = []
       state.loading = false
       state.error = null
-      state.llmDialog = initialState.llmDialog
+      state.llmDialog = {
+        isOpen: false,
+        loading: false,
+        error: null,
+        data: null,
+        viewStartTime: null,
+        pendingConcept: null,
+        pendingConceptViewId: null
+      }
     }
   },
   extraReducers: (builder) => {
@@ -208,9 +237,19 @@ const keyConceptsSlice = createSlice({
         state.llmDialog.error = action.payload
       })
 
-      // Record concept view (fire-and-forget, no state changes needed)
+      // Record concept view — store the returned id for the later PATCH
+      .addCase(recordConceptView.fulfilled, (state, action) => {
+        if (action.payload?.id) {
+          state.llmDialog.pendingConceptViewId = action.payload.id
+        }
+      })
       .addCase(recordConceptView.rejected, (state, action) => {
         console.warn('recordConceptView failed silently:', action.payload)
+      })
+
+      // Update concept view time — fire-and-forget on modal close
+      .addCase(updateConceptViewTime.rejected, (state, action) => {
+        console.warn('updateConceptViewTime failed silently:', action.payload)
       })
   }
 })
@@ -259,5 +298,7 @@ export const {
   closeLLMDialog,
   resetKeyConcepts
 } = keyConceptsSlice.actions
+
+export { updateConceptViewTime }
 
 export default keyConceptsSlice.reducer

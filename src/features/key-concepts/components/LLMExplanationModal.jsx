@@ -1,29 +1,23 @@
 import { useDispatch, useSelector } from 'react-redux'
 import {
   closeLLMDialog,
-  recordConceptView,
+  updateConceptViewTime,
   selectLLMDialog
 } from '../state/keyConceptsSlice'
 import { X, Lightbulb, Target } from 'lucide-react'
 
 export default function LLMExplanationModal() {
   const dispatch = useDispatch()
-  const { isOpen, loading, error, data, viewStartTime, pendingConcept } =
+  const { isOpen, loading, error, data, viewStartTime, pendingConceptViewId } =
     useSelector(selectLLMDialog)
 
   const handleClose = () => {
-    // Record actual time spent — capped at 500s on the frontend (and again on
-    // the backend). This is a second row; the first (time=0) was written on
-    // open to guarantee credit even if the modal is never closed.
-    if (pendingConcept && viewStartTime) {
+    // PATCH the existing row with actual time spent — only fires if the modal
+    // is explicitly closed. If never closed: no request, no DB query, no cost.
+    if (pendingConceptViewId && viewStartTime) {
       const timeSpentSeconds = Math.round((Date.now() - viewStartTime) / 1000)
       dispatch(
-        recordConceptView({
-          conceptName: pendingConcept.conceptName,
-          topic: pendingConcept.topic,
-          subtopic: pendingConcept.subtopic,
-          timeSpentSeconds
-        })
+        updateConceptViewTime({ id: pendingConceptViewId, timeSpentSeconds })
       )
     }
     dispatch(closeLLMDialog())
