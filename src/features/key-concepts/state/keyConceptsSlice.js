@@ -129,7 +129,9 @@ const initialState = {
     isOpen: false,
     loading: false,
     error: null,
-    data: null
+    data: null,
+    viewStartTime: null,
+    pendingConcept: null
   }
 }
 
@@ -156,6 +158,8 @@ const keyConceptsSlice = createSlice({
       state.llmDialog.isOpen = false
       state.llmDialog.data = null
       state.llmDialog.error = null
+      state.llmDialog.viewStartTime = null
+      state.llmDialog.pendingConcept = null
     },
     resetKeyConcepts: (state) => {
       state.concepts = []
@@ -183,10 +187,17 @@ const keyConceptsSlice = createSlice({
       })
 
       // Ask LLM
-      .addCase(askLLMAboutConcept.pending, (state) => {
+      .addCase(askLLMAboutConcept.pending, (state, action) => {
         state.llmDialog.loading = true
         state.llmDialog.error = null
         state.llmDialog.isOpen = true
+        state.llmDialog.viewStartTime = Date.now()
+        const { conceptName, topicCode, subtopicCode } = action.meta.arg
+        state.llmDialog.pendingConcept = {
+          conceptName,
+          topic: topicCode,
+          subtopic: subtopicCode
+        }
       })
       .addCase(askLLMAboutConcept.fulfilled, (state, action) => {
         state.llmDialog.loading = false
