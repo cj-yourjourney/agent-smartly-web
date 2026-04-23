@@ -49,8 +49,19 @@ export const askLLMAboutConcept = createAsyncThunk(
       subtopicCode,
       description
     },
-    { rejectWithValue }
+    { rejectWithValue, dispatch }
   ) => {
+    // Record the view immediately on open — credit is given for any interaction,
+    // regardless of how long the modal stays open or whether it is closed.
+    dispatch(
+      recordConceptView({
+        conceptName,
+        topic: topicCode,
+        subtopic: subtopicCode,
+        timeSpentSeconds: 0
+      })
+    )
+
     try {
       const requestBody = {
         main_topic: topicName,
@@ -93,12 +104,13 @@ export const recordConceptView = createAsyncThunk(
     { conceptName, topic, subtopic, timeSpentSeconds },
     { rejectWithValue }
   ) => {
+    const MAX_TIME_SECONDS = 500
     try {
       await api.post(API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW, {
         concept_name: conceptName,
         topic,
         subtopic,
-        time_spent_seconds: timeSpentSeconds
+        time_spent_seconds: Math.min(timeSpentSeconds, MAX_TIME_SECONDS)
       })
     } catch (error) {
       console.warn('Failed to record concept view:', error.message)
@@ -117,9 +129,7 @@ const initialState = {
     isOpen: false,
     loading: false,
     error: null,
-    data: null,
-    viewStartTime: null,
-    pendingConcept: null
+    data: null
   }
 }
 
@@ -146,8 +156,6 @@ const keyConceptsSlice = createSlice({
       state.llmDialog.isOpen = false
       state.llmDialog.data = null
       state.llmDialog.error = null
-      state.llmDialog.viewStartTime = null
-      state.llmDialog.pendingConcept = null
     },
     resetKeyConcepts: (state) => {
       state.concepts = []
@@ -175,18 +183,10 @@ const keyConceptsSlice = createSlice({
       })
 
       // Ask LLM
-      .addCase(askLLMAboutConcept.pending, (state, action) => {
+      .addCase(askLLMAboutConcept.pending, (state) => {
         state.llmDialog.loading = true
         state.llmDialog.error = null
         state.llmDialog.isOpen = true
-        state.llmDialog.viewStartTime = Date.now()
-        // Store codes (not display names) so the record POST passes Django validation
-        const { conceptName, topicCode, subtopicCode } = action.meta.arg
-        state.llmDialog.pendingConcept = {
-          conceptName,
-          topic: topicCode, // e.g. "property_ownership"
-          subtopic: subtopicCode // e.g. "land_use"
-        }
       })
       .addCase(askLLMAboutConcept.fulfilled, (state, action) => {
         state.llmDialog.loading = false
