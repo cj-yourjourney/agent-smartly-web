@@ -72,7 +72,7 @@ export default function LLMExplanationModal() {
           {/* Success State */}
           {data && !loading && (
             <div className="space-y-5">
-              {/* Simple Explanation */}
+              
               <div>
                 <p className="text-base leading-relaxed text-base-content">
                   {data.simpleExplanation}
