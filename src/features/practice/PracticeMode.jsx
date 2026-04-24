@@ -15,7 +15,8 @@ import {
   setStartTime,
   recordQuestionAttempt,
   createSession,
-  completeSession
+  completeSession,
+  abandonSession
 } from './state/practiceSlice'
 import { ROUTES } from '../../shared/constants/routes'
 
@@ -63,6 +64,19 @@ export default function PracticeMode() {
   const isTimeCritical = timeRemaining <= 5 * 60 && timeRemaining > 0
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
+  // ── Session duration tracking (frontend-only, sent once on complete/abandon) ─
+  // Max creditable seconds per session type — mirrors the server-side cap in
+  // PracticeSession._MAX_DURATION_SECONDS so the two stay in sync.
+  const SESSION_MAX_SECONDS = isPracticeQuiz ? 150 * 60 : 40 * 60
+
+  // Returns elapsed seconds capped at the session type's maximum.
+  // Called once when the user finishes or exits — no polling, no periodic saves.
+  const getSessionDuration = useCallback(() => {
+    if (!sessionStartTime) return 0
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
+    return Math.min(elapsed, SESSION_MAX_SECONDS)
+  }, [sessionStartTime, SESSION_MAX_SECONDS])
+
   // ── Effects ─────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -76,6 +90,15 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
+  // Start the session clock for ALL session types the moment questions load.
+  // For topic/subtopic sessions this is the only place it is set.
+  // For the quiz, the countdown effect below also reads sessionStartTime.
+  useEffect(() => {
+    if (questions.length > 0 && !sessionStartTime) {
+      setSessionStartTime(Date.now())
+    }
+  }, [questions.length, sessionStartTime])
+
   // Reset tracking when a new session begins
   useEffect(() => {
     if (selectedTopic && questions.length > 0) {
@@ -84,13 +107,8 @@ export default function PracticeMode() {
     }
   }, [selectedTopic, questions.length])
 
-  // Countdown timer for practice exam
+  // Countdown timer for practice exam (display only — does not affect tracking).
   useEffect(() => {
-    if (isPracticeQuiz && selectedTopic && !sessionStartTime) {
-      setSessionStartTime(Date.now())
-      setShowTimeUpAlert(false)
-    }
-
     if (isPracticeQuiz && sessionStartTime) {
       const interval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
@@ -101,13 +119,7 @@ export default function PracticeMode() {
       }, 1000)
       return () => clearInterval(interval)
     }
-  }, [
-    isPracticeQuiz,
-    sessionStartTime,
-    selectedTopic,
-    showTimeUpAlert,
-    timeLimit
-  ])
+  }, [isPracticeQuiz, sessionStartTime, showTimeUpAlert, timeLimit])
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -177,7 +189,11 @@ export default function PracticeMode() {
   const handleSubmitAnswer = async () => {
     if (!selectedAnswer) return
     const currentQuestion = questions[currentQuestionIndex]
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000)
+
+    // Cap per-question time at 120 s (admin tracking only, not a user timer).
+    const MAX_TIME_PER_QUESTION = 120
+    const rawTimeSpent = Math.floor((Date.now() - startTime) / 1000)
+    const timeSpent = Math.min(rawTimeSpent, MAX_TIME_PER_QUESTION)
 
     const result = await dispatch(
       checkAnswer({ questionId: currentQuestion.id, answer: selectedAnswer })
@@ -197,9 +213,13 @@ export default function PracticeMode() {
   }
 
   const finishSession = useCallback(() => {
-    if (sessionId) dispatch(completeSession(sessionId))
+    if (sessionId) {
+      dispatch(
+        completeSession({ sessionId, durationSeconds: getSessionDuration() })
+      )
+    }
     setShowSessionComplete(true)
-  }, [dispatch, sessionId])
+  }, [dispatch, sessionId, getSessionDuration])
 
   const handleNextQuestion = () => {
     if (isLastQuestion && answerResult) {
@@ -215,14 +235,22 @@ export default function PracticeMode() {
   }
 
   const handleViewDetails = () => {
-    if (sessionId) dispatch(completeSession(sessionId))
+    if (sessionId) {
+      dispatch(
+        completeSession({ sessionId, durationSeconds: getSessionDuration() })
+      )
+    }
     dispatch(resetToTopicSelection())
     resetLocalState()
     router.push(`${ROUTES.LEARNING.PROGRESS}?tab=sessions`)
   }
 
   const handleBackToTopics = () => {
-    if (sessionId) dispatch(completeSession(sessionId))
+    if (sessionId) {
+      dispatch(
+        abandonSession({ sessionId, durationSeconds: getSessionDuration() })
+      )
+    }
     dispatch(resetToTopicSelection())
     resetLocalState()
   }

@@ -107,15 +107,33 @@ export const createSession = createAsyncThunk(
   }
 )
 
-// NEW: Mark the current session as completed when the user exits or finishes.
-// Calls a custom DRF action: POST /api/sessions/{id}/complete/
+// Mark the session as completed (user finished all questions or clicked Finish).
+// durationSeconds is the elapsed wall-clock time tracked entirely in the frontend —
+// no polling, no periodic requests.  It is sent once, piggybacked on the
+// complete/abandon POST that already fires at session end.
 export const completeSession = createAsyncThunk(
   'practice/completeSession',
-  async (sessionId, { rejectWithValue }) => {
+  async ({ sessionId, durationSeconds }, { rejectWithValue }) => {
     try {
       const data = await api.post(
         `${API_CONFIG.ENDPOINTS.SESSIONS}${sessionId}/complete/`,
-        {}
+        { duration_seconds: durationSeconds }
+      )
+      return data
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+// Mark the session as abandoned (user clicked Exit or Back before finishing).
+export const abandonSession = createAsyncThunk(
+  'practice/abandonSession',
+  async ({ sessionId, durationSeconds }, { rejectWithValue }) => {
+    try {
+      const data = await api.post(
+        `${API_CONFIG.ENDPOINTS.SESSIONS}${sessionId}/abandon/`,
+        { duration_seconds: durationSeconds }
       )
       return data
     } catch (error) {
@@ -298,13 +316,19 @@ const practiceSlice = createSlice({
         // Silent failure — session tracking is non-critical, practice still works
         console.error('Failed to create session:', action.payload)
       })
-      // NEW: Complete session — clear session ID (resetToTopicSelection also clears it)
+      // Complete session — clear session ID (resetToTopicSelection also clears it)
       .addCase(completeSession.fulfilled, (state) => {
         state.sessionId = null
       })
       .addCase(completeSession.rejected, (state, action) => {
-        // Silent failure
         console.error('Failed to complete session:', action.payload)
+      })
+      // Abandon session — clear session ID
+      .addCase(abandonSession.fulfilled, (state) => {
+        state.sessionId = null
+      })
+      .addCase(abandonSession.rejected, (state, action) => {
+        console.error('Failed to abandon session:', action.payload)
       })
   }
 })
@@ -318,5 +342,7 @@ export const {
   resetToTopicSelection,
   setStartTime
 } = practiceSlice.actions
+
+export { abandonSession }
 
 export default practiceSlice.reducer
