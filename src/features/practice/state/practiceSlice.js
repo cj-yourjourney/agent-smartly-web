@@ -343,6 +343,4 @@ export const {
   setStartTime
 } = practiceSlice.actions
 
-export { abandonSession }
-
 export default practiceSlice.reducer
