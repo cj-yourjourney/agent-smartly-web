@@ -286,7 +286,14 @@ function SessionCard({ session }) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function SessionsActivityTab({ sessions }) {
-  const scoredSessions = sessions.filter(
+  // Safety-net: never show sessions where the user never answered a question.
+  // The backend already excludes these, but guard here too in case of stale
+  // Redux state or a direct prop passed from elsewhere.
+  const visibleSessions = (sessions || []).filter(
+    (s) => s.questions_attempted > 0
+  )
+
+  const scoredSessions = visibleSessions.filter(
     (s) => s.status === 'completed' && s.questions_attempted > 0
   )
   const avgAccuracy =
@@ -296,7 +303,7 @@ export default function SessionsActivityTab({ sessions }) {
             scoredSessions.length
         )
       : 0
-  const totalQuestions = sessions.reduce(
+  const totalQuestions = visibleSessions.reduce(
     (sum, s) => sum + (s.questions_attempted || 0),
     0
   )
@@ -310,11 +317,11 @@ export default function SessionsActivityTab({ sessions }) {
         </h2>
 
         {/* Summary strip */}
-        {sessions.length > 0 && (
+        {visibleSessions.length > 0 && (
           <div className="flex gap-6 text-sm border-b border-base-200 pb-4">
             <div>
               <p className="text-xs text-base-content/40 mb-0.5">Sessions</p>
-              <p className="font-bold tabular-nums">{sessions.length}</p>
+              <p className="font-bold tabular-nums">{visibleSessions.length}</p>
             </div>
             <div>
               <p className="text-xs text-base-content/40 mb-0.5">Questions</p>
@@ -333,7 +340,7 @@ export default function SessionsActivityTab({ sessions }) {
           </div>
         )}
 
-        {!sessions || sessions.length === 0 ? (
+        {visibleSessions.length === 0 ? (
           <div className="alert alert-info">
             <Info className="w-5 h-5" />
             <span className="text-sm">
@@ -342,7 +349,7 @@ export default function SessionsActivityTab({ sessions }) {
           </div>
         ) : (
           <div className="space-y-2">
-            {sessions.map((session) => (
+            {visibleSessions.map((session) => (
               <SessionCard key={session.id} session={session} />
             ))}
           </div>
