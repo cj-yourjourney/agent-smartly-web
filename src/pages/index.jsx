@@ -80,52 +80,6 @@ const topics = [
   }
 ]
 
-const stats = [
-  { value: '1,300+', label: 'Practice Questions' },
-  { value: '134', label: 'Key Concepts' },
-  { value: '7', label: 'Exam Topics' },
-  { value: '$9.99', label: '1-Month Access' }
-]
-
-const features = [
-  {
-    icon: '📚',
-    title: '1,300+ Practice Questions',
-    desc: 'Every question maps directly to the official DRE Salesperson Exam blueprint — covering all 7 topics and every subtopic the real exam tests.',
-    pills: ['All 7 Topics', 'Full Subtopics', 'DRE Aligned']
-  },
-  {
-    icon: '🧠',
-    title: '134 Key Concepts',
-    desc: 'Bite-sized concept cards with definitions, memory tricks, real-world examples, and exam tips — so concepts stick, not just memorized answers.',
-    pills: ['Definitions', 'Memory Tips', 'Examples']
-  },
-  {
-    icon: '📈',
-    title: 'Progress Tracking',
-    desc: "See your accuracy by topic, identify weak subtopics, track your streaks, and watch your mastery grow — know exactly when you're ready.",
-    pills: ['Per-Topic Stats', 'Weak Areas', 'Accuracy Rate']
-  }
-]
-
-const testimonials = [
-  {
-    text: 'I passed on my first attempt. The practice questions were incredibly close to what showed up on the real exam — especially the Contracts and Agency sections.',
-    author: 'Marcus T.',
-    detail: 'Passed March 2025'
-  },
-  {
-    text: "The key concepts section was a game changer. Having definitions AND memory tricks made the dense legal terminology actually stick. Couldn't recommend it more.",
-    author: 'Sarah L.',
-    detail: 'Passed January 2025'
-  },
-  {
-    text: 'I loved seeing my progress by topic. When I saw my Property Ownership accuracy was low, I knew exactly where to focus. Felt confident walking into the exam.',
-    author: 'Diana R.',
-    detail: 'Passed February 2025'
-  }
-]
-
 export default function Home() {
   const router = useRouter()
   const { isAuthenticated } = useSelector((state) => state.auth)
@@ -138,13 +92,13 @@ export default function Home() {
         {/* Decorative blob behind image */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto px-6 py-16 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Text Content */}
+          {/* Left: Text Content — always first in DOM so it appears first on mobile */}
           <div className="flex flex-col gap-5">
             <h1
               className="font-display text-4xl md:text-5xl leading-tight hero-fade-up"
               style={{ animationDelay: '0ms' }}
             >
-              Ace the CA Real Estate{' '}
+              Pass the CA Real Estate{' '}
               <span className="font-display-italic text-primary">
                 Salesperson
               </span>{' '}
@@ -211,9 +165,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Image — stacked above text on mobile, right column on desktop */}
+          {/* Hero Image — AFTER text in DOM, so it appears below H1 on mobile */}
           <div
-            className="flex justify-center items-center order-first lg:order-last hero-fade-up"
+            className="flex justify-center items-center hero-fade-up"
             style={{ animationDelay: '200ms' }}
           >
             <div className="rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm aspect-[3/4] hero-float">
@@ -228,9 +182,9 @@ export default function Home() {
       </div>
 
       {/* ── STATS BAR ── */}
-      <div className="bg-base-200 py-14 border-y border-base-300">
+      <div className="bg-base-200 py-12 border-y border-base-300">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-base-300">
+          <div className="grid grid-cols-2 md:grid-cols-4">
             {[
               { value: '1,300+', label: 'Practice Questions' },
               { value: '134', label: 'Key Concepts' },
@@ -239,7 +193,12 @@ export default function Home() {
             ].map((s, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center gap-1 py-2 px-4"
+                className={`flex flex-col items-center gap-1 py-6 px-4
+                  ${i % 2 === 0 ? 'border-r border-base-300' : ''}
+                  ${i < 2 ? 'border-b border-base-300 md:border-b-0' : ''}
+                  ${i === 1 ? 'md:border-r md:border-base-300' : ''}
+                  ${i === 2 ? 'md:border-r md:border-base-300' : ''}
+                `}
               >
                 <div className="text-3xl md:text-4xl font-bold text-primary">
                   {s.value}
@@ -332,7 +291,7 @@ export default function Home() {
 
           {/* Feature 2 — Key Concepts (image right) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
-            <div className="flex flex-col gap-4 order-last lg:order-first">
+            <div className="flex flex-col gap-4">
               <span className="badge badge-primary badge-outline w-fit">
                 02 — Key Concepts
               </span>
@@ -360,7 +319,7 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200 order-first lg:order-last">
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
               <img
                 src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key+concepts.png"
                 alt="Key Concepts feature"
@@ -481,8 +440,59 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── FOUNDER STORY ── */}
+      <div className="py-20 px-4 bg-base-100 border-t border-base-200">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* Photo + credential */}
+            <div className="flex flex-col items-center lg:items-start gap-4">
+              <img
+                src="https://cjluo.com/static/media/profile.cb5ba9c13f9d23e2ea90.png"
+                alt="CJ Luo — Founder of Agent Smartly"
+                className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl object-cover shadow-xl border-4 border-base-200"
+              />
+              <div className="text-center lg:text-left">
+                <p className="font-bold text-base-content">CJ Luo</p>
+                <p className="text-base-content/45 text-sm mt-0.5">
+                  Software Engineer · CA Real Estate Agent · Founder
+                </p>
+                <span className="badge badge-success badge-outline badge-sm mt-2">
+                  ✅ Passed DRE Exam 2025
+                </span>
+              </div>
+            </div>
+
+            {/* Story snippet */}
+            <div className="flex flex-col gap-5 text-center lg:text-left items-center lg:items-start">
+              <p className="text-primary font-bold tracking-widest text-xs uppercase">
+                Why This Exists
+              </p>
+              <h2 className="font-display text-2xl sm:text-3xl leading-snug">
+                I built this because I{' '}
+                <span className="font-display-italic text-primary">
+                  needed it myself
+                </span>
+              </h2>
+              <p className="text-base-content/60 leading-relaxed text-sm sm:text-base max-w-md">
+                In 2024, I was laid off — because of AI. Looking for work that
+                was genuinely human, I pivoted to real estate. Every prep tool I
+                tried let me down, so I built my own from scratch using the
+                official DRE blueprint. I passed on my first attempt in 2025.
+                Then my friends used it. They passed too.
+              </p>
+              <button
+                className="btn btn-outline btn-sm sm:btn-md"
+                onClick={() => router.push(ROUTES.ABOUT)}
+              >
+                Read the full story →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── FAQ ── */}
-      <div className="py-24 px-4 bg-base-100">
+      <div className="py-24 px-4 bg-base-100 border-t border-base-300">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
             FAQ
@@ -502,7 +512,7 @@ export default function Home() {
                 className="border border-base-300 rounded-xl overflow-hidden transition-all duration-200"
               >
                 <button
-                  className="w-full flex justify-between items-center px-6 py-5 text-left gap-4 hover:bg-base-200 transition-colors duration-150"
+                  className="w-full flex justify-between items-center px-6 py-5 text-left gap-4 hover:bg-base-200 transition-colors duration-150 bg-base-100"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
                   <span className="font-semibold text-base">{faq.q}</span>
@@ -525,7 +535,6 @@ export default function Home() {
 
       {/* ── CTA ── */}
       <div className="py-28 px-4 bg-primary relative overflow-hidden">
-        {/* Decorative blobs */}
         <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
 
@@ -534,11 +543,11 @@ export default function Home() {
             ✓ 3-Day Free Trial — No Credit Card Required
           </div>
           <h2 className="font-display text-4xl md:text-5xl text-primary-content">
-            Ready to Ace Your Exam?
+            Ready to Pass Your Exam?
           </h2>
           <p className="text-primary-content/70 text-lg max-w-md">
-            Join hundreds of California real estate exam takers who prepared
-            smarter with Agent Smartly.
+            Join 500+ CA real estate exam takers who prepared smarter with Agent
+            Smartly.
           </p>
           {isAuthenticated ? (
             <button
@@ -548,7 +557,7 @@ export default function Home() {
               Continue Practicing →
             </button>
           ) : (
-            <div className="flex flex-col items-center gap-1.5">
+            <div className="flex flex-col items-center gap-2">
               <button
                 className="btn btn-lg bg-white text-primary hover:bg-base-200 border-none shadow-xl mt-2"
                 onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
@@ -556,19 +565,31 @@ export default function Home() {
                 Start Free Trial →
               </button>
               <p className="text-primary-content/50 text-xs font-medium">
-                No subscription, ever.
+                3 days free · then $9.99 for 1-month access · no auto-renewal
               </p>
             </div>
           )}
-          <p className="text-primary-content/40 text-xs">
-            3 days free · then $9.99 for 1-month access, billed once · no
-            auto-renewal
+        </div>
+      </div>
+
+      {/* ── DISCLAIMER ── */}
+      <div className="bg-base-200 border-t border-base-300 px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-center text-xs text-base-content/35 leading-relaxed">
+            <span className="font-semibold text-base-content/45">
+              Disclaimer:
+            </span>{' '}
+            Agent Smartly is an independent study tool, not affiliated with or
+            endorsed by the California Department of Real Estate or any
+            licensing authority. Practice questions are independently created
+            for study purposes and are not actual exam questions. Use as a
+            supplement to your official preparation materials.
           </p>
         </div>
       </div>
 
       {/* ── FOOTER ── */}
-      <footer className="footer footer-center p-10 bg-base-200 text-base-content">
+      <footer className="footer footer-center p-10 pb-24 lg:pb-10 bg-base-200 text-base-content border-t border-base-300">
         <div>
           <p className="font-bold text-lg">
             <span className="text-primary">Agent</span> Smartly
@@ -581,6 +602,26 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* ── STICKY MOBILE CTA ── */}
+      {!isAuthenticated && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-base-100/95 backdrop-blur border-t border-base-300 px-4 py-3 flex items-center gap-3 shadow-lg">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-base-content truncate">
+              Start your free 3-day trial
+            </p>
+            <p className="text-xs text-base-content/40">
+              No credit card required
+            </p>
+          </div>
+          <button
+            className="btn btn-primary btn-sm shrink-0"
+            onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
+          >
+            Start Free →
+          </button>
+        </div>
+      )}
     </div>
   )
 }

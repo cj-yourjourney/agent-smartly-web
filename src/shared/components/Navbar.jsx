@@ -238,8 +238,12 @@ const Navbar = () => {
 
             {/* Mobile Menu Button - Authenticated */}
             <div className="dropdown dropdown-end lg:hidden">
-              <label tabIndex={0} className="btn btn-ghost btn-circle">
-                <Menu className="h-5 w-5" />
+              <label
+                tabIndex={0}
+                className="btn btn-outline btn-sm border-base-300 gap-1.5"
+              >
+                <Menu className="h-4 w-4" />
+                <span className="text-xs font-medium">Menu</span>
               </label>
               <ul
                 tabIndex={0}
@@ -331,8 +335,12 @@ const Navbar = () => {
 
             {/* Not Authenticated - Mobile */}
             <div className="dropdown dropdown-end lg:hidden">
-              <label tabIndex={0} className="btn btn-ghost btn-circle">
-                <Menu className="h-5 w-5" />
+              <label
+                tabIndex={0}
+                className="btn btn-outline btn-sm border-base-300 gap-1.5"
+              >
+                <Menu className="h-4 w-4" />
+                <span className="text-xs font-medium">Menu</span>
               </label>
               <ul
                 tabIndex={0}
