@@ -189,7 +189,7 @@ export default function LoginPage() {
             {/* Brand mark */}
             <div className="text-center mb-2">
               <span className="text-2xl font-bold">
-                <span className="text-primary">Agent</span>Smartly
+                <span className="text-primary">Agent</span> Smartly
               </span>
             </div>
             <h2 className="card-title text-2xl sm:text-3xl font-bold text-center justify-center mb-1">
@@ -217,7 +217,7 @@ export default function LoginPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Email"
+                  placeholder="your@email.com"
                   className="input input-bordered w-full h-12"
                   disabled={loading}
                   required
