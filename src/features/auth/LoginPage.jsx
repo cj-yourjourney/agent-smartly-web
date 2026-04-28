@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import { loginUser, clearError, requestPasswordReset } from './state/authSlice'
 import ROUTES from '@/shared/constants/routes'
+import { X, Mail, XCircle, Eye, EyeOff } from 'lucide-react'
 
 // ─── Forgot Password Modal ────────────────────────────────────────────────────
 const ForgotPasswordModal = ({ onClose }) => {
@@ -60,20 +61,7 @@ const ForgotPasswordModal = ({ onClose }) => {
               onClick={onClose}
               className="btn btn-ghost btn-sm btn-circle -mt-1 -mr-2"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -82,20 +70,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             <div className="mt-4 space-y-4">
               <div className="flex justify-center">
                 <div className="w-16 h-16 bg-success/15 rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-success"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
+                  <Mail className="h-8 w-8 text-success" />
                 </div>
               </div>
               <p className="text-sm text-base-content/60 text-center leading-relaxed">
@@ -114,19 +89,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             <form onSubmit={handleSubmit} className="mt-4 space-y-3">
               {localError && (
                 <div className="alert alert-error py-2 text-sm">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <XCircle className="shrink-0 h-5 w-5" />
                   <span>{localError}</span>
                 </div>
               )}
@@ -220,13 +183,19 @@ export default function LoginPage() {
         <ForgotPasswordModal onClose={() => setShowForgotModal(false)} />
       )}
 
-      <div className="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="card w-full max-w-md bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title text-3xl font-bold text-center justify-center mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-base-200 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="card w-full max-w-md bg-base-100 shadow-xl rounded-2xl">
+          <div className="card-body px-6 py-8 sm:px-8">
+            {/* Brand mark */}
+            <div className="text-center mb-2">
+              <span className="text-2xl font-bold">
+                <span className="text-primary">Agent</span>Smartly
+              </span>
+            </div>
+            <h2 className="card-title text-2xl sm:text-3xl font-bold text-center justify-center mb-1">
               Welcome Back
             </h2>
-            <p className="text-center text-base-content/70 mb-6">
+            <p className="text-center text-base-content/60 text-sm sm:text-base mb-5">
               Sign in to your account
             </p>
 
@@ -235,19 +204,7 @@ export default function LoginPage() {
               <div
                 className={`alert mb-4 ${isUnverifiedError ? 'alert-warning' : 'alert-error'}`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="stroke-current shrink-0 h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <XCircle className="stroke-current shrink-0 h-6 w-6" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -261,7 +218,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full h-12"
                   disabled={loading}
                   required
                 />
@@ -276,52 +233,23 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Password"
-                    className="input input-bordered w-full pr-10"
+                    className="input input-bordered w-full pr-11 h-12"
                     disabled={loading}
                     required
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
                   >
                     {showPassword ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 opacity-60"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                        />
-                      </svg>
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 opacity-60"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
@@ -339,10 +267,10 @@ export default function LoginPage() {
               </div>
 
               {/* Submit */}
-              <div className="form-control mt-6">
+              <div className="form-control mt-2">
                 <button
                   type="submit"
-                  className={`btn btn-primary w-full ${loading ? 'loading' : ''}`}
+                  className={`btn btn-primary w-full h-12 text-base ${loading ? 'loading' : ''}`}
                   disabled={loading}
                 >
                   {loading ? 'Signing in...' : 'Sign In'}
