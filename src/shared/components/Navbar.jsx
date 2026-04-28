@@ -61,11 +61,18 @@ const Navbar = () => {
     dispatch(logout())
     router.push(ROUTES.HOME)
     setIsMobileMenuOpen(false)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
   }
 
   const handleNavigation = (path) => {
     router.push(path)
     setIsMobileMenuOpen(false)
+    // Close DaisyUI dropdown by removing focus from the trigger
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
   }
 
   const isActive = (path) => {
