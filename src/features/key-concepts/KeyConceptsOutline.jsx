@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchKeyConcepts,
+  fetchConceptViewCounts,
   toggleTopic,
   askLLMAboutConcept,
   selectOrganizedConcepts,
@@ -9,7 +10,8 @@ import {
   selectLoading,
   selectError,
   selectKeyConcepts,
-  selectLLMDialog
+  selectLLMDialog,
+  selectConceptViewCounts
 } from './state/keyConceptsSlice'
 import LLMExplanationModal from './components/LLMExplanationModal'
 import { ChevronDown, ChevronRight, BookOpen } from 'lucide-react'
@@ -22,9 +24,11 @@ export default function KeyConceptsOutline() {
   const error = useSelector(selectError)
   const concepts = useSelector(selectKeyConcepts)
   const llmDialog = useSelector(selectLLMDialog)
+  const conceptViewCounts = useSelector(selectConceptViewCounts)
 
   useEffect(() => {
     dispatch(fetchKeyConcepts())
+    dispatch(fetchConceptViewCounts())
   }, [dispatch])
 
   const handleToggleTopic = (code) => dispatch(toggleTopic(code))
@@ -156,27 +160,42 @@ export default function KeyConceptsOutline() {
 
                           {/* Concept rows */}
                           <div className="px-3 pb-3 space-y-1">
-                            {subtopic.concepts.map((concept) => (
-                              <button
-                                key={concept.id}
-                                onClick={() =>
-                                  handleAskLLM(
-                                    concept,
-                                    subtopic.name,
-                                    topic.name,
-                                    topic.code,
-                                    subtopic.code
-                                  )
-                                }
-                                disabled={llmDialog.loading}
-                                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-base-200/70 hover:bg-base-200 active:bg-base-300 active:scale-[0.985] rounded-xl transition-all text-left disabled:opacity-40"
-                              >
-                                <span className="text-sm text-base-content leading-snug">
-                                  {concept.name}
-                                </span>
-                                <ChevronRight className="w-3.5 h-3.5 text-base-content/25 flex-shrink-0" />
-                              </button>
-                            ))}
+                            {subtopic.concepts.map((concept) => {
+                              const reviewCount =
+                                conceptViewCounts[concept.name] ?? 0
+                              return (
+                                <button
+                                  key={concept.id}
+                                  onClick={() =>
+                                    handleAskLLM(
+                                      concept,
+                                      subtopic.name,
+                                      topic.name,
+                                      topic.code,
+                                      subtopic.code
+                                    )
+                                  }
+                                  disabled={llmDialog.loading}
+                                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-base-200/70 hover:bg-base-200 active:bg-base-300 active:scale-[0.985] rounded-xl transition-all text-left disabled:opacity-40"
+                                >
+                                  <span className="text-sm text-base-content leading-snug flex-1">
+                                    {concept.name}
+                                  </span>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    {reviewCount > 0 ? (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-base-300/60 text-base-content/45 text-[10px] font-medium leading-none">
+                                        Reviewed {reviewCount} times
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-lg bg-base-200 text-base-content/25 text-[11px] font-medium leading-none">
+                                        New
+                                      </span>
+                                    )}
+                                    <ChevronRight className="w-3.5 h-3.5 text-base-content/25" />
+                                  </div>
+                                </button>
+                              )
+                            })}
                           </div>
                         </div>
                       )

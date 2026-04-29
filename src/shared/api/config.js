@@ -52,6 +52,7 @@ export const API_CONFIG = {
     WEAK_AREAS: '/api/progress/weak-areas/',
     SESSIONS: '/api/progress/sessions/',
     RECENT_ACTIVITY: '/api/progress/recent-activity/',
+    KEY_CONCEPT_VIEW_COUNTS: '/api/progress/key-concept-view-counts/',
 
     // Payment endpoints
     PAYMENT: '/api/payments/pay/',

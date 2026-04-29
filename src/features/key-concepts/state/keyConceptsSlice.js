@@ -122,6 +122,20 @@ export const recordConceptView = createAsyncThunk(
   }
 )
 
+export const fetchConceptViewCounts = createAsyncThunk(
+  'keyConcepts/fetchConceptViewCounts',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Returns { "Riparian Rights": 3, "Adverse Possession": 1, ... }
+      return await api.get(API_CONFIG.ENDPOINTS.KEY_CONCEPT_VIEW_COUNTS)
+    } catch (error) {
+      return rejectWithValue(
+        error.message || 'Failed to fetch concept view counts'
+      )
+    }
+  }
+)
+
 export const updateConceptViewTime = createAsyncThunk(
   'keyConcepts/updateConceptViewTime',
   async ({ id, timeSpentSeconds }, { rejectWithValue }) => {
@@ -142,6 +156,7 @@ const initialState = {
   concepts: [],
   examTopics: EXAM_TOPICS,
   expandedTopics: [],
+  conceptViewCounts: {}, // { conceptName: reviewCount }
   loading: false,
   error: null,
   llmDialog: {
@@ -237,10 +252,17 @@ const keyConceptsSlice = createSlice({
         state.llmDialog.error = action.payload
       })
 
-      // Record concept view — store the returned id for the later PATCH
+      // Record concept view — store the returned id for the later PATCH,
+      // and optimistically increment the local count so the badge updates
+      // immediately without waiting for a refetch.
       .addCase(recordConceptView.fulfilled, (state, action) => {
         if (action.payload?.id) {
           state.llmDialog.pendingConceptViewId = action.payload.id
+        }
+        const name = action.meta.arg?.conceptName
+        if (name) {
+          state.conceptViewCounts[name] =
+            (state.conceptViewCounts[name] ?? 0) + 1
         }
       })
       .addCase(recordConceptView.rejected, (state, action) => {
@@ -251,6 +273,15 @@ const keyConceptsSlice = createSlice({
       .addCase(updateConceptViewTime.rejected, (state, action) => {
         console.warn('updateConceptViewTime failed silently:', action.payload)
       })
+
+      // Fetch per-concept review counts from server
+      .addCase(fetchConceptViewCounts.fulfilled, (state, action) => {
+        state.conceptViewCounts = action.payload
+      })
+      .addCase(fetchConceptViewCounts.rejected, (state, action) => {
+        // Silent failure — UI degrades gracefully (all badges show 0)
+        console.warn('fetchConceptViewCounts failed silently:', action.payload)
+      })
   }
 })
 
@@ -258,6 +289,8 @@ const keyConceptsSlice = createSlice({
 export const selectKeyConcepts = (state) => state.keyConcepts.concepts
 export const selectExamTopics = (state) => state.keyConcepts.examTopics
 export const selectExpandedTopics = (state) => state.keyConcepts.expandedTopics
+export const selectConceptViewCounts = (state) =>
+  state.keyConcepts.conceptViewCounts
 export const selectLoading = (state) => state.keyConcepts.loading
 export const selectError = (state) => state.keyConcepts.error
 export const selectLLMDialog = (state) => state.keyConcepts.llmDialog

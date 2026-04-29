@@ -27,7 +27,9 @@ export const ROUTES = {
   },
 
   // User routes
-  ACCOUNT: '/account'
+  ACCOUNT: '/account',
+
+
 }
 
 // Helper function to check if a route is active
