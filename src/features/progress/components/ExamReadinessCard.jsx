@@ -5,7 +5,6 @@ import {
   BookOpen,
   Zap,
   Clock,
-  ChevronRight,
   ChevronDown,
   ChevronUp,
   Info,
@@ -26,7 +25,7 @@ function getScoreBand(score) {
       label: 'Not Started',
       badge: 'badge-ghost',
       text: 'text-base-content/30',
-      bar: 'progress-base-300'
+      bar: ''
     }
   if (score < 40)
     return {
@@ -64,11 +63,10 @@ function getScoreBand(score) {
   }
 }
 
-// ── Smart "next step" recommendation ─────────────────────────────────────────
+// ── Smart next-step recommendation ───────────────────────────────────────────
 
 function getNextStep({
   score,
-  pillars,
   volumePct,
   accuracyPct,
   topicCoveragePct,
@@ -76,68 +74,54 @@ function getNextStep({
 }) {
   if (score === 0) {
     return {
-      action: 'practice',
       headline: 'Start your first practice session',
       detail:
-        'Answer a few questions to get your baseline score and see where you stand.',
-      icon: <Target className="w-4 h-4" />
+        'Answer a few questions to get your baseline score and see where you stand.'
     }
   }
 
-  // Find lowest incomplete pillar
-  const ranked = [
+  const candidates = [
     {
       key: 'accuracy',
       pct: accuracyPct,
-      action: 'topics',
       headline: 'Focus on accuracy',
       detail:
-        'Your accuracy score has the highest impact (45%). Review your weak subtopics and revisit tricky concepts.'
+        'Accuracy has the biggest impact (45%). Review your weak subtopics and make sure you understand the "why" behind each answer.'
     },
     {
       key: 'volume',
       pct: volumePct,
-      action: 'practice',
       headline: 'Practice more questions',
-      detail: `You've answered ${Math.round(volumePct * 3)} of 300 target questions. Consistent daily practice builds retention fast.`
+      detail: `You've answered ${Math.round(volumePct * 3)} of 300 target questions. Consistent daily practice builds pattern recognition fast.`
     },
     {
       key: 'topics',
       pct: topicCoveragePct,
-      action: 'practice',
       headline: 'Cover more topics',
       detail:
-        'Some topics still need 25+ questions. Spread your practice across all 7 exam topics for full credit.'
+        'Some topics still need 25+ questions to earn full credit. Spread your practice across all 7 exam topics.'
     },
     {
       key: 'concepts',
       pct: conceptCoverage,
-      action: 'concepts',
       headline: 'Review key concepts',
-      detail: `Read through the 134 key concepts (60 s each counts). This pillar is a quick win — ${CONCEPT_TARGET - Math.round((conceptCoverage * CONCEPT_TARGET) / 100)} remaining.`
+      detail: `Read through the 134 key concepts — a quick win with ${CONCEPT_TARGET - Math.round((conceptCoverage * CONCEPT_TARGET) / 100)} still remaining.`
     }
   ]
-    .filter((p) => p.pct < 100)
-    .sort((a, b) => a.pct - b.pct)
 
-  if (ranked.length === 0) {
+  const top = candidates
+    .filter((c) => c.pct < 100)
+    .sort((a, b) => a.pct - b.pct)[0]
+
+  if (!top) {
     return {
-      action: 'practice',
       headline: 'Keep your score fresh',
       detail:
-        "All pillars complete! Practice regularly so your score doesn't decay from inactivity.",
-      icon: <Zap className="w-4 h-4" />
+        "All pillars complete! Practice regularly so your score doesn't decay from inactivity."
     }
   }
 
-  const top = ranked[0]
-  const icons = {
-    accuracy: <Award className="w-4 h-4" />,
-    volume: <Target className="w-4 h-4" />,
-    topics: <BookOpen className="w-4 h-4" />,
-    concepts: <Zap className="w-4 h-4" />
-  }
-  return { ...top, icon: icons[top.key] }
+  return top
 }
 
 // ── Pillar card ───────────────────────────────────────────────────────────────
@@ -154,12 +138,12 @@ function PillarCard({
 }) {
   return (
     <div className="bg-base-200 rounded-xl p-3 space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-1">
+        <div className="flex items-center gap-1.5 min-w-0">
           {icon}
           <span className="text-sm font-semibold">{label}</span>
         </div>
-        <span className="text-xs text-base-content/40 font-medium">
+        <span className="text-xs text-base-content/40 font-medium flex-shrink-0">
           {weight}
         </span>
       </div>
@@ -168,19 +152,20 @@ function PillarCard({
         value={pct}
         max="100"
       />
-      <div className="flex justify-between text-xs gap-1">
-        <span className="text-base-content/60 truncate">{value}</span>
-        <span
-          className={`flex-shrink-0 ${done ? 'text-success font-medium' : 'text-base-content/40'}`}
+      {/* Each line gets its own row — no truncation */}
+      <div className="text-xs space-y-0.5">
+        <p className="text-base-content/60">{value}</p>
+        <p
+          className={done ? 'text-success font-medium' : 'text-base-content/40'}
         >
           {note}
-        </span>
+        </p>
       </div>
     </div>
   )
 }
 
-// ── How scoring works explainer ───────────────────────────────────────────────
+// ── Scoring explainer (collapsible) ──────────────────────────────────────────
 
 function ScoringExplainer() {
   const [open, setOpen] = useState(false)
@@ -202,8 +187,8 @@ function ScoringExplainer() {
       </button>
 
       {open && (
-        <div className="px-4 pb-4 pt-1 space-y-3 bg-base-50 text-sm">
-          <p className="text-base-content/60 text-xs leading-relaxed">
+        <div className="px-4 pb-4 pt-1 space-y-3">
+          <p className="text-xs text-base-content/60 leading-relaxed">
             Your Exam Readiness score (0–100) is a composite of four pillars
             that mirror what actually predicts CA Real Estate Exam success. It
             decays slightly when you stop practicing, nudging you to stay
@@ -227,9 +212,9 @@ function ScoringExplainer() {
                 desc: '25+ questions per topic earns full credit; fewer gives partial credit.'
               },
               {
-                label: 'Key Concept Review',
+                label: 'Key Concepts',
                 weight: '15%',
-                desc: 'Reading all 134 key concepts for ≥60 seconds each. Fast and high-impact.'
+                desc: 'Reading all 134 key concepts. Fast and high-impact.'
               }
             ].map((row) => (
               <div key={row.label} className="flex gap-2 items-start">
@@ -245,10 +230,10 @@ function ScoringExplainer() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-base-content/40 border-t border-base-200 pt-2">
-            <Clock className="w-3 h-3 inline mr-1" />
-            Freshness multiplier: score drops to 85% after 7 days, 70% after 30,
-            and 55% after 60 days of inactivity.
+          <p className="text-xs text-base-content/40 border-t border-base-200 pt-2 flex items-center gap-1">
+            <Clock className="w-3 h-3 flex-shrink-0" />
+            Freshness: score drops to 85% after 7 days, 70% after 30, and 55%
+            after 60 days without practice.
           </p>
         </div>
       )}
@@ -339,7 +324,7 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
       icon: <Zap className="w-4 h-4 text-warning" />,
       label: 'Concepts',
       weight: '15%',
-      value: `${conceptsFullyReviewed}${conceptsSkimmed > 0 ? ` + ${conceptsSkimmed}` : ''} / ${CONCEPT_TARGET}`,
+      value: `${conceptsFullyReviewed}${conceptsSkimmed > 0 ? ` + ${conceptsSkimmed} skimmed` : ''} / ${CONCEPT_TARGET}`,
       pct: conceptCoverage,
       progressClass:
         conceptCoverage >= 100 ? 'progress-success' : 'progress-warning',
@@ -354,33 +339,30 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
   return (
     <div className="card bg-base-100 shadow-sm border border-base-200">
       <div className="card-body gap-5 p-4 sm:p-6">
-        {/* ── Score row ── */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs text-base-content/40 uppercase tracking-widest mb-1.5">
-              Exam Readiness Score
-            </p>
-            <div className="flex items-baseline gap-2.5 flex-wrap">
-              <span className={`text-5xl font-bold tabular-nums ${band.text}`}>
-                {score}
-              </span>
-              <span className="text-base-content/30 text-xl">/100</span>
-              <span className={`badge ${band.badge} font-semibold`}>
-                {band.label}
-              </span>
-            </div>
-            {/* Overall score bar */}
-            <div className="mt-3 w-48 max-w-full">
-              <progress
-                className={`progress w-full h-2 ${band.bar}`}
-                value={score}
-                max="100"
-              />
-            </div>
+        {/* Score */}
+        <div>
+          <p className="text-xs text-base-content/40 uppercase tracking-widest mb-1.5">
+            Exam Readiness Score
+          </p>
+          <div className="flex items-baseline gap-2.5 flex-wrap">
+            <span className={`text-5xl font-bold tabular-nums ${band.text}`}>
+              {score}
+            </span>
+            <span className="text-base-content/30 text-xl">/100</span>
+            <span className={`badge ${band.badge} font-semibold`}>
+              {band.label}
+            </span>
+          </div>
+          <div className="mt-3 w-48 max-w-full">
+            <progress
+              className={`progress w-full h-2 ${band.bar}`}
+              value={score}
+              max="100"
+            />
           </div>
         </div>
 
-        {/* ── Inactivity warning ── */}
+        {/* Inactivity warning */}
         {daysInactive !== null && daysInactive > 7 && (
           <div
             className={`alert py-2 text-sm ${daysInactive > 30 ? 'alert-error' : 'alert-warning'}`}
@@ -394,7 +376,7 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
           </div>
         )}
 
-        {/* ── Next step recommendation ── */}
+        {/* Next step recommendation */}
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-3">
           <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-0.5">
             <Lightbulb className="w-4 h-4" />
@@ -409,27 +391,27 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
           </div>
         </div>
 
-        {/* ── CTA buttons ── */}
-        <div className="flex flex-col sm:flex-row gap-2">
+        {/* CTA buttons — full-width stacked, default (md) size */}
+        <div className="flex flex-col gap-2.5">
           <button
             onClick={() => router.push(ROUTES.LEARNING.PRACTICE)}
-            className="btn btn-primary btn-sm flex-1 gap-1.5"
+            className="btn btn-primary w-full gap-2"
           >
-            <Target className="w-4 h-4" />
+            <Target className="w-5 h-5" />
             Practice Questions
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4 ml-auto" />
           </button>
           <button
             onClick={() => router.push(ROUTES.LEARNING.KEY_CONCEPTS)}
-            className="btn btn-outline btn-sm flex-1 gap-1.5"
+            className="btn btn-outline w-full gap-2"
           >
-            <Zap className="w-4 h-4" />
+            <Zap className="w-5 h-5" />
             Review Key Concepts
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4 ml-auto" />
           </button>
         </div>
 
-        {/* ── 4 Pillars ── */}
+        {/* 4 Pillars */}
         <div>
           <p className="text-xs text-base-content/40 uppercase tracking-widest mb-3">
             The 4 Pillars
@@ -441,7 +423,7 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
           </div>
         </div>
 
-        {/* ── Scoring explainer ── */}
+        {/* Scoring explainer */}
         <ScoringExplainer />
       </div>
     </div>
