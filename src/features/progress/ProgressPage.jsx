@@ -35,8 +35,6 @@ export default function ProgressPage() {
   const dispatch = useDispatch()
   const router = useRouter()
 
-  // Read the initial tab from ?tab= query param (e.g. from the session complete screen).
-  // Default to 'overview' if the param is absent or invalid.
   const [activeTab, setActiveTab] = useState('overview')
 
   const { isAuthenticated, isInitialized } = useSelector((s) => s.auth)
@@ -51,7 +49,6 @@ export default function ProgressPage() {
     selectedTopic
   } = useSelector((s) => s.progress)
 
-  // Sync active tab with ?tab= query param once the router is ready
   useEffect(() => {
     if (!router.isReady) return
     const tabParam = router.query.tab
@@ -87,7 +84,6 @@ export default function ProgressPage() {
     }
   }
 
-  // When the user manually switches tabs, clean up the URL param
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
     if (router.query.tab) {
@@ -106,14 +102,16 @@ export default function ProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200 py-8">
+    <div className="min-h-screen bg-base-200 py-6 sm:py-8">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Page header */}
-        <div className="mb-6 flex items-center gap-3">
-          <TrendingUp className="w-7 h-7 text-primary" />
+        <div className="mb-5 flex items-center gap-3">
+          <TrendingUp className="w-6 h-6 text-primary flex-shrink-0" />
           <div>
-            <h1 className="text-2xl font-bold leading-tight">Your Progress</h1>
-            <p className="text-sm text-base-content/50">
+            <h1 className="text-xl sm:text-2xl font-bold leading-tight">
+              Your Progress
+            </h1>
+            <p className="text-xs text-base-content/50">
               Track your learning and identify areas for improvement
             </p>
           </div>
@@ -131,7 +129,7 @@ export default function ProgressPage() {
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              className={`tab gap-1.5 px-5 ${activeTab === id ? 'tab-active' : ''}`}
+              className={`tab gap-1.5 px-4 sm:px-5 text-sm ${activeTab === id ? 'tab-active' : ''}`}
               onClick={() => handleTabChange(id)}
             >
               <Icon className="w-4 h-4" />
