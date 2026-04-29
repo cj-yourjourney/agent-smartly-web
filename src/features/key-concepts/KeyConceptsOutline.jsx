@@ -12,7 +12,7 @@ import {
   selectLLMDialog
 } from './state/keyConceptsSlice'
 import LLMExplanationModal from './components/LLMExplanationModal'
-import { Brain, ChevronRight, Info } from 'lucide-react'
+import { ChevronDown, ChevronRight, BookOpen } from 'lucide-react'
 
 export default function KeyConceptsOutline() {
   const dispatch = useDispatch()
@@ -27,11 +27,8 @@ export default function KeyConceptsOutline() {
     dispatch(fetchKeyConcepts())
   }, [dispatch])
 
-  const handleToggleTopic = (code) => {
-    dispatch(toggleTopic(code))
-  }
+  const handleToggleTopic = (code) => dispatch(toggleTopic(code))
 
-  // Pass both display names (for the modal UI) and codes (for the API record call)
   const handleAskLLM = (
     concept,
     subtopicName,
@@ -54,14 +51,14 @@ export default function KeyConceptsOutline() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto max-w-4xl p-6">
+      <div className="container mx-auto max-w-3xl p-4">
         <div className="alert alert-error">
           <span>Error: {error}</span>
         </div>
@@ -71,130 +68,107 @@ export default function KeyConceptsOutline() {
 
   return (
     <>
-      <div className="container mx-auto max-w-4xl p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Key Concepts</h1>
-          <div className="flex items-center gap-2 text-sm text-base-content/60">
-            <span>{concepts.length} concepts</span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              Hover and click
-              <kbd className="kbd kbd-xs">
-                <Brain className="w-3 h-3" />
-              </kbd>
-              Explain for AI help
-            </span>
+      <div className="min-h-screen bg-base-200 py-6 sm:py-8">
+        <div className="container mx-auto max-w-3xl px-4">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen className="w-6 h-6 text-primary flex-shrink-0" />
+              <h1 className="text-2xl font-bold">Key Concepts</h1>
+            </div>
+            <p className="text-sm text-base-content/50">
+              {concepts.length} essential concepts for the CA Real Estate
+              Salesperson exam
+            </p>
+            <p className="text-xs text-base-content/40 mt-1">
+              Tap any concept for an AI explanation
+            </p>
           </div>
-        </div>
 
-        {/* Topics List */}
-        <div className="space-y-4">
-          {organizedConcepts.map((topic) => {
-            const isExpanded = expandedTopics.includes(topic.code)
-            const count = topic.subtopics.reduce(
-              (sum, st) => sum + st.concepts.length,
-              0
-            )
+          {/* Topics list */}
+          <div className="space-y-3">
+            {organizedConcepts.map((topic) => {
+              const isExpanded = expandedTopics.includes(topic.code)
+              const count = topic.subtopics.reduce(
+                (sum, st) => sum + st.concepts.length,
+                0
+              )
+              if (count === 0) return null
 
-            if (count === 0) return null
-
-            return (
-              <div
-                key={topic.code}
-                className="card bg-base-100 border border-base-300 shadow-sm"
-              >
-                {/* Topic Header */}
-                <button
-                  onClick={() => handleToggleTopic(topic.code)}
-                  className="card-body p-5 flex-row items-center gap-3 hover:bg-base-200/50 transition-colors"
+              return (
+                <div
+                  key={topic.code}
+                  className="card bg-base-100 shadow-sm border border-base-200 overflow-hidden"
                 >
-                  <ChevronRight
-                    className={`w-5 h-5 transition-transform flex-shrink-0 ${
-                      isExpanded ? 'rotate-90' : ''
-                    }`}
-                  />
-                  <span className="font-semibold flex-1 text-left">
-                    {topic.name}
-                  </span>
-                  <div className="badge badge-ghost">{count}</div>
-                </button>
+                  {/* Topic header */}
+                  <button
+                    onClick={() => handleToggleTopic(topic.code)}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-base-200/60 transition-colors text-left"
+                  >
+                    <ChevronDown
+                      className={`w-4 h-4 text-base-content/40 flex-shrink-0 transition-transform duration-200 ${
+                        isExpanded ? 'rotate-180' : ''
+                      }`}
+                    />
+                    <span className="font-semibold flex-1 text-sm sm:text-base">
+                      {topic.name}
+                    </span>
+                    <span className="badge badge-ghost badge-sm flex-shrink-0">
+                      {count}
+                    </span>
+                  </button>
 
-                {/* Subtopics & Concepts */}
-                {isExpanded && (
-                  <div className="border-t border-base-300">
-                    {topic.subtopics.map((subtopic, idx) => (
-                      <div
-                        key={subtopic.code}
-                        className={`px-5 py-4 ${
-                          idx !== topic.subtopics.length - 1
-                            ? 'border-b border-base-200'
-                            : ''
-                        }`}
-                      >
-                        <div className="text-xs font-semibold text-base-content/60 tracking-wide mb-3">
-                          {subtopic.name}
-                        </div>
-                        <div className="space-y-3">
-                          {subtopic.concepts.map((concept) => (
-                            <div
-                              key={concept.id}
-                              className="flex items-start gap-3 py-1 group"
-                            >
+                  {/* Subtopics & concepts */}
+                  {isExpanded && (
+                    <div className="border-t border-base-200">
+                      {topic.subtopics.map((subtopic, idx) => (
+                        <div
+                          key={subtopic.code}
+                          className={
+                            idx !== topic.subtopics.length - 1
+                              ? 'border-b border-base-200'
+                              : ''
+                          }
+                        >
+                          {/* Subtopic label */}
+                          <div className="px-4 pt-3 pb-2">
+                            <span className="text-xs font-semibold text-base-content/40 uppercase tracking-wide">
+                              {subtopic.name}
+                            </span>
+                          </div>
+
+                          {/* Concept rows — clearly tappable cards */}
+                          <div className="px-3 pb-3 space-y-1.5">
+                            {subtopic.concepts.map((concept) => (
                               <button
+                                key={concept.id}
                                 onClick={() =>
                                   handleAskLLM(
                                     concept,
                                     subtopic.name,
                                     topic.name,
-                                    topic.code, // ← code for API
-                                    subtopic.code // ← code for API
+                                    topic.code,
+                                    subtopic.code
                                   )
                                 }
                                 disabled={llmDialog.loading}
-                                className="btn btn-primary btn-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5"
+                                className="w-full flex items-center justify-between gap-3 px-3.5 py-3 bg-base-200 hover:bg-base-300 active:scale-[0.98] rounded-lg transition-all text-left disabled:opacity-50"
                               >
-                                <Brain className="w-3 h-3" />
-                                Explain
+                                <span className="text-sm font-medium text-base-content/80">
+                                  {concept.name}
+                                </span>
+                                <ChevronRight className="w-3.5 h-3.5 text-base-content/30 flex-shrink-0" />
                               </button>
-
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium">
-                                    {concept.name}
-                                  </span>
-
-                                  {concept.description && (
-                                    <div className="relative group/tooltip inline-block">
-                                      <Info className="w-3.5 h-3.5 text-info cursor-help" />
-                                      <div className="absolute left-0 top-6 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 z-50 pointer-events-none">
-                                        <div className="bg-white text-gray-800 text-sm rounded-lg shadow-2xl border-2 border-gray-200 p-4 w-96 max-w-[calc(100vw-2rem)]">
-                                          <div className="absolute -top-2 left-4 w-4 h-4 bg-white border-l-2 border-t-2 border-gray-200 transform rotate-45"></div>
-                                          <p className="text-gray-700 leading-relaxed relative z-10">
-                                            {concept.description}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {concept.page_number && (
-                                    <span className="text-xs text-base-content/50">
-                                      {/* {concept.page_number} */}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 
