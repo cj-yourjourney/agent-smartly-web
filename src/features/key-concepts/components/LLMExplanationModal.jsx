@@ -39,7 +39,7 @@ export default function LLMExplanationModal() {
               {data?.concept || 'Concept Explanation'}
             </h2>
             {data && (
-              <p className="text-xs text-base-content/50 mt-0.5 truncate">
+              <p className="text-xs text-base-content/50 mt-0.5">
                 {data.topic} → {data.subtopic}
               </p>
             )}
