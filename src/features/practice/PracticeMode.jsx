@@ -54,7 +54,7 @@ export default function PracticeMode() {
 
   const sessionResults = {
     total: Object.keys(answeredMap).length,
-    correct: Object.values(answeredMap).filter(Boolean).length
+    correct: Object.values(answeredMap).filter((v) => v.isCorrect).length
   }
 
   const timeLimit = 90 * 60
@@ -188,6 +188,9 @@ export default function PracticeMode() {
 
   const handleSubmitAnswer = async () => {
     if (!selectedAnswer) return
+    // Prevent re-submitting an already-answered question
+    if (answeredMap[currentQuestionIndex]) return
+
     const currentQuestion = questions[currentQuestionIndex]
 
     // Cap per-question time at 120 s (admin tracking only, not a user timer).
@@ -199,8 +202,18 @@ export default function PracticeMode() {
       checkAnswer({ questionId: currentQuestion.id, answer: selectedAnswer })
     )
 
-    const isCorrect = result?.payload?.is_correct ?? false
-    setAnsweredMap((prev) => ({ ...prev, [currentQuestionIndex]: isCorrect }))
+    const payload = result?.payload ?? {}
+    const isCorrect = payload.is_correct ?? false
+
+    // Store full answer data so navigating back shows a read-only review state
+    setAnsweredMap((prev) => ({
+      ...prev,
+      [currentQuestionIndex]: {
+        isCorrect,
+        userAnswer: selectedAnswer,
+        result: payload
+      }
+    }))
 
     dispatch(
       recordQuestionAttempt({
@@ -297,8 +310,14 @@ export default function PracticeMode() {
       currentQuestion={questions[currentQuestionIndex]}
       currentQuestionIndex={currentQuestionIndex}
       totalQuestions={questions.length}
-      selectedAnswer={selectedAnswer}
-      answerResult={answerResult}
+      // If this question was already answered, derive display state from the map
+      // so the user sees read-only review state instead of a blank submit form.
+      selectedAnswer={
+        answeredMap[currentQuestionIndex]?.userAnswer ?? selectedAnswer
+      }
+      answerResult={answeredMap[currentQuestionIndex]?.result ?? answerResult}
+      // isReviewing = navigated back to a question that was already answered
+      isReviewing={!!answeredMap[currentQuestionIndex] && !answerResult}
       timeRemaining={timeRemaining}
       isTimeUp={isTimeUp}
       isTimeWarning={isTimeWarning}

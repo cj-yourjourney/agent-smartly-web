@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   Clock,
   Info,
@@ -5,7 +6,8 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
-  BarChart2
+  BarChart2,
+  Eye
 } from 'lucide-react'
 import { formatTimeClock } from '../utils'
 
@@ -18,6 +20,7 @@ function QuizHeader({
   isTimeUp,
   isTimeWarning,
   isTimeCritical,
+  isReviewing,
   onExit
 }) {
   const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100
@@ -35,6 +38,12 @@ function QuizHeader({
           >
             {isPracticeQuiz ? 'Exam' : 'Topic'}
           </span>
+          {isReviewing && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-base-300 text-base-content/50 flex items-center gap-1 shrink-0">
+              <Eye className="w-3 h-3" />
+              Review
+            </span>
+          )}
           <span className="text-sm font-medium text-base-content/60 truncate hidden sm:block">
             {topicLabel}
           </span>
@@ -182,9 +191,10 @@ function AnswerOptions({ question, selectedAnswer, isAnswered, onSelect }) {
   )
 }
 
-function AnswerFeedback({ answerResult }) {
+function AnswerFeedback({ answerResult, feedbackRef }) {
   return (
     <div
+      ref={feedbackRef}
       className={`p-3.5 rounded-xl mb-3 border-2 ${
         answerResult.is_correct
           ? 'bg-success/8 border-success/30'
@@ -270,6 +280,7 @@ export function QuizScreen({
   totalQuestions,
   selectedAnswer,
   answerResult,
+  isReviewing,
   timeRemaining,
   isTimeUp,
   isTimeWarning,
@@ -282,6 +293,30 @@ export function QuizScreen({
   onNext,
   onExit
 }) {
+  const feedbackRef = useRef(null)
+  const scrollContainerRef = useRef(null)
+
+  // Auto-scroll so feedback is visible above the sticky footer when answer is submitted
+  useEffect(() => {
+    if (!answerResult || !feedbackRef.current || !scrollContainerRef.current)
+      return
+    const timer = setTimeout(() => {
+      const container = scrollContainerRef.current
+      const el = feedbackRef.current
+      if (!container || !el) return
+      // Scroll the element into view within the container, leaving room for the sticky footer (~72px)
+      const elBottom = el.offsetTop + el.offsetHeight
+      const visibleBottom = container.scrollTop + container.clientHeight - 72
+      if (elBottom > visibleBottom) {
+        container.scrollTo({
+          top: elBottom - container.clientHeight + 88,
+          behavior: 'smooth'
+        })
+      }
+    }, 120)
+    return () => clearTimeout(timer)
+  }, [answerResult])
+
   return (
     <div className="min-h-screen bg-base-100 flex flex-col">
       {/* Sticky header with progress bar */}
@@ -294,12 +329,13 @@ export function QuizScreen({
         isTimeUp={isTimeUp}
         isTimeWarning={isTimeWarning}
         isTimeCritical={isTimeCritical}
+        isReviewing={isReviewing}
         onExit={onExit}
       />
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="w-full max-w-2xl mx-auto px-4 pt-5 pb-4">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+        <div className="w-full max-w-2xl mx-auto px-4 pt-5 pb-28">
           <TimeAlerts
             isPracticeQuiz={isPracticeQuiz}
             showTimeUpAlert={showTimeUpAlert}
@@ -319,7 +355,12 @@ export function QuizScreen({
           />
 
           {/* Feedback shown inline after answering */}
-          {answerResult && <AnswerFeedback answerResult={answerResult} />}
+          {answerResult && (
+            <AnswerFeedback
+              answerResult={answerResult}
+              feedbackRef={feedbackRef}
+            />
+          )}
         </div>
       </div>
 
