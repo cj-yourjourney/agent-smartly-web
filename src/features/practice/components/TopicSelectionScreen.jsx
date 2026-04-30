@@ -1,28 +1,29 @@
-import { Clock, ChevronRight, ChevronDown } from 'lucide-react'
+import { Clock, ChevronRight, ChevronDown, BookOpen } from 'lucide-react'
 
 function FullPracticeExamCard({ onSelect }) {
   return (
     <button
       onClick={onSelect}
-      className="w-full p-6 border-2 border-base-300 rounded-xl hover:border-primary hover:shadow-md transition-all group text-left bg-base-100"
+      className="w-full p-4 sm:p-6 border-2 border-base-300 rounded-2xl hover:border-primary hover:shadow-md active:scale-[0.99] transition-all group text-left bg-base-100 touch-manipulation"
       title="Start a full 75-question practice exam with 90-minute timer"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-          <Clock className="w-7 h-7 text-primary" />
+      <div className="flex items-center gap-3 sm:gap-4 mb-3">
+        <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+          <Clock className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
         </div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-base-content mb-1 group-hover:text-primary transition-colors">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold text-base-content mb-0.5 group-hover:text-primary transition-colors leading-tight">
             Full Practice Exam
           </h2>
-          <p className="text-base-content/60">
-            Complete exam simulation with timer
+          <p className="text-sm text-base-content/60 leading-snug">
+            Complete simulation with timer
           </p>
         </div>
-        <ChevronRight className="w-6 h-6 text-base-content/30 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+        <ChevronRight className="w-5 h-5 text-base-content/30 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
       </div>
-      <div className="flex items-center gap-4 text-sm text-base-content/70">
-        {['75 questions', '90 minutes', 'All topics'].map((tag) => (
+      <div className="flex items-center gap-3 sm:gap-4 text-xs text-base-content/60">
+        {['75 questions', '90 min', 'All topics'].map((tag) => (
           <span key={tag} className="flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-base-content/40" />
             {tag}
@@ -42,39 +43,39 @@ function TopicRow({
 }) {
   return (
     <div
-      className={`border rounded-lg transition-all ${
+      className={`border rounded-xl transition-all ${
         isExpanded
           ? 'border-primary/50 bg-primary/5 shadow-sm'
-          : 'border-base-300 bg-base-100 hover:border-base-400'
+          : 'border-base-200 bg-base-100 hover:border-base-300'
       }`}
     >
-      <div className="flex items-center">
+      <div className="flex items-stretch">
         <button
           onClick={() => onTopicSelect(item.topic.value)}
-          className="flex-1 text-left px-3.5 py-3 text-sm font-medium text-base-content hover:text-primary transition-colors"
+          className="flex-1 text-left px-4 py-3.5 text-sm font-medium text-base-content hover:text-primary transition-colors min-h-[48px] flex items-center touch-manipulation"
           title={`Practice ${item.topic.label} (20 questions)`}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {item.topic.label}
         </button>
 
         {item.subtopics.length > 0 && (
           <>
-            <div className="w-px h-6 bg-base-300" />
+            <div className="w-px bg-base-200 my-2" />
             <button
               onClick={() => onToggle(item.topic.value)}
-              className="px-3.5 py-3 text-base-content/50 hover:text-primary hover:bg-base-200/50 transition-all flex items-center gap-1.5"
+              className="px-4 text-base-content/40 hover:text-primary hover:bg-base-200/50 active:bg-base-200 transition-all flex items-center gap-1 touch-manipulation min-w-[60px] justify-center rounded-r-xl"
               title={
                 isExpanded
                   ? 'Hide subtopics'
                   : `Show ${item.subtopics.length} subtopics`
               }
               aria-label="Toggle subtopics"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <span className="text-xs font-semibold min-w-[1rem] text-center">
-                {item.subtopics.length}
-              </span>
+              <span className="text-xs font-bold">{item.subtopics.length}</span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
               />
             </button>
           </>
@@ -82,7 +83,7 @@ function TopicRow({
       </div>
 
       {isExpanded && item.subtopics.length > 0 && (
-        <div className="border-t border-base-300/60">
+        <div className="border-t border-base-200/60">
           <div className="p-2 space-y-0.5">
             {item.subtopics.map((subtopic) => (
               <button
@@ -90,10 +91,11 @@ function TopicRow({
                 onClick={() =>
                   onSubtopicSelect(item.topic.value, subtopic.value)
                 }
-                className="w-full text-left py-2 px-3 text-xs text-base-content/70 hover:text-primary hover:bg-base-100 rounded-md transition-all flex items-center group"
+                className="w-full text-left py-3 px-4 text-sm text-base-content/70 hover:text-primary hover:bg-base-100 active:bg-base-200 rounded-lg transition-all flex items-center group touch-manipulation"
                 title={`Practice ${subtopic.label} (20 questions)`}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary mr-2.5 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary mr-3 shrink-0 transition-colors" />
                 {subtopic.label}
               </button>
             ))}
@@ -113,31 +115,16 @@ function StudyByTopicPanel({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-4 mb-5">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
         </div>
         <div className="flex-1">
-          <h2 className="text-2xl font-bold text-base-content mb-1">
+          <h2 className="text-lg sm:text-2xl font-bold text-base-content leading-tight">
             Study by Topic
           </h2>
-          <p className="text-base-content/60 text-sm">
-            Click topic or use{' '}
-            <ChevronDown className="w-3.5 h-3.5 inline mx-0.5 -mt-0.5" /> for
-            subtopics • 20 questions • No time limit
+          <p className="text-xs sm:text-sm text-base-content/60 mt-0.5">
+            20 questions · No time limit
           </p>
         </div>
       </div>
@@ -167,26 +154,32 @@ export function TopicSelectionScreen({
   onSubtopicSelect
 }) {
   return (
-    <div className="min-h-screen bg-base-100 p-6 md:p-12">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-base-content mb-2">
+    <div className="min-h-screen bg-base-100">
+      {/* Compact sticky header on mobile */}
+      <div className="sticky top-0 z-10 bg-base-100/95 backdrop-blur-sm border-b border-base-200 px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-xl sm:text-3xl font-bold text-base-content">
             Practice Mode
           </h1>
-          <p className="text-base-content/60">
+          <p className="text-xs sm:text-sm text-base-content/50 mt-0.5">
             Choose how you want to practice
           </p>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
-          <StudyByTopicPanel
-            topicStructure={topicStructure}
-            expandedTopic={expandedTopic}
-            onTopicSelect={onTopicSelect}
-            onToggle={onToggle}
-            onSubtopicSelect={onSubtopicSelect}
-          />
+      {/* Content */}
+      <div className="px-4 sm:px-6 md:px-12 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 lg:items-start">
+            <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
+            <StudyByTopicPanel
+              topicStructure={topicStructure}
+              expandedTopic={expandedTopic}
+              onTopicSelect={onTopicSelect}
+              onToggle={onToggle}
+              onSubtopicSelect={onSubtopicSelect}
+            />
+          </div>
         </div>
       </div>
     </div>

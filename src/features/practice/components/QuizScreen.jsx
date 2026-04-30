@@ -20,46 +20,62 @@ function QuizHeader({
   isTimeCritical,
   onExit
 }) {
-  return (
-    <div className="flex justify-between items-center mb-5">
-      <div className="flex items-center gap-2.5">
-        <span
-          className={`text-xs font-semibold px-2 py-1 rounded ${
-            isPracticeQuiz
-              ? 'text-secondary bg-secondary/10'
-              : 'text-primary bg-primary/10'
-          }`}
-        >
-          {topicLabel}
-        </span>
-        <span className="text-sm font-medium text-base-content/50">
-          {currentQuestionIndex + 1} / {totalQuestions}
-        </span>
-      </div>
+  const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100
 
-      <div className="flex items-center gap-3">
-        {isPracticeQuiz && (
-          <div
-            className={`flex items-center gap-1.5 text-sm font-medium px-2 py-1 rounded ${
-              isTimeUp || isTimeCritical
-                ? 'text-error bg-error/10'
-                : isTimeWarning
-                  ? 'text-warning bg-warning/10'
-                  : 'text-base-content/70 bg-base-200'
+  return (
+    <div className="sticky top-0 z-20 bg-base-100/95 backdrop-blur-sm border-b border-base-200">
+      <div className="flex justify-between items-center px-4 pt-3 pb-2 max-w-2xl mx-auto">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded shrink-0 ${
+              isPracticeQuiz
+                ? 'text-secondary bg-secondary/10'
+                : 'text-primary bg-primary/10'
             }`}
           >
-            <Clock className="w-4 h-4" />
-            <span>
-              {isTimeUp ? 'Overtime' : formatTimeClock(timeRemaining)}
-            </span>
-          </div>
-        )}
-        <button
-          onClick={onExit}
-          className="text-xs text-base-content/50 hover:text-base-content transition-colors"
-        >
-          Exit
-        </button>
+            {isPracticeQuiz ? 'Exam' : 'Topic'}
+          </span>
+          <span className="text-sm font-medium text-base-content/60 truncate hidden sm:block">
+            {topicLabel}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {isPracticeQuiz && (
+            <div
+              className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${
+                isTimeUp || isTimeCritical
+                  ? 'text-error bg-error/10'
+                  : isTimeWarning
+                    ? 'text-warning bg-warning/10'
+                    : 'text-base-content/60 bg-base-200'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>{isTimeUp ? 'OT' : formatTimeClock(timeRemaining)}</span>
+            </div>
+          )}
+
+          <span className="text-xs font-bold text-base-content/50 tabular-nums">
+            {currentQuestionIndex + 1}
+            <span className="text-base-content/30">/{totalQuestions}</span>
+          </span>
+
+          <button
+            onClick={onExit}
+            className="text-xs text-base-content/40 hover:text-base-content transition-colors px-2 py-1 -mr-1 touch-manipulation"
+          >
+            Exit
+          </button>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-0.5 bg-base-200 mx-4 mb-0 rounded-full overflow-hidden max-w-2xl mx-auto">
+        <div
+          className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </div>
   )
@@ -75,10 +91,10 @@ function TimeAlerts({
 
   if (showTimeUpAlert) {
     return (
-      <div className="alert alert-error mb-4">
+      <div className="alert alert-error mb-4 py-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="stroke-current shrink-0 h-6 w-6"
+          className="stroke-current shrink-0 h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -90,10 +106,9 @@ function TimeAlerts({
           />
         </svg>
         <div>
-          <h3 className="font-bold">Time&apos;s Up!</h3>
-          <div className="text-sm">
-            In the real exam, time would be over. You can continue practicing,
-            but this is now overtime.
+          <h3 className="font-bold text-sm">Time&apos;s Up!</h3>
+          <div className="text-xs opacity-90">
+            Real exam would be over. Continue for practice.
           </div>
         </div>
       </div>
@@ -103,9 +118,9 @@ function TimeAlerts({
   if (isTimeWarning) {
     return (
       <div
-        className={`alert mb-4 ${isTimeCritical ? 'alert-error' : 'alert-warning'}`}
+        className={`alert mb-4 py-2.5 ${isTimeCritical ? 'alert-error' : 'alert-warning'}`}
       >
-        <Info className="w-5 h-5" />
+        <Info className="w-4 h-4 shrink-0" />
         <span className="text-sm">
           {isTimeCritical
             ? 'Less than 5 minutes remaining!'
@@ -120,33 +135,46 @@ function TimeAlerts({
 
 function AnswerOptions({ question, selectedAnswer, isAnswered, onSelect }) {
   return (
-    <div className="space-y-2 mb-5">
+    <div className="space-y-2.5 mb-4">
       {['a', 'b', 'c', 'd'].map((choice) => {
         const isSelected = selectedAnswer === choice
         return (
           <label
             key={choice}
             className={`
-              flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all
+              flex items-start gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all active:scale-[0.99]
               ${
                 isSelected
-                  ? 'border-primary bg-primary/5'
-                  : 'border-base-300 hover:border-primary/30 hover:bg-base-200/30'
+                  ? 'border-primary bg-primary/8 shadow-sm'
+                  : 'border-base-200 hover:border-primary/40 hover:bg-base-50 active:bg-base-200/50'
               }
-              ${isAnswered ? 'cursor-default pointer-events-none opacity-60' : ''}
+              ${isAnswered ? 'cursor-default pointer-events-none' : ''}
             `}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
+            {/* Choice letter badge */}
+            <span
+              className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 transition-colors ${
+                isSelected
+                  ? 'bg-primary text-primary-content'
+                  : 'bg-base-200 text-base-content/50'
+              } ${isAnswered ? 'opacity-60' : ''}`}
+            >
+              {choice.toUpperCase()}
+            </span>
+            <span
+              className={`text-base leading-snug ${isAnswered ? 'opacity-60' : 'text-base-content'}`}
+            >
+              {question[`choice_${choice}`]}
+            </span>
             <input
               type="radio"
               name="answer"
-              className="radio radio-primary radio-sm mt-0.5 shrink-0"
+              className="sr-only"
               checked={isSelected}
               onChange={() => onSelect(choice)}
               disabled={isAnswered}
             />
-            <span className="text-base leading-snug">
-              {question[`choice_${choice}`]}
-            </span>
           </label>
         )
       })}
@@ -157,35 +185,35 @@ function AnswerOptions({ question, selectedAnswer, isAnswered, onSelect }) {
 function AnswerFeedback({ answerResult }) {
   return (
     <div
-      className={`p-3 rounded-lg mb-3 border ${
+      className={`p-3.5 rounded-xl mb-3 border-2 ${
         answerResult.is_correct
-          ? 'bg-success/10 border-success/30'
-          : 'bg-error/10 border-error/30'
+          ? 'bg-success/8 border-success/30'
+          : 'bg-error/8 border-error/30'
       }`}
     >
-      <div className="flex items-start gap-2 mb-2">
+      <div className="flex items-start gap-2.5">
         {answerResult.is_correct ? (
           <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
         ) : (
           <XCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
         )}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <span
-            className={`font-semibold block mb-1 ${
+            className={`font-bold block mb-1 text-sm ${
               answerResult.is_correct ? 'text-success' : 'text-error'
             }`}
           >
             {answerResult.is_correct ? 'Correct!' : 'Incorrect'}
           </span>
           {!answerResult.is_correct && (
-            <p className="text-base text-base-content/80 mb-1.5">
+            <p className="text-sm text-base-content/80 mb-1.5">
               Correct answer:{' '}
-              <span className="font-semibold">
+              <span className="font-bold">
                 {answerResult.correct_answer.toUpperCase()}
               </span>
             </p>
           )}
-          <p className="text-base text-base-content/80 leading-snug">
+          <p className="text-sm text-base-content/70 leading-relaxed">
             {answerResult.explanation}
           </p>
         </div>
@@ -205,21 +233,28 @@ function QuizNavigation({
       <button
         onClick={onPrevious}
         disabled={currentQuestionIndex === 0}
-        className="btn btn-outline flex-1 btn-sm"
+        className="btn btn-outline btn-sm h-11 flex-none px-4 touch-manipulation disabled:opacity-30"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
-        <ChevronLeft className="w-4 h-4" /> Previous
+        <ChevronLeft className="w-4 h-4" />
+        <span className="hidden sm:inline">Prev</span>
       </button>
 
       {isLastQuestion ? (
         <button
           onClick={onNext}
-          className="btn btn-primary flex-1 btn-sm gap-1.5"
+          className="btn btn-primary flex-1 h-11 gap-1.5 touch-manipulation"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <BarChart2 className="w-4 h-4" />
           Finish Session
         </button>
       ) : (
-        <button onClick={onNext} className="btn btn-primary flex-1 btn-sm">
+        <button
+          onClick={onNext}
+          className="btn btn-primary flex-1 h-11 touch-manipulation"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
+        >
           Next <ChevronRight className="w-4 h-4" />
         </button>
       )}
@@ -248,57 +283,67 @@ export function QuizScreen({
   onExit
 }) {
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center p-4 py-6">
-      <div className="w-full max-w-2xl">
-        <QuizHeader
-          topicLabel={topicLabel}
-          isPracticeQuiz={isPracticeQuiz}
-          currentQuestionIndex={currentQuestionIndex}
-          totalQuestions={totalQuestions}
-          timeRemaining={timeRemaining}
-          isTimeUp={isTimeUp}
-          isTimeWarning={isTimeWarning}
-          isTimeCritical={isTimeCritical}
-          onExit={onExit}
-        />
+    <div className="min-h-screen bg-base-100 flex flex-col">
+      {/* Sticky header with progress bar */}
+      <QuizHeader
+        topicLabel={topicLabel}
+        isPracticeQuiz={isPracticeQuiz}
+        currentQuestionIndex={currentQuestionIndex}
+        totalQuestions={totalQuestions}
+        timeRemaining={timeRemaining}
+        isTimeUp={isTimeUp}
+        isTimeWarning={isTimeWarning}
+        isTimeCritical={isTimeCritical}
+        onExit={onExit}
+      />
 
-        <TimeAlerts
-          isPracticeQuiz={isPracticeQuiz}
-          showTimeUpAlert={showTimeUpAlert}
-          isTimeWarning={isTimeWarning}
-          isTimeCritical={isTimeCritical}
-        />
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-full max-w-2xl mx-auto px-4 pt-5 pb-4">
+          <TimeAlerts
+            isPracticeQuiz={isPracticeQuiz}
+            showTimeUpAlert={showTimeUpAlert}
+            isTimeWarning={isTimeWarning}
+            isTimeCritical={isTimeCritical}
+          />
 
-        <h2 className="text-2xl font-semibold text-base-content mb-5 leading-tight">
-          {currentQuestion.question_text}
-        </h2>
+          <h2 className="text-lg sm:text-2xl font-semibold text-base-content mb-5 leading-snug">
+            {currentQuestion.question_text}
+          </h2>
 
-        <AnswerOptions
-          question={currentQuestion}
-          selectedAnswer={selectedAnswer}
-          isAnswered={!!answerResult}
-          onSelect={onAnswerSelect}
-        />
+          <AnswerOptions
+            question={currentQuestion}
+            selectedAnswer={selectedAnswer}
+            isAnswered={!!answerResult}
+            onSelect={onAnswerSelect}
+          />
 
-        {!answerResult ? (
-          <button
-            onClick={onSubmit}
-            disabled={!selectedAnswer}
-            className="btn btn-primary w-full"
-          >
-            Submit Answer
-          </button>
-        ) : (
-          <div>
-            <AnswerFeedback answerResult={answerResult} />
+          {/* Feedback shown inline after answering */}
+          {answerResult && <AnswerFeedback answerResult={answerResult} />}
+        </div>
+      </div>
+
+      {/* Sticky action footer */}
+      <div className="sticky bottom-0 z-20 bg-base-100/95 backdrop-blur-sm border-t border-base-200 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <div className="max-w-2xl mx-auto">
+          {!answerResult ? (
+            <button
+              onClick={onSubmit}
+              disabled={!selectedAnswer}
+              className="btn btn-primary w-full h-12 text-base touch-manipulation disabled:opacity-40"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              Submit Answer
+            </button>
+          ) : (
             <QuizNavigation
               currentQuestionIndex={currentQuestionIndex}
               isLastQuestion={isLastQuestion}
               onPrevious={onPrevious}
               onNext={onNext}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )
