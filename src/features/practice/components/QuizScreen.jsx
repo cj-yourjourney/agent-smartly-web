@@ -44,7 +44,7 @@ function QuizHeader({
               Review
             </span>
           )}
-          <span className="text-sm font-medium text-base-content/60 truncate hidden sm:block">
+          <span className="text-sm font-medium text-base-content/60 truncate">
             {topicLabel}
           </span>
         </div>
@@ -308,7 +308,10 @@ export function QuizScreen({
   }, [answerResult])
 
   return (
-    <div className="min-h-screen bg-base-100 flex flex-col">
+    // height: 100dvh (fixed) is critical — min-h-screen lets the container grow beyond
+    // the viewport, which means overflow-y-auto never activates and scrollTo has no effect.
+    // 100dvh accounts for mobile browser chrome (address bar shrinking on scroll).
+    <div className="bg-base-100 flex flex-col" style={{ height: '100dvh' }}>
       {/* Sticky header with progress bar */}
       <QuizHeader
         topicLabel={topicLabel}
