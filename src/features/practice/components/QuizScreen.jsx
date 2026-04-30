@@ -307,6 +307,12 @@ export function QuizScreen({
     return () => clearTimeout(timer)
   }, [answerResult])
 
+  // Reset scroll to top instantly when moving to a new question so users
+  // always land at the question text, not the bottom of the previous answer.
+  useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [currentQuestionIndex])
+
   return (
     // height: 100dvh (fixed) is critical — min-h-screen lets the container grow beyond
     // the viewport, which means overflow-y-auto never activates and scrollTo has no effect.
