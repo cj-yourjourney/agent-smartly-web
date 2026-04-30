@@ -9,7 +9,7 @@ export default function InfoRow({ icon: Icon, label, value }) {
       <span className="text-sm text-base-content/50 w-28 shrink-0 font-medium">
         {label}
       </span>
-      <span className="text-sm font-semibold text-base-content flex-1 text-right truncate">
+      <span className="text-sm font-semibold text-base-content flex-1 text-right break-all">
         {value || '—'}
       </span>
     </div>
