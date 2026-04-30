@@ -191,10 +191,9 @@ function AnswerOptions({ question, selectedAnswer, isAnswered, onSelect }) {
   )
 }
 
-function AnswerFeedback({ answerResult, feedbackRef }) {
+function AnswerFeedback({ answerResult }) {
   return (
     <div
-      ref={feedbackRef}
       className={`p-3.5 rounded-xl mb-3 border-2 ${
         answerResult.is_correct
           ? 'bg-success/8 border-success/30'
@@ -293,26 +292,17 @@ export function QuizScreen({
   onNext,
   onExit
 }) {
-  const feedbackRef = useRef(null)
   const scrollContainerRef = useRef(null)
 
-  // Auto-scroll so feedback is visible above the sticky footer when answer is submitted
+  // After submitting, scroll to the bottom of the container so the feedback/explanation
+  // is always fully visible above the sticky footer (pb-28 provides clearance).
   useEffect(() => {
-    if (!answerResult || !feedbackRef.current || !scrollContainerRef.current)
-      return
+    if (!answerResult || !scrollContainerRef.current) return
     const timer = setTimeout(() => {
-      const container = scrollContainerRef.current
-      const el = feedbackRef.current
-      if (!container || !el) return
-      // Scroll the element into view within the container, leaving room for the sticky footer (~72px)
-      const elBottom = el.offsetTop + el.offsetHeight
-      const visibleBottom = container.scrollTop + container.clientHeight - 72
-      if (elBottom > visibleBottom) {
-        container.scrollTo({
-          top: elBottom - container.clientHeight + 88,
-          behavior: 'smooth'
-        })
-      }
+      scrollContainerRef.current?.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
     }, 120)
     return () => clearTimeout(timer)
   }, [answerResult])
@@ -355,12 +345,7 @@ export function QuizScreen({
           />
 
           {/* Feedback shown inline after answering */}
-          {answerResult && (
-            <AnswerFeedback
-              answerResult={answerResult}
-              feedbackRef={feedbackRef}
-            />
-          )}
+          {answerResult && <AnswerFeedback answerResult={answerResult} />}
         </div>
       </div>
 
