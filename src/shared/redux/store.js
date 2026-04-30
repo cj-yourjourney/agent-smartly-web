@@ -5,6 +5,7 @@ import authReducer from '../../features/auth/state/authSlice'
 import progressReducer from '../../features/progress/state/progressSlice'
 import keyConceptsReducer from '../../features/key-concepts/state/keyConceptsSlice'
 import subscriptionReducer from '../../features/subscription/state/subscriptionSlice'
+import accountReducer from '../../features/account/state/accountSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,7 +13,8 @@ export const store = configureStore({
     practice: practiceReducer,
     progress: progressReducer,
     keyConcepts: keyConceptsReducer,
-    subscription: subscriptionReducer
+    subscription: subscriptionReducer,
+    account: accountReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
