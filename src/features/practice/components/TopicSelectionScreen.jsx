@@ -129,6 +129,35 @@ function StudyByTopicPanel({
         </div>
       </div>
 
+      {/* Guidance callout */}
+      <div className="flex gap-3 bg-primary/5 border border-primary/15 rounded-xl px-3.5 py-3 mb-4">
+        <div className="shrink-0 mt-0.5">
+          <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+            <span
+              className="text-primary font-bold"
+              style={{ fontSize: '9px', lineHeight: 1 }}
+            >
+              i
+            </span>
+          </div>
+        </div>
+        <div className="text-xs text-base-content/60 leading-relaxed space-y-1">
+          <p>
+            <span className="font-semibold text-base-content/80">
+              Tap a topic name
+            </span>{' '}
+            to practice 20 mixed questions from that topic.
+          </p>
+          <p>
+            <span className="font-semibold text-base-content/80">
+              Tap the <ChevronDown className="w-3 h-3 inline -mt-0.5" /> number
+              badge
+            </span>{' '}
+            to expand subtopics and drill into a specific area.
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-2">
         {topicStructure.map((item) => (
           <TopicRow
