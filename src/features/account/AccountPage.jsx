@@ -23,6 +23,7 @@ import AvatarCircle from './components/AvatarCircle'
 import InfoRow from './components/InfoRow'
 import UpgradeBanner from './components/UpgradeBanner'
 import AccessSection from './components/AccessSection'
+import SupportContact from './components/SupportContact'
 
 // ─── AccountPage ───────────────────────────────────────────────────────────────
 
@@ -95,7 +96,7 @@ const AccountPage = () => {
       className="min-h-screen bg-base-100"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="max-w-lg mx-auto px-4 pt-8 pb-12">
+      <div className="max-w-lg mx-auto px-4 pt-8 pb-12 space-y-4">
         {/* Upgrade banner — only shown when redirected from a guarded page */}
         {showUpgradeBanner && !accountData?.has_access && <UpgradeBanner />}
 
@@ -115,13 +116,14 @@ const AccountPage = () => {
         </div>
 
         {/* Access / Trial Section */}
-        <div className="mb-4">
-          <AccessSection
-            user={user}
-            profileData={accountData}
-            onSubscriptionActivated={handleAccessActivated}
-          />
-        </div>
+        <AccessSection
+          user={user}
+          profileData={accountData}
+          onSubscriptionActivated={handleAccessActivated}
+        />
+
+        {/* Support / Contact */}
+        <SupportContact />
 
         {/* Account info card */}
         <div className="card bg-base-100 border border-base-200 rounded-2xl shadow-sm">
