@@ -141,7 +141,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(ROUTES.LEARNING.PRACTICE)
+      router.push(ROUTES.LEARNING.PROGRESS)
     }
   }, [isAuthenticated, router])
 
