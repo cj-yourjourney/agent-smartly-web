@@ -1,262 +1,320 @@
 // src/features/onboarding/OnboardingPage.jsx
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { ClipboardCheck, BookOpen, BarChart2, Trophy } from 'lucide-react'
+import {
+  Target, Zap, Layers, Lightbulb,
+  ChevronRight, ChevronLeft,
+  Trophy, CircleCheck, Gauge,
+  ArrowRight,
+} from 'lucide-react'
 import ROUTES from '@/shared/constants/routes'
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-const FEATURES = [
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const C = {
+  accuracy : '#4f46e5',
+  volume   : '#ec4899',
+  topics   : '#14b8a6',
+  concepts : '#f59e0b',
+}
+
+const PILLARS = [
   {
-    icon: <ClipboardCheck className="w-7 h-7" />,
-    stat: '1,300+',
-    title: 'Practice Questions',
-    desc: 'Exam-style questions covering every topic tested by the California DRE — from contracts to fair housing.',
-    color: 'text-primary',
-    bg: 'bg-primary/10'
+    key      : 'accuracy',
+    icon     : Target,
+    weight   : 45,
+    label    : 'Accuracy',
+    target   : '82%+ correct',
+    why      : 'Answering correctly is the single biggest predictor of passing.',
+    color    : C.accuracy,
+    textCls  : 'text-indigo-600',
+    bgCls    : 'bg-indigo-50',
+    ringCls  : 'ring-indigo-100',
   },
   {
-    icon: <BookOpen className="w-7 h-7" />,
-    stat: '134',
-    title: 'Key Concepts',
-    desc: 'Bite-sized cards with plain-English explanations. Ask the AI to go deeper on any concept.',
-    color: 'text-secondary',
-    bg: 'bg-secondary/10'
+    key      : 'volume',
+    icon     : Zap,
+    weight   : 25,
+    label    : 'Volume',
+    target   : '300 questions',
+    why      : 'Reps build pattern recognition — the more you see, the less surprises you.',
+    color    : C.volume,
+    textCls  : 'text-pink-600',
+    bgCls    : 'bg-pink-50',
+    ringCls  : 'ring-pink-100',
   },
   {
-    icon: <BarChart2 className="w-7 h-7" />,
-    stat: '3 Pillars',
-    title: 'Progress Tracking',
-    desc: 'Volume, accuracy, and topic coverage combine into one live Exam Readiness score with specific next steps.',
-    color: 'text-accent',
-    bg: 'bg-accent/10'
-  }
+    key      : 'topics',
+    icon     : Layers,
+    weight   : 15,
+    label    : 'Topic Coverage',
+    target   : '25+ Qs per topic',
+    why      : 'The exam pulls from all 7 subject areas. No blind spots allowed.',
+    color    : C.topics,
+    textCls  : 'text-teal-600',
+    bgCls    : 'bg-teal-50',
+    ringCls  : 'ring-teal-100',
+  },
+  {
+    key      : 'concepts',
+    icon     : Lightbulb,
+    weight   : 15,
+    label    : 'Key Concepts',
+    target   : '107 of 134 concepts',
+    why      : 'The exam tests comprehension. Read to understand, not memorize.',
+    color    : C.concepts,
+    textCls  : 'text-amber-600',
+    bgCls    : 'bg-amber-50',
+    ringCls  : 'ring-amber-100',
+  },
 ]
 
-const SUCCESS_MILESTONES = [
-  {
-    value: '300+',
-    label: 'Questions Practiced',
-    sub: 'Volume builds pattern recognition — the more you see, the less the exam surprises you.',
-    progress: 100,
-    color: 'progress-primary'
-  },
-  {
-    value: '75%+',
-    label: 'Overall Accuracy',
-    sub: 'Consistency matters more than perfection. Aim to stay above 75% across all topics.',
-    progress: 75,
-    color: 'progress-secondary'
-  },
-  {
-    value: '80%',
-    label: 'Key Concepts Understood',
-    sub: "That's at least 107 of the 134 concepts. The exam tests comprehension, not memorization.",
-    progress: 80,
-    color: 'progress-accent'
-  }
-]
+// Ordered stop-points for the conic-gradient ring (hardcoded hex = no CSS var issues)
+const RING_GRADIENT = `conic-gradient(
+  ${C.accuracy} 0% 45%,
+  ${C.volume}   45% 70%,
+  ${C.topics}   70% 85%,
+  ${C.concepts} 85% 100%
+)`
 
-const STEPS = ['Welcome', 'Your Tools', 'Path to Pass']
+const STEPS       = ['Score', 'Pillars', 'Targets', 'Ready']
 const STORAGE_KEY = 'onboarding_step'
 
-// ── Animated step wrapper ────────────────────────────────────────────────────
-// Re-keying on `step` unmounts/remounts the div, retriggering the animation
-const StepPanel = ({ children, step }) => (
-  <div key={step} style={{ animation: 'stepIn 0.25s ease forwards' }}>
-    {children}
-  </div>
+// ── Step panel (re-key triggers entry animation) ──────────────────────────────
+const StepPanel = ({ children, id }) => (
+  <div key={id} className="ob-panel">{children}</div>
 )
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Segmented weight bar ──────────────────────────────────────────────────────
+function WeightBar({ activeKey = null }) {
+  return (
+    <div className="w-full flex flex-col gap-1.5">
+      <div className="flex h-2 w-full gap-[3px] rounded-full overflow-hidden">
+        {PILLARS.map(({ key, weight, color }) => (
+          <div
+            key={key}
+            style={{
+              width     : `${weight}%`,
+              background: color,
+              opacity   : activeKey && activeKey !== key ? 0.25 : 1,
+              transition: 'opacity 0.2s',
+              borderRadius: 99,
+            }}
+          />
+        ))}
+      </div>
+      <div className="flex w-full">
+        {PILLARS.map(({ key, label, weight, textCls }) => (
+          <div key={key} style={{ width: `${weight}%` }} className="flex flex-col items-center">
+            <span className={`text-[10px] font-extrabold leading-none ${
+              activeKey && activeKey !== key ? 'text-base-content/25' : textCls
+            }`}>{weight}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function OnboardingPage() {
-  const [step, setStep] = useState(0)
-  const [visible, setVisible] = useState(false)
-  const router = useRouter()
+  const [step, setStep]         = useState(0)
+  const [visible, setVisible]   = useState(false)
+  const [hoveredKey, setHovered] = useState(null)
+  const router                  = useRouter()
+  const isLast                  = step === STEPS.length - 1
 
-  const isLast = step === STEPS.length - 1
-
-  // ── Restore saved step + fade-in on mount ──
   useEffect(() => {
     try {
-      const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10)
-      if (!isNaN(saved) && saved > 0 && saved < STEPS.length) {
-        setStep(saved)
-      }
+      const s = parseInt(localStorage.getItem(STORAGE_KEY), 10)
+      if (!isNaN(s) && s > 0 && s < STEPS.length) setStep(s)
     } catch (_) {}
-    const t = setTimeout(() => setVisible(true), 50)
+    const t = setTimeout(() => setVisible(true), 40)
     return () => clearTimeout(t)
   }, [])
 
-  // ── Persist current step ──
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, String(step))
-    } catch (_) {}
+    try { localStorage.setItem(STORAGE_KEY, String(step)) } catch (_) {}
   }, [step])
 
-  // ── Navigation handlers ──
-  const handleNext = useCallback(() => {
+  const goNext = useCallback(() => {
     if (isLast) {
-      try {
-        localStorage.removeItem(STORAGE_KEY)
-      } catch (_) {}
+      try { localStorage.removeItem(STORAGE_KEY) } catch (_) {}
       router.push(ROUTES.LEARNING.PROGRESS)
     } else {
       setStep((s) => s + 1)
     }
   }, [isLast, router])
 
-  const handleBack = useCallback(() => {
-    setStep((s) => s - 1)
-  }, [])
+  const goBack = useCallback(() => setStep((s) => s - 1), [])
 
-  // Skip goes to Progress too — not HOME
-  const handleSkip = useCallback(() => {
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch (_) {}
+  const goSkip = useCallback(() => {
+    try { localStorage.removeItem(STORAGE_KEY) } catch (_) {}
     router.push(ROUTES.LEARNING.PROGRESS)
   }, [router])
 
-  // ── Keyboard navigation ──
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Enter' || e.key === 'ArrowRight') handleNext()
-      if (e.key === 'ArrowLeft' && step > 0) handleBack()
+    const h = (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Enter') goNext()
+      if (e.key === 'ArrowLeft' && step > 0) goBack()
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [handleNext, handleBack, step])
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [goNext, goBack, step])
 
   return (
     <>
       <style>{`
-        @keyframes stepIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
+        @keyframes ob-in {
+          from { opacity: 0; transform: translateY(20px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        }
+        .ob-panel {
+          animation: ob-in 0.35s cubic-bezier(0.22, 0.68, 0, 1.1) forwards;
+        }
+        .ob-wrap {
+          opacity   : 0;
+          transform : translateY(10px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .ob-wrap.visible {
+          opacity   : 1;
+          transform : translateY(0);
+        }
+        /* Pillar card hover lift */
+        .pillar-card {
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .pillar-card:hover {
+          transform : translateY(-2px);
+          box-shadow: 0 8px 24px -6px rgba(0,0,0,0.10);
         }
       `}</style>
 
       <div
         data-theme="light"
-        className="min-h-screen bg-base-200 flex flex-col items-center justify-center px-4 py-12"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(12px)',
-          transition: 'opacity 0.35s ease, transform 0.35s ease'
-        }}
+        className={`ob-wrap min-h-screen bg-base-200 flex flex-col items-center justify-center px-4 py-10 ${visible ? 'visible' : ''}`}
       >
-        {/* ── Stepper ── */}
-        <div className="flex items-center gap-2 mb-10">
-          {STEPS.map((label, i) => (
-            <div key={label} className="flex items-center gap-2">
-              <button
-                onClick={() => i < step && setStep(i)}
-                className={`flex items-center gap-2 text-xs font-semibold transition-all
-                  ${
-                    i === step
-                      ? 'text-primary'
-                      : i < step
-                        ? 'text-base-content/50 cursor-pointer hover:text-base-content/70'
-                        : 'text-base-content/25 cursor-default'
-                  }`}
-              >
-                <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 transition-all duration-200
-                  ${
-                    i === step
-                      ? 'border-primary bg-primary text-primary-content'
-                      : i < step
-                        ? 'border-base-content/30 bg-base-content/10 text-base-content/50'
-                        : 'border-base-content/20 text-base-content/25'
-                  }`}
-                >
-                  {i < step ? '✓' : i + 1}
-                </span>
-                <span className="hidden sm:inline">{label}</span>
-              </button>
-              {i < STEPS.length - 1 && (
-                <span
-                  className={`w-8 h-px transition-all duration-300
-                  ${i < step ? 'bg-base-content/30' : 'bg-base-content/15'}`}
-                />
-              )}
-            </div>
+        {/* ── Progress segments ── */}
+        <div className="flex gap-1.5 mb-6 w-full max-w-[320px]">
+          {STEPS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => i < step && setStep(i)}
+              className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                i === step   ? 'bg-indigo-600' :
+                i <  step   ? 'bg-indigo-300 cursor-pointer hover:bg-indigo-400' :
+                              'bg-base-300 cursor-default'
+              }`}
+            />
           ))}
         </div>
 
         {/* ── Card ── */}
-        <div className="card bg-base-100 shadow-xl w-full max-w-2xl">
-          <div className="card-body p-8 sm:p-10">
-            {/* STEP 0 — Welcome */}
+        <div className="card bg-base-100 shadow-xl border border-base-200 w-full max-w-[348px]">
+          <div className="card-body p-6 sm:p-7 gap-0">
+
+            {/* ══════════ STEP 0 — What is the score? ══════════ */}
             {step === 0 && (
-              <StepPanel step={0}>
-                <div className="flex flex-col items-center text-center gap-5">
-                  <div className="badge badge-primary badge-outline text-xs tracking-widest uppercase font-mono">
-                    CA Real Estate Salesperson Exam Prep
-                  </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-base-content leading-tight">
-                    Welcome — let&apos;s get
-                    <br className="hidden sm:block" /> you ready to pass.
-                  </h1>
-                  <p className="text-base-content/60 text-base max-w-md leading-relaxed">
-                    Everything you need to pass the California real estate
-                    salesperson exam — organized, trackable, and built around
-                    how the test actually works.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2 mt-1">
-                    {[
-                      '1,300+ Questions',
-                      '134 Key Concepts',
-                      'Progress Tracking'
-                    ].map((f) => (
+              <StepPanel id="s0">
+                <div className="flex flex-col items-center text-center gap-6">
+
+                  {/* CSS-only multi-color ring — no <svg> */}
+                  <div className="relative w-[148px] h-[148px] mx-auto">
+                    {/* Outer conic ring */}
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: RING_GRADIENT }}
+                    />
+                    {/* Inner cutout */}
+                    <div className="absolute inset-[14px] rounded-full bg-base-100 flex flex-col items-center justify-center gap-0.5 shadow-inner">
+                      <Gauge className="w-5 h-5 text-base-content/30 mb-0.5" strokeWidth={2} />
                       <span
-                        key={f}
-                        className="badge badge-ghost text-sm py-3 px-4"
+                        className="text-3xl font-black leading-none tracking-tight"
+                        style={{ color: C.accuracy }}
                       >
-                        {f}
+                        80+
                       </span>
-                    ))}
+                      <span className="text-[9px] font-bold text-base-content/35 tracking-[0.18em] uppercase">
+                        target
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Weight bar */}
+                  <WeightBar />
+
+                  {/* Copy */}
+                  <div className="flex flex-col gap-2">
+                    <span className="badge badge-ghost text-[10px] font-bold tracking-widest uppercase">
+                      CA Real Estate Exam Prep
+                    </span>
+                    <h1 className="text-[1.6rem] font-extrabold text-base-content leading-snug tracking-tight">
+                      One number tells you<br />if you're ready to pass.
+                    </h1>
+                    <p className="text-sm text-base-content/55 leading-relaxed">
+                      Your <strong className="text-base-content/80">Exam Readiness Score</strong> (0–100)
+                      updates live as you study. It's built from 4 pillars — tap Next to see how.
+                    </p>
                   </div>
                 </div>
               </StepPanel>
             )}
 
-            {/* STEP 1 — Your Tools */}
+            {/* ══════════ STEP 1 — The 4 pillars ══════════ */}
             {step === 1 && (
-              <StepPanel step={1}>
-                <div className="flex flex-col gap-6">
-                  <div className="text-center">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-base-content mb-2">
-                      Your study toolkit
+              <StepPanel id="s1">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-base-content leading-snug tracking-tight">
+                      4 pillars drive<br />your score.
                     </h2>
-                    <p className="text-base-content/55 text-sm">
-                      Three tools, each doing a specific job.
+                    <p className="text-xs text-base-content/45 mt-1 font-medium">
+                      Bigger weight = bigger impact. Hover to highlight.
                     </p>
                   </div>
-                  <div className="flex flex-col gap-4">
-                    {FEATURES.map(({ icon, stat, title, desc, color, bg }) => (
+
+                  {/* Live weight bar reacts to hover */}
+                  <WeightBar activeKey={hoveredKey} />
+
+                  <div className="flex flex-col gap-2">
+                    {PILLARS.map(({ key, icon: Icon, weight, label, why, color, textCls, bgCls, ringCls }) => (
                       <div
-                        key={title}
-                        className="flex gap-4 items-start p-4 rounded-2xl bg-base-200"
+                        key={key}
+                        className={`pillar-card flex items-center gap-3 p-3.5 rounded-2xl ring-1 ${bgCls} ${ringCls} cursor-default`}
+                        onMouseEnter={() => setHovered(key)}
+                        onMouseLeave={() => setHovered(null)}
                       >
+                        {/* Icon bubble */}
                         <div
-                          className={`${bg} ${color} p-3 rounded-xl shrink-0`}
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${textCls}`}
+                          style={{ background: color + '22' }}
                         >
-                          {icon}
+                          <Icon className="w-5 h-5" strokeWidth={2} />
                         </div>
-                        <div>
-                          <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className={`text-xl font-extrabold ${color}`}>
-                              {stat}
-                            </span>
-                            <span className="font-semibold text-base-content text-sm">
-                              {title}
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-sm font-bold ${textCls}`}>{label}</span>
+                            <span
+                              className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-full leading-none shrink-0"
+                              style={{ background: color }}
+                            >
+                              {weight}%
                             </span>
                           </div>
-                          <p className="text-base-content/60 text-sm leading-relaxed">
-                            {desc}
-                          </p>
+                          {/* Mini progress bar */}
+                          <div className="h-1 rounded-full bg-white/80 mb-1.5">
+                            <div
+                              className="h-full rounded-full transition-all duration-300"
+                              style={{
+                                width     : `${weight}%`,
+                                background: color,
+                                opacity   : hoveredKey === key ? 1 : 0.7,
+                              }}
+                            />
+                          </div>
+                          <p className="text-xs text-base-content/55 leading-snug">{why}</p>
                         </div>
                       </div>
                     ))}
@@ -265,80 +323,149 @@ export default function OnboardingPage() {
               </StepPanel>
             )}
 
-            {/* STEP 2 — Path to Pass */}
+            {/* ══════════ STEP 2 — Concrete targets ══════════ */}
             {step === 2 && (
-              <StepPanel step={2}>
-                <div className="flex flex-col gap-6">
-                  <div className="text-center">
-                    <div className="inline-flex items-center gap-2 text-warning mb-3">
-                      <Trophy className="w-5 h-5" />
-                      <span className="font-bold text-sm uppercase tracking-wider">
-                        Success Pattern
+              <StepPanel id="s2">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Trophy className="w-4 h-4 text-amber-500" strokeWidth={2.5} />
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-500">
+                        What passing looks like
                       </span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-base-content mb-2">
-                      What passing students have in common
+                    <h2 className="text-xl font-extrabold text-base-content leading-snug tracking-tight">
+                      Hit these numbers,<br />pass the exam.
                     </h2>
-                    <p className="text-base-content/55 text-sm max-w-sm mx-auto">
-                      Users who passed the real exam shared a clear pattern.
-                      Here&apos;s what to aim for.
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {PILLARS.map(({ key, icon: Icon, label, target, weight, color, textCls, bgCls, ringCls }) => (
+                      <div
+                        key={key}
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl ring-1 ${bgCls} ${ringCls}`}
+                      >
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${textCls}`}
+                          style={{ background: color + '22' }}
+                        >
+                          <Icon className="w-4 h-4" strokeWidth={2} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-semibold text-base-content/40 leading-none mb-0.5">{label}</p>
+                          <p className={`text-sm font-extrabold ${textCls} leading-tight`}>{target}</p>
+                        </div>
+                        <div
+                          className="text-[11px] font-bold px-2 py-1 rounded-full text-white shrink-0"
+                          style={{ background: color }}
+                        >
+                          {weight}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Info callout */}
+                  <div className="flex items-start gap-2.5 bg-indigo-50 ring-1 ring-indigo-100 rounded-2xl p-3.5">
+                    <CircleCheck className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" strokeWidth={2.5} />
+                    <p className="text-xs text-indigo-700 leading-relaxed">
+                      Your <strong>Progress page</strong> tracks all four automatically —
+                      you'll always see exactly what to work on next.
+                    </p>
+                  </div>
+                </div>
+              </StepPanel>
+            )}
+
+            {/* ══════════ STEP 3 — Ready ══════════ */}
+            {step === 3 && (
+              <StepPanel id="s3">
+                <div className="flex flex-col items-center text-center gap-5">
+
+                  {/* Hero icon */}
+                  <div
+                    className="w-20 h-20 rounded-3xl flex items-center justify-center mt-1 shadow-lg shadow-indigo-100"
+                    style={{ background: `linear-gradient(135deg, ${C.accuracy}22, ${C.accuracy}44)` }}
+                  >
+                    <Trophy className="w-10 h-10 text-indigo-600" strokeWidth={1.75} />
+                  </div>
+
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-base-content tracking-tight">
+                      You're all set! 🎉
+                    </h2>
+                    <p className="text-sm text-base-content/50 mt-1.5 max-w-[210px] mx-auto leading-relaxed">
+                      Your Progress page shows your live score and exactly what to study next.
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-5">
-                    {SUCCESS_MILESTONES.map(
-                      ({ value, label, sub, progress, color }) => (
-                        <div key={label} className="flex flex-col gap-2">
-                          <div className="flex justify-between items-end">
-                            <div>
-                              <span className="font-extrabold text-lg text-base-content">
-                                {value}
-                              </span>
-                              <span className="ml-2 font-semibold text-sm text-base-content/70">
-                                {label}
-                              </span>
-                            </div>
-                            <span className="text-xs text-base-content/40 font-mono">
-                              {progress}%
-                            </span>
-                          </div>
-                          <progress
-                            className={`progress ${color} w-full h-2.5`}
-                            value={progress}
-                            max="100"
-                          />
-                          <p className="text-xs text-base-content/50 leading-relaxed">
-                            {sub}
-                          </p>
-                        </div>
-                      )
-                    )}
+                  {/* Recap rows */}
+                  <div className="w-full flex flex-col gap-1.5">
+                    {[
+                      { color: C.accuracy, Icon: Target,   text: '82%+ correct',          label: 'Accuracy',       pct: '45%' },
+                      { color: C.volume,   Icon: Zap,      text: '300 questions practiced',label: 'Volume',         pct: '25%' },
+                      { color: C.topics,   Icon: Layers,   text: '25+ Qs per topic',       label: 'Topic Coverage', pct: '15%' },
+                      { color: C.concepts, Icon: Lightbulb,text: '107+ key concepts read', label: 'Key Concepts',   pct: '15%' },
+                    ].map(({ color, Icon, text, label, pct }) => (
+                      <div
+                        key={label}
+                        className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left"
+                        style={{
+                          background  : color + '10',
+                          borderLeft  : `3px solid ${color}`,
+                        }}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" style={{ color }} strokeWidth={2} />
+                        <span className="flex-1 text-xs font-semibold text-base-content/70 leading-snug">{text}</span>
+                        <span
+                          className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full text-white shrink-0"
+                          style={{ background: color }}
+                        >
+                          {pct}
+                        </span>
+                      </div>
+                    ))}
                   </div>
 
-                  <p className="text-xs text-center text-base-content/40 mt-1">
-                    Your Progress page tracks all three automatically as you
-                    study.
+                  <p className="text-[11px] text-base-content/30 font-medium -mt-1">
+                    Score updates live every time you study.
                   </p>
                 </div>
               </StepPanel>
             )}
 
             {/* ── Navigation ── */}
-            <div className="card-actions justify-between items-center mt-8 pt-6 border-t border-base-200">
+            <div className="flex items-center justify-between mt-6 pt-5 border-t border-base-200">
               <button
-                className="btn btn-ghost btn-sm text-base-content/40"
-                onClick={handleSkip}
+                className="btn btn-ghost btn-sm text-base-content/30 hover:text-base-content/55 px-2 font-medium"
+                onClick={goSkip}
               >
-                Skip for now
+                Skip
               </button>
-              <div className="flex items-center gap-3">
+
+              <div className="flex items-center gap-2">
                 {step > 0 && (
-                  <button className="btn btn-ghost btn-sm" onClick={handleBack}>
-                    ← Back
+                  <button
+                    className="btn btn-ghost btn-sm btn-square text-base-content/50 hover:text-base-content"
+                    onClick={goBack}
+                  >
+                    <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
                   </button>
                 )}
-                <button className="btn btn-primary" onClick={handleNext}>
-                  {isLast ? 'Start Studying →' : 'Next →'}
+                <button
+                  className="btn btn-sm text-white gap-1.5 px-5 font-bold shadow-md transition-all active:scale-95"
+                  style={{
+                    background   : C.accuracy,
+                    borderColor  : C.accuracy,
+                    boxShadow    : `0 4px 14px -2px ${C.accuracy}55`,
+                  }}
+                  onClick={goNext}
+                >
+                  {isLast ? (
+                    <>Let&apos;s Study <ArrowRight className="w-4 h-4" strokeWidth={2.5} /></>
+                  ) : (
+                    <>Next <ChevronRight className="w-4 h-4" strokeWidth={2.5} /></>
+                  )}
                 </button>
               </div>
             </div>
@@ -346,21 +473,23 @@ export default function OnboardingPage() {
         </div>
 
         {/* ── Step dots ── */}
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2 mt-5">
           {STEPS.map((_, i) => (
-            <span
+            <button
               key={i}
-              className={`h-2 rounded-full transition-all duration-300
-                ${i === step ? 'bg-primary w-5' : 'bg-base-content/20 w-2'}`}
+              onClick={() => i < step && setStep(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === step ? 'w-6 bg-indigo-600' :
+                i <  step ? 'w-2 bg-indigo-300 cursor-pointer hover:bg-indigo-400' :
+                            'w-2 bg-base-content/15 cursor-default'
+              }`}
             />
           ))}
         </div>
 
-        {/* ── Keyboard hint ── */}
-        <p className="text-xs text-base-content/25 mt-4 hidden sm:block">
-          Press <kbd className="kbd kbd-xs">→</kbd> to advance
-          {' · '}
-          <kbd className="kbd kbd-xs">←</kbd> to go back
+        {/* ── Keyboard hint (desktop only) ── */}
+        <p className="text-xs text-base-content/25 mt-3 hidden sm:block select-none">
+          <kbd className="kbd kbd-xs">→</kbd> next &nbsp;·&nbsp; <kbd className="kbd kbd-xs">←</kbd> back
         </p>
       </div>
     </>
