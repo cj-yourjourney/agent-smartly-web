@@ -165,18 +165,23 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Image — AFTER text in DOM, so it appears below H1 on mobile */}
+          {/* Hero Image — AFTER text in DOM, so it appears below H1 on mobile       */}
+          {/* hero-float lives directly on the <img> so the GPU compositing layer    */}
+          {/* IS the image itself — rasterized at full device pixel ratio (sharp 2x) */}
+          {/* drop-shadow replaces box-shadow so no wrapper div needs overflow:hidden */}
           <div
-            className="flex justify-center items-center hero-fade-up"
+            className="flex justify-center items-center hero-fade-up relative z-10"
             style={{ animationDelay: '200ms' }}
           >
-            <div className="rounded-2xl overflow-hidden shadow-2xl w-full border border-base-300 hero-float">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
-                alt="Exam Readiness Score dashboard — 84.5/100 On Track"
-                className="w-full h-auto"
-              />
-            </div>
+            <img
+              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
+              alt="Exam Readiness Score dashboard — 84.5/100 On Track"
+              className="w-full h-auto block rounded-2xl border border-base-300 hero-float"
+              style={{
+                filter: 'drop-shadow(0 20px 48px rgba(0,0,0,0.18))'
+              }}
+              loading="eager"
+            />
           </div>
         </div>
       </div>
@@ -255,13 +260,13 @@ export default function Home() {
 
           {/* Feature 1 — Exam Readiness Score (image left) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
-                alt="Exam Readiness Score dashboard"
-                className="w-full h-auto"
-              />
-            </div>
+            <img
+              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
+              alt="Exam Readiness Score dashboard"
+              className="w-full h-auto block rounded-2xl border border-base-200"
+              style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+              loading="lazy"
+            />
             <div className="flex flex-col gap-4">
               <span className="badge badge-primary badge-outline w-fit">
                 01 — Exam Readiness Score
@@ -329,25 +334,25 @@ export default function Home() {
             {/* Side-by-side screenshots */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="flex flex-col gap-2">
-                <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-                  <img
-                    src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice-mode-05-04.png"
-                    alt="Practice Mode — choose Full Practice Exam or Study by Topic"
-                    className="w-full h-auto"
-                  />
-                </div>
+                <img
+                  src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice-mode-05-04.png"
+                  alt="Practice Mode — choose Full Practice Exam or Study by Topic"
+                  className="w-full h-auto block rounded-2xl border border-base-200"
+                  style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                  loading="lazy"
+                />
                 <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
                   Choose your mode
                 </p>
               </div>
               <div className="flex flex-col gap-2">
-                <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-                  <img
-                    src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
-                    alt="Practice question with instant explanation and memory tip"
-                    className="w-full h-auto"
-                  />
-                </div>
+                <img
+                  src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
+                  alt="Practice question with instant explanation and memory tip"
+                  className="w-full h-auto block rounded-2xl border border-base-200"
+                  style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                  loading="lazy"
+                />
                 <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
                   Answer & learn instantly
                 </p>
@@ -357,13 +362,13 @@ export default function Home() {
 
           {/* Feature 3 — Key Concepts (image left) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
-                alt="Key Concepts organized by topic with review tracking"
-                className="w-full h-auto"
-              />
-            </div>
+            <img
+              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
+              alt="Key Concepts organized by topic with review tracking"
+              className="w-full h-auto block rounded-2xl border border-base-200"
+              style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+              loading="lazy"
+            />
             <div className="flex flex-col gap-4">
               <span className="badge badge-primary badge-outline w-fit">
                 03 — Key Concepts
