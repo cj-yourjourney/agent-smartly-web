@@ -293,9 +293,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Feature 2 — Practice Questions (text left, image right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
-            <div className="flex flex-col gap-4">
+          {/* Feature 2 — Practice Questions (full-width: centered text + dual images) */}
+          <div className="mb-28">
+            {/* Centered text header */}
+            <div className="flex flex-col gap-4 items-center text-center max-w-2xl mx-auto mb-12">
               <span className="badge badge-primary badge-outline w-fit">
                 02 — Practice Questions
               </span>
@@ -303,12 +304,12 @@ export default function Home() {
                 1,300+ Questions with Instant Explanations
               </h3>
               <p className="text-base-content/65 text-lg leading-relaxed">
-                Practice the full 75-question timed exam or drill by topic.
-                Every question comes with a detailed explanation and memory tip
-                the moment you answer — so you learn <em>why</em>, not just
-                what.
+                Pick your mode — run the full 75-question timed exam, or drill
+                by topic. Every question comes with a detailed explanation and
+                memory tip the moment you answer — so you learn <em>why</em>,
+                not just what.
               </p>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 justify-center mt-1">
                 {[
                   'Full Practice Exam',
                   'Study by Topic',
@@ -324,12 +325,33 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
-                alt="Practice question with instant explanation and memory tip"
-                className="w-full h-auto"
-              />
+
+            {/* Side-by-side screenshots */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div className="flex flex-col gap-2">
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
+                  <img
+                    src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice-mode-05-04.png"
+                    alt="Practice Mode — choose Full Practice Exam or Study by Topic"
+                    className="w-full h-auto"
+                  />
+                </div>
+                <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
+                  Choose your mode
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
+                  <img
+                    src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
+                    alt="Practice question with instant explanation and memory tip"
+                    className="w-full h-auto"
+                  />
+                </div>
+                <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
+                  Answer & learn instantly
+                </p>
+              </div>
             </div>
           </div>
 
