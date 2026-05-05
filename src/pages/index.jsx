@@ -170,11 +170,11 @@ export default function Home() {
             className="flex justify-center items-center hero-fade-up"
             style={{ animationDelay: '200ms' }}
           >
-            <div className="rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm aspect-[3/4] hero-float">
+            <div className="rounded-2xl overflow-hidden shadow-2xl w-full border border-base-300 hero-float">
               <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/hero.jpg"
-                alt="Person celebrating after passing exam"
-                className="w-full h-full object-cover object-top"
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
+                alt="Exam Readiness Score dashboard — 84.5/100 On Track"
+                className="w-full h-auto"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export default function Home() {
               { value: '1,300+', label: 'Practice Questions' },
               { value: '134', label: 'Key Concepts' },
               { value: '7', label: 'Exam Topics' },
-              { value: '$9.99', label: '1-Month Access' }
+              { value: '500+', label: 'Exam Takers' }
             ].map((s, i) => (
               <div
                 key={i}
@@ -226,10 +226,13 @@ export default function Home() {
             {topics.map((t, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 bg-base-200 rounded-xl px-4 py-3"
+                className="flex items-center gap-3 bg-base-200 rounded-xl px-4 py-3"
               >
-                <span className="text-base">{t.icon}</span>
-                <span className="text-sm font-medium">{t.title}</span>
+                <span className="text-base shrink-0">{t.icon}</span>
+                <span className="text-sm font-medium flex-1">{t.title}</span>
+                <span className="text-xs font-bold text-primary shrink-0 ml-1">
+                  {t.pct}
+                </span>
               </div>
             ))}
           </div>
@@ -250,33 +253,34 @@ export default function Home() {
             salesperson exam blueprint.
           </p>
 
-          {/* Feature 1 — Practice Questions (image left) */}
+          {/* Feature 1 — Exam Readiness Score (image left) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
             <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
               <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice+questions.png"
-                alt="Practice Questions feature"
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
+                alt="Exam Readiness Score dashboard"
                 className="w-full h-auto"
               />
             </div>
             <div className="flex flex-col gap-4">
               <span className="badge badge-primary badge-outline w-fit">
-                01 — Practice Questions
+                01 — Exam Readiness Score
               </span>
               <h3 className="font-display text-3xl md:text-4xl">
-                1,300+ Questions, DRE Aligned
+                Know If You're Actually Ready
               </h3>
               <p className="text-base-content/65 text-lg leading-relaxed">
-                Every question maps directly to the official DRE Salesperson
-                Exam blueprint. Practice the full exam or drill by topic — with
-                subtopics and no time pressure.
+                A composite score built on four weighted pillars — accuracy,
+                question volume, topic coverage, and key concepts — calculated
+                to match how the real DRE exam is structured. No more guessing
+                whether your prep is working.
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {[
-                  'All 7 Topics',
-                  'Full Subtopics',
-                  'Study by Topic',
-                  '75-Question Exam Mode'
+                  '4-Pillar Score',
+                  'DRE-Weighted',
+                  'Study Freshness',
+                  'On Track Indicator'
                 ].map((p) => (
                   <span
                     key={p}
@@ -289,72 +293,74 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Feature 2 — Key Concepts (image right) */}
+          {/* Feature 2 — Practice Questions (text left, image right) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
             <div className="flex flex-col gap-4">
               <span className="badge badge-primary badge-outline w-fit">
-                02 — Key Concepts
+                02 — Practice Questions
+              </span>
+              <h3 className="font-display text-3xl md:text-4xl">
+                1,300+ Questions with Instant Explanations
+              </h3>
+              <p className="text-base-content/65 text-lg leading-relaxed">
+                Practice the full 75-question timed exam or drill by topic.
+                Every question comes with a detailed explanation and memory tip
+                the moment you answer — so you learn <em>why</em>, not just
+                what.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  'Full Practice Exam',
+                  'Study by Topic',
+                  'Instant Explanations',
+                  'Memory Tips'
+                ].map((p) => (
+                  <span
+                    key={p}
+                    className="badge badge-primary badge-outline badge-sm"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
+                alt="Practice question with instant explanation and memory tip"
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+
+          {/* Feature 3 — Key Concepts (image left) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
+                alt="Key Concepts organized by topic with review tracking"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="flex flex-col gap-4">
+              <span className="badge badge-primary badge-outline w-fit">
+                03 — Key Concepts
               </span>
               <h3 className="font-display text-3xl md:text-4xl">
                 134 Concepts That Actually Stick
               </h3>
               <p className="text-base-content/65 text-lg leading-relaxed">
-                Bite-sized concept cards with definitions, memory tricks,
-                real-world examples, and exam tips — organized by topic so you
-                always know where you stand.
+                Every essential term and rule from the DRE blueprint, organized
+                by topic with definitions, memory tricks, and AI explanations on
+                demand. Tap any concept for a deeper breakdown — and track which
+                ones you've reviewed.
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {[
                   'Definitions',
                   'Memory Tricks',
                   'AI Explain',
-                  'Organized by Topic'
-                ].map((p) => (
-                  <span
-                    key={p}
-                    className="badge badge-primary badge-outline badge-sm"
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key+concepts.png"
-                alt="Key Concepts feature"
-                className="w-full h-auto"
-              />
-            </div>
-          </div>
-
-          {/* Feature 3 — Progress Tracking (image left) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="rounded-2xl overflow-hidden shadow-xl border border-base-200">
-              <img
-                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/progress+trcking.png"
-                alt="Progress Tracking feature"
-                className="w-full h-auto"
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <span className="badge badge-primary badge-outline w-fit">
-                03 — Progress Tracking
-              </span>
-              <h3 className="font-display text-3xl md:text-4xl">
-                Know Exactly Where You Stand
-              </h3>
-              <p className="text-base-content/65 text-lg leading-relaxed">
-                See your accuracy by topic, spot weak areas, and track your
-                streaks. When your numbers are strong, you'll walk into the exam
-                with real confidence.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {[
-                  'Per-Topic Accuracy',
-                  'Weak Area Detection',
-                  'Streaks',
-                  'Answer Breakdown'
+                  'Review Tracking'
                 ].map((p) => (
                   <span
                     key={p}

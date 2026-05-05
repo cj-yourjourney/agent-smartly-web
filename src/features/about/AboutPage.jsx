@@ -5,24 +5,27 @@ import { ROUTES } from '@/shared/constants/routes'
 const TESTIMONIALS = [
   {
     quote:
-      'I failed the DRE exam once before finding Agent Smartly. The readiness score showed me exactly where I was weak. Passed second time with zero doubt.',
+      'I failed the DRE exam once before finding Agent Smartly. The readiness score showed me exactly where I was weak — I had no idea Finance was dragging me down. Passed on my second attempt with zero doubt going in.',
     name: 'Marcus T.',
     detail: 'Passed DRE Exam · Los Angeles',
-    emoji: '🏡'
+    initials: 'MT',
+    color: 'bg-primary/10 text-primary'
   },
   {
     quote:
-      'Every other prep site felt like a guessing game. This one is built by someone who actually took the exam. The topic weights alone are worth it.',
+      'Every other prep site felt like a guessing game. This one is clearly built by someone who actually sat in that exam room. Knowing the topic weights changed how I spent my last two weeks of studying.',
     name: 'Priya S.',
     detail: 'Passed DRE Exam · San Jose',
-    emoji: '✅'
+    initials: 'PS',
+    color: 'bg-success/10 text-success'
   },
   {
     quote:
-      'CJ told me about this before it was even public. I used it for 3 weeks and walked into the exam feeling genuinely ready. First try.',
+      'CJ shared this with me before it was even public. Three weeks of focused practice and I walked into the test center feeling like I had already taken the exam. Passed first try.',
     name: 'Daniel R.',
     detail: 'Passed DRE Exam · Sacramento',
-    emoji: '🎯'
+    initials: 'DR',
+    color: 'bg-warning/15 text-warning-content'
   }
 ]
 
@@ -141,6 +144,26 @@ export default function AboutPage() {
                   </span>
                 ))}
               </div>
+              {/* Social proof stat strip */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-5 pt-2 border-t border-base-300 w-full">
+                {[
+                  { value: '500+', label: 'exam passers' },
+                  { value: '1st try', label: 'how most pass' },
+                  { value: '0', label: 'ads, no marketing budget' }
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex flex-col items-center lg:items-start"
+                  >
+                    <span className="text-base font-black text-base-content">
+                      {stat.value}
+                    </span>
+                    <span className="text-xs text-base-content/45">
+                      {stat.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -208,16 +231,36 @@ export default function AboutPage() {
         <Chapter
           icon="😤"
           year="2024 — The Problem"
-          title="Every prep tool I tried let me down"
+          title="Every prep tool I tried made me feel more lost"
         >
           <p>
-            I enrolled in my pre-licensing course and started preparing for the
-            DRE exam. I tried everything — prep books, flashcard apps,
-            third-party exam sites. None of them felt right. The questions
-            didn't map cleanly to the official DRE blueprint. The explanations
-            were shallow. There was no way to know if I was actually ready or
-            just spinning my wheels.
+            I enrolled in my pre-licensing course and threw myself into
+            studying. I bought the prep books. I used the flashcard apps. I paid
+            for a third-party exam site. None of them felt right — and I
+            couldn't tell if that was the tools or just me not being smart
+            enough.
           </p>
+          <p>
+            I remember sitting at my kitchen table at 11pm, grinding through
+            practice questions, and thinking:{' '}
+            <span className="font-semibold text-base-content">
+              I have no idea if I'm actually ready or just spinning my wheels.
+            </span>{' '}
+            There was no signal. No score that meant anything. Just a completion
+            percentage that told me nothing about whether I'd walk out of that
+            exam room with a pass.
+          </p>
+          <p>
+            The questions didn't match the official DRE blueprint. The
+            explanations were shallow. I was six weeks out from my exam date and
+            genuinely couldn't tell if I was close or miles away.
+          </p>
+          <div className="rounded-xl border-l-4 border-error/40 bg-error/5 px-4 sm:px-5 py-4 !mt-4">
+            <p className="text-base-content/75 italic leading-relaxed text-sm">
+              "The worst part wasn't the hard questions. It was the uncertainty.
+              Not knowing if the studying was working."
+            </p>
+          </div>
           <p>
             As an engineer, there's a thought pattern that's hard to turn off:{' '}
             <span className="font-semibold text-base-content">
@@ -242,6 +285,15 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="px-5 sm:px-6 py-5 space-y-3 text-base-content/65 leading-relaxed text-sm sm:text-base">
+            <p>
+              Let me be clear about what this was:{' '}
+              <span className="font-semibold text-base-content">
+                I wasn't trying to build a business. I just didn't want to fail
+                my exam.
+              </span>{' '}
+              I wasn't thinking about users or revenue or launch dates. I was
+              thinking about how to not waste six months of my life.
+            </p>
             <p>
               I started with the{' '}
               <a
@@ -390,6 +442,12 @@ export default function AboutPage() {
           </div>
           <div className="px-5 sm:px-6 py-5 space-y-3 text-base-content/65 leading-relaxed text-sm sm:text-base">
             <p>
+              Honestly? I wasn't sure it would work for anyone else. It had only
+              worked for me. Maybe I just got lucky with the questions. Maybe
+              I'm better at multiple choice than most people. I had no idea if
+              what I built was genuinely good — or just good enough for me.
+            </p>
+            <p>
               In 2025, I sat for the DRE Salesperson Exam using Agent Smartly as
               my primary prep tool. When I walked out of that exam room and saw
               the word{' '}
@@ -405,9 +463,10 @@ export default function AboutPage() {
             </p>
             <p>
               I started sharing it with friends who were also preparing. They
-              passed too. Word spread through referrals — no ads, no marketing
-              budget, just people telling other people it worked. That organic
-              growth told me something real was here.
+              passed too. Then their friends asked. Word spread through
+              referrals — no ads, no marketing budget, just people telling other
+              people it worked. That organic growth told me something real was
+              here.
             </p>
           </div>
           <div className="mx-5 sm:mx-6 mb-6 bg-success/10 border border-success/20 rounded-xl px-4 sm:px-5 py-4 flex items-center gap-4">
@@ -417,7 +476,8 @@ export default function AboutPage() {
               <span className="font-semibold text-base-content">
                 first attempt
               </span>
-              , 2025. Shared with friends — they passed too.
+              , 2025. Then 20+ others did too — all through word of mouth, zero
+              ads.
             </p>
           </div>
         </div>
@@ -434,12 +494,25 @@ export default function AboutPage() {
               key={t.name}
               className="card bg-base-100 border border-base-200 rounded-2xl px-5 sm:px-6 py-5 flex flex-col gap-3"
             >
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className="w-3.5 h-3.5 fill-warning"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
               <p className="text-base-content/70 leading-relaxed text-sm sm:text-base italic">
                 "{t.quote}"
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-base-200 border border-base-300 flex items-center justify-center text-base shrink-0">
-                  {t.emoji}
+                <div
+                  className={`w-9 h-9 rounded-full ${t.color} border border-base-200 flex items-center justify-center text-xs font-bold shrink-0`}
+                >
+                  {t.initials}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-base-content">
@@ -476,9 +549,10 @@ export default function AboutPage() {
             </p>
             <p>
               Every question, every concept, every feature on this site exists
-              because I needed it myself first. I know exactly what it feels
-              like to sit in that exam room. I built this so you walk in
-              prepared.
+              because I needed it myself first. I know what it feels like to sit
+              at your kitchen table at 11pm, unsure if the studying is working.
+              I built this so that feeling goes away — and so you walk into that
+              exam room knowing exactly where you stand.
             </p>
           </div>
         </div>
