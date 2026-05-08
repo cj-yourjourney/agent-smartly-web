@@ -175,8 +175,6 @@ export default function PracticeMode() {
 
   const handlePracticeQuizSelect = () => {
     dispatch(fetchPracticeQuizQuestions())
-    setElapsedTime(0)
-    setSessionStartTime(null)
     dispatch(
       createSession({ sessionType: 'practice_exam', totalQuestions: 75 })
     )
