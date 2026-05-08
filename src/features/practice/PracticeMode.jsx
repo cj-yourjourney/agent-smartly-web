@@ -99,13 +99,15 @@ export default function PracticeMode() {
     }
   }, [questions.length, sessionStartTime])
 
-  // Reset tracking when a new session begins
+  // Reset tracking when a new session begins.
+  // Intentionally keyed on selectedTopic only — questions.length can change
+  // mid-session (e.g. Redux state updates) and must not wipe answered answers.
   useEffect(() => {
-    if (selectedTopic && questions.length > 0) {
+    if (selectedTopic) {
       setAnsweredMap({})
       setShowSessionComplete(false)
     }
-  }, [selectedTopic, questions.length])
+  }, [selectedTopic])
 
   // Countdown timer for practice exam (display only — does not affect tracking).
   useEffect(() => {
@@ -175,6 +177,8 @@ export default function PracticeMode() {
 
   const handlePracticeQuizSelect = () => {
     dispatch(fetchPracticeQuizQuestions())
+    setElapsedTime(0)
+    setSessionStartTime(null)
     dispatch(
       createSession({ sessionType: 'practice_exam', totalQuestions: 75 })
     )
