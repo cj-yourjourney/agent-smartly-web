@@ -47,13 +47,19 @@ export default function PracticeMode() {
 
   const [expandedTopic, setExpandedTopic] = useState(null)
   const [elapsedTime, setElapsedTime] = useState(0)
-  const [sessionStartTime, setSessionStartTime] = useState(null)
   const [showTimeUpAlert, setShowTimeUpAlert] = useState(false)
-  // Ref so the interval callback can check this without being a dep —
-  // prevents the interval from tearing down/restarting mid-session.
-  const timeUpFiredRef = useRef(false)
   const [answeredMap, setAnsweredMap] = useState({})
   const [showSessionComplete, setShowSessionComplete] = useState(false)
+
+  // Use a ref for sessionStartTime so the interval callback always reads the
+  // live value without being a useEffect dependency. This prevents the interval
+  // from ever tearing down and restarting mid-session due to a state change,
+  // which was the root cause of the timer reset around 30 minutes.
+  const sessionStartTimeRef = useRef(null)
+  // Ref guard so the time-up alert fires exactly once without being a dep.
+  const timeUpFiredRef = useRef(false)
+  // Holds the live interval ID so resetLocalState can clear it imperatively.
+  const timerIntervalRef = useRef(null)
 
   const sessionResults = {
     total: Object.keys(answeredMap).length,
@@ -75,10 +81,12 @@ export default function PracticeMode() {
   // Returns elapsed seconds capped at the session type's maximum.
   // Called once when the user finishes or exits — no polling, no periodic saves.
   const getSessionDuration = useCallback(() => {
-    if (!sessionStartTime) return 0
-    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
+    if (!sessionStartTimeRef.current) return 0
+    const elapsed = Math.floor(
+      (Date.now() - sessionStartTimeRef.current) / 1000
+    )
     return Math.min(elapsed, SESSION_MAX_SECONDS)
-  }, [sessionStartTime, SESSION_MAX_SECONDS])
+  }, [SESSION_MAX_SECONDS])
 
   // ── Effects ─────────────────────────────────────────────────────────────────
 
@@ -94,14 +102,12 @@ export default function PracticeMode() {
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
   // Start the session clock the moment questions load.
-  // Only set ONCE — never overwrite an existing start time mid-session.
-  // sessionStartTime is intentionally excluded from deps so a mid-session
-  // Redux update (questions array re-evaluating) cannot reset the clock.
+  // Written to a ref (not state) so it can never trigger a re-render or cause
+  // the countdown interval to restart. The guard ensures it is set only once.
   useEffect(() => {
-    if (questions.length > 0 && !sessionStartTime) {
-      setSessionStartTime(Date.now())
+    if (questions.length > 0 && !sessionStartTimeRef.current) {
+      sessionStartTimeRef.current = Date.now()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions.length])
 
   // Reset tracking when a new session begins.
@@ -115,35 +121,57 @@ export default function PracticeMode() {
   }, [selectedTopic])
 
   // Countdown timer for practice exam (display only — does not affect tracking).
-  // IMPORTANT: showTimeUpAlert is intentionally NOT in the dep array.
-  // Using a ref (timeUpFiredRef) to guard the one-time alert prevents the
-  // interval from tearing down and restarting every second after time-up,
-  // which was causing sessionStartTime to be re-captured and the timer to jump.
+  // Deps are ONLY isPracticeQuiz and timeLimit — both effectively constant for
+  // the lifetime of a session. sessionStartTimeRef and timeUpFiredRef are refs
+  // so reading them inside the interval never stales and never triggers a
+  // re-run. This means the interval is created ONCE and runs uninterrupted
+  // from 90:00 → 00:00 with no resets.
   useEffect(() => {
-    if (isPracticeQuiz && sessionStartTime) {
-      timeUpFiredRef.current = false // reset guard whenever a new interval starts
-      const interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
-        setElapsedTime(elapsed)
-        if (elapsed >= timeLimit && !timeUpFiredRef.current) {
-          timeUpFiredRef.current = true
-          setShowTimeUpAlert(true)
-        }
-      }, 1000)
-      return () => clearInterval(interval)
+    if (!isPracticeQuiz) return
+    // Wait until questions have loaded and the ref is populated before starting.
+    const bootstrap = setInterval(() => {
+      if (sessionStartTimeRef.current) {
+        clearInterval(bootstrap)
+        timeUpFiredRef.current = false
+        const interval = setInterval(() => {
+          const elapsed = Math.floor(
+            (Date.now() - sessionStartTimeRef.current) / 1000
+          )
+          setElapsedTime(elapsed)
+          if (elapsed >= timeLimit && !timeUpFiredRef.current) {
+            timeUpFiredRef.current = true
+            setShowTimeUpAlert(true)
+          }
+        }, 1000)
+        // Store cleanup on the ref so resetLocalState can also clear it
+        timerIntervalRef.current = interval
+      }
+    }, 100)
+    return () => {
+      clearInterval(bootstrap)
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
     }
-  }, [isPracticeQuiz, sessionStartTime, timeLimit])
+  }, [isPracticeQuiz, timeLimit])
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
   const resetLocalState = useCallback(() => {
     setExpandedTopic(null)
     setElapsedTime(0)
-    setSessionStartTime(null)
     setShowTimeUpAlert(false)
-    timeUpFiredRef.current = false
     setAnsweredMap({})
     setShowSessionComplete(false)
+    // Clear refs — must happen after state resets so the bootstrap loop
+    // in the countdown effect doesn't immediately re-arm on the next session.
+    sessionStartTimeRef.current = null
+    timeUpFiredRef.current = false
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
   }, [])
 
   const resolveTopicLabel = useCallback(() => {
@@ -188,9 +216,16 @@ export default function PracticeMode() {
   }
 
   const handlePracticeQuizSelect = () => {
-    dispatch(fetchPracticeQuizQuestions())
+    // Reset ref and state so the new session gets a fresh clock.
+    sessionStartTimeRef.current = null
+    timeUpFiredRef.current = false
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
     setElapsedTime(0)
-    setSessionStartTime(null)
+    setShowTimeUpAlert(false)
+    dispatch(fetchPracticeQuizQuestions())
     dispatch(
       createSession({ sessionType: 'practice_exam', totalQuestions: 75 })
     )
