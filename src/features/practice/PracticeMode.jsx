@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import {
@@ -49,6 +49,9 @@ export default function PracticeMode() {
   const [elapsedTime, setElapsedTime] = useState(0)
   const [sessionStartTime, setSessionStartTime] = useState(null)
   const [showTimeUpAlert, setShowTimeUpAlert] = useState(false)
+  // Ref so the interval callback can check this without being a dep —
+  // prevents the interval from tearing down/restarting mid-session.
+  const timeUpFiredRef = useRef(false)
   const [answeredMap, setAnsweredMap] = useState({})
   const [showSessionComplete, setShowSessionComplete] = useState(false)
 
@@ -90,14 +93,16 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
-  // Start the session clock for ALL session types the moment questions load.
-  // For topic/subtopic sessions this is the only place it is set.
-  // For the quiz, the countdown effect below also reads sessionStartTime.
+  // Start the session clock the moment questions load.
+  // Only set ONCE — never overwrite an existing start time mid-session.
+  // sessionStartTime is intentionally excluded from deps so a mid-session
+  // Redux update (questions array re-evaluating) cannot reset the clock.
   useEffect(() => {
     if (questions.length > 0 && !sessionStartTime) {
       setSessionStartTime(Date.now())
     }
-  }, [questions.length, sessionStartTime])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions.length])
 
   // Reset tracking when a new session begins.
   // Intentionally keyed on selectedTopic only — questions.length can change
@@ -110,18 +115,24 @@ export default function PracticeMode() {
   }, [selectedTopic])
 
   // Countdown timer for practice exam (display only — does not affect tracking).
+  // IMPORTANT: showTimeUpAlert is intentionally NOT in the dep array.
+  // Using a ref (timeUpFiredRef) to guard the one-time alert prevents the
+  // interval from tearing down and restarting every second after time-up,
+  // which was causing sessionStartTime to be re-captured and the timer to jump.
   useEffect(() => {
     if (isPracticeQuiz && sessionStartTime) {
+      timeUpFiredRef.current = false // reset guard whenever a new interval starts
       const interval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000)
         setElapsedTime(elapsed)
-        if (elapsed >= timeLimit && !showTimeUpAlert) {
+        if (elapsed >= timeLimit && !timeUpFiredRef.current) {
+          timeUpFiredRef.current = true
           setShowTimeUpAlert(true)
         }
       }, 1000)
       return () => clearInterval(interval)
     }
-  }, [isPracticeQuiz, sessionStartTime, showTimeUpAlert, timeLimit])
+  }, [isPracticeQuiz, sessionStartTime, timeLimit])
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -130,6 +141,7 @@ export default function PracticeMode() {
     setElapsedTime(0)
     setSessionStartTime(null)
     setShowTimeUpAlert(false)
+    timeUpFiredRef.current = false
     setAnsweredMap({})
     setShowSessionComplete(false)
   }, [])
