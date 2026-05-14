@@ -156,7 +156,11 @@ const initialState = {
   error: null,
   startTime: null,
   isPracticeQuiz: false,
-  sessionId: null // NEW: tracks the active backend session ID
+  sessionId: null, // tracks the active backend session ID
+  // Absolute Unix ms timestamp set once when the practice exam begins.
+  // Lives in Redux (not a component ref) so it survives component remounts
+  // and can never be accidentally reset mid-session by a re-render.
+  quizStartTimestamp: null
 }
 
 // Slice
@@ -202,7 +206,8 @@ const practiceSlice = createSlice({
       state.answerResult = null
       state.startTime = null
       state.isPracticeQuiz = false
-      state.sessionId = null // NEW: clear session on reset
+      state.sessionId = null
+      state.quizStartTimestamp = null
     },
     setStartTime: (state) => {
       state.startTime = Date.now()
@@ -291,6 +296,9 @@ const practiceSlice = createSlice({
         state.answerResult = null
         state.startTime = Date.now()
         state.isPracticeQuiz = true
+        // Set the exam clock anchor here, in Redux, so it survives any
+        // component remount and can never be silently reset mid-session.
+        state.quizStartTimestamp = Date.now()
       })
       .addCase(fetchPracticeQuizQuestions.rejected, (state, action) => {
         state.loading = false
