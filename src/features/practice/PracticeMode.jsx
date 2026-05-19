@@ -19,6 +19,7 @@ import {
   abandonSession
 } from './state/practiceSlice'
 import { ROUTES } from '../../shared/constants/routes'
+import { fetchSubscriptionStatus } from '../subscription/state/subscriptionSlice'
 
 import { LoadingScreen } from './components/LoadingScreen'
 import { NoQuestionsScreen } from './components/NoQuestionsScreen'
@@ -247,6 +248,13 @@ export default function PracticeMode() {
         sessionId: sessionId || undefined
       })
     )
+
+    // Re-fetch subscription status after every answer.
+    // trialQuestionsUsed in Redux reflects the count at login and is never
+    // incremented locally, so a threshold check would never fire mid-session.
+    // A lightweight GET after each answer guarantees the paywall modal appears
+    // immediately after question #60 without requiring a page reload.
+    dispatch(fetchSubscriptionStatus())
   }
 
   const finishSession = useCallback(() => {

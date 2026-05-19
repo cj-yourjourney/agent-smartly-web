@@ -5,7 +5,7 @@ import { API_CONFIG } from '../../../shared/api/config'
 
 /**
  * Fetch subscription + access status from /api/profiles/details/
- * The endpoint already returns has_access (trial OR active sub) and subscription object.
+ * Returns has_access, subscription, trial_questions_used, trial_questions_limit.
  */
 export const fetchSubscriptionStatus = createAsyncThunk(
   'subscription/fetchStatus',
@@ -24,6 +24,8 @@ const subscriptionSlice = createSlice({
   initialState: {
     hasAccess: null, // null = not yet fetched; true/false = known
     subscription: null, // raw subscription object from backend
+    trialQuestionsUsed: 0, // questions answered during free trial
+    trialQuestionsLimit: 60, // free question cap (mirrors TRIAL_QUESTION_LIMIT)
     isLoading: false,
     isFetched: false, // true once we've completed at least one fetch
     error: null
@@ -33,15 +35,23 @@ const subscriptionSlice = createSlice({
     resetSubscription: (state) => {
       state.hasAccess = null
       state.subscription = null
+      state.trialQuestionsUsed = 0
+      state.trialQuestionsLimit = 60
       state.isLoading = false
       state.isFetched = false
       state.error = null
     },
-    // Optimistic update — called by ProfilePage after a successful payment
+    // Optimistic update — called by AccountPage after a successful payment
     // so guarded pages unlock immediately without waiting for a re-fetch
     setSubscriptionData: (state, action) => {
       state.hasAccess = action.payload.has_access ?? state.hasAccess
       state.subscription = action.payload.subscription ?? state.subscription
+      if (action.payload.trial_questions_used !== undefined) {
+        state.trialQuestionsUsed = action.payload.trial_questions_used
+      }
+      if (action.payload.trial_questions_limit !== undefined) {
+        state.trialQuestionsLimit = action.payload.trial_questions_limit
+      }
       state.isFetched = true
     }
   },
@@ -55,6 +65,8 @@ const subscriptionSlice = createSlice({
         state.isLoading = false
         state.hasAccess = action.payload.has_access
         state.subscription = action.payload.subscription
+        state.trialQuestionsUsed = action.payload.trial_questions_used ?? 0
+        state.trialQuestionsLimit = action.payload.trial_questions_limit ?? 60
         state.isFetched = true
         state.error = null
       })

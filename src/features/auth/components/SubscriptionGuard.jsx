@@ -29,12 +29,13 @@ export default function SubscriptionGuard({
   const router = useRouter()
 
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth)
-  const { hasAccess, isLoading, isFetched } = useSelector(
-    (state) => state.subscription
-  )
+  const { hasAccess, isFetched } = useSelector((state) => state.subscription)
 
-  // True once we have a definitive answer on access status
-  const subscriptionResolved = isFetched && !isLoading
+  // True once we have a definitive answer on access status.
+  // Deliberately ignores isLoading so that background re-fetches (e.g. the
+  // per-answer check in PracticeMode) don't flash a full-page spinner.
+  // The spinner is only shown on the very first fetch (isFetched = false).
+  const subscriptionResolved = isFetched
 
   // Only redirect for authentication failures — not for expired access
   useEffect(() => {

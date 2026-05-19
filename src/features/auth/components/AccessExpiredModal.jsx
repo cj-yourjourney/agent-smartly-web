@@ -2,8 +2,7 @@
 import { useRouter } from 'next/router'
 import { Zap, CheckCircle, ArrowRight, Info } from 'lucide-react'
 import ROUTES from '../../../shared/constants/routes'
-
-const ACCESS_PRICE = '$9.99'
+import { TRIAL_QUESTION_LIMIT, ACCESS_PRICE } from '../../account/utils'
 
 const FEATURES = [
   'Unlimited practice questions',
@@ -14,11 +13,11 @@ const FEATURES = [
 /**
  * AccessExpiredModal
  *
- * A full-viewport overlay rendered on top of blurred page content when the
- * user's trial or access has expired. The underlying page remains visible
- * (but dimmed and blurred) so the user can see what they're missing.
+ * Full-viewport overlay shown when the user has used all 60 free questions
+ * and does not have an active paid subscription.
  *
- * Clicking "Get access" navigates to /account where the Stripe form lives.
+ * The underlying page remains visible (dimmed) so the user can see what
+ * they're missing. Clicking "Get access" navigates to /account?upgrade=true.
  */
 export default function AccessExpiredModal() {
   const router = useRouter()
@@ -28,7 +27,7 @@ export default function AccessExpiredModal() {
   }
 
   return (
-    /* Backdrop — blurs and dims the page content behind */
+    /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
@@ -45,12 +44,17 @@ export default function AccessExpiredModal() {
             id="expired-modal-title"
             className="text-sm font-semibold text-warning"
           >
-            Trial Ended — Get Full Access
+            {TRIAL_QUESTION_LIMIT} Free Questions Used — Get Full Access
           </span>
         </div>
 
         {/* Body */}
         <div className="px-5 py-5 space-y-5">
+          <p className="text-sm text-base-content/60">
+            You&apos;ve completed your free trial. Unlock unlimited practice to
+            keep preparing for your exam.
+          </p>
+
           {/* Feature list */}
           <ul className="space-y-2">
             {FEATURES.map((feature) => (

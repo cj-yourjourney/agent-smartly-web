@@ -8,7 +8,12 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react'
-import { ACCESS_PRICE, formatDate, getTrialInfo } from '../utils'
+import {
+  ACCESS_PRICE,
+  TRIAL_QUESTION_LIMIT,
+  formatDate,
+  getTrialInfo
+} from '../utils'
 import PaymentForm from './PaymentForm'
 
 // ─── Sub-states ────────────────────────────────────────────────────────────────
@@ -96,9 +101,16 @@ function SuccessCard({ expiresAt }) {
   )
 }
 
-function TrialActiveCard({ trial, dateJoined, onPurchase }) {
+/**
+ * TrialActiveCard
+ *
+ * Shows a progress bar based on questions answered, not days elapsed.
+ * Props:
+ *   trial        — result of getTrialInfo(questionsUsed, questionsLimit)
+ *   onPurchase   — callback after successful payment
+ */
+function TrialActiveCard({ trial, onPurchase }) {
   const [showForm, setShowForm] = useState(false)
-  const pct = Math.round(((TRIAL_DAYS - trial.daysLeft) / TRIAL_DAYS) * 100)
 
   return (
     <div className="space-y-3">
@@ -110,20 +122,23 @@ function TrialActiveCard({ trial, dateJoined, onPurchase }) {
           </span>
           <div className="badge badge-success badge-outline gap-1 text-xs">
             <ShieldCheck className="h-3 w-3" />
-            {trial.daysLeft} day{trial.daysLeft !== 1 ? 's' : ''} left
+            {trial.questionsLeft} question{trial.questionsLeft !== 1 ? 's' : ''}{' '}
+            left
           </div>
         </div>
+
         <progress
           className="progress progress-primary w-full h-2"
-          value={pct}
+          value={trial.pctUsed}
           max="100"
         />
+
         <div className="flex justify-between mt-2">
           <span className="text-xs text-base-content/40">
-            Started {formatDate(dateJoined)}
+            {trial.questionsUsed} of {trial.questionsLimit} free questions used
           </span>
           <span className="text-xs text-base-content/40">
-            Ends {formatDate(trial.trialEndDate)}
+            {trial.questionsLeft} remaining
           </span>
         </div>
       </div>
@@ -186,7 +201,7 @@ function TrialEndedCard({ onPurchase }) {
       <div className="bg-warning/10 px-4 py-3.5 flex items-center gap-2">
         <Zap className="h-5 w-5 text-warning" />
         <span className="text-sm font-bold text-warning">
-          Trial Ended — Get Full Access
+          {TRIAL_QUESTION_LIMIT} Free Questions Used — Get Full Access
         </span>
       </div>
       <div className="card-body p-5 space-y-4">
@@ -207,17 +222,17 @@ function TrialEndedCard({ onPurchase }) {
 
 // ─── Orchestrator ──────────────────────────────────────────────────────────────
 
-// Import TRIAL_DAYS here so TrialActiveCard can use it without prop-drilling
-import { TRIAL_DAYS } from '../utils'
-
 export default function AccessSection({
-  user,
   profileData,
   onSubscriptionActivated
 }) {
   const [successData, setSuccessData] = useState(null)
 
-  const trial = getTrialInfo(user?.date_joined)
+  // Derive trial state from question counts returned by the profile endpoint
+  const trial = getTrialInfo(
+    profileData?.trial_questions_used,
+    profileData?.trial_questions_limit
+  )
   const subscription = profileData?.subscription
 
   const handleSuccess = useCallback(
@@ -239,13 +254,7 @@ export default function AccessSection({
   }
 
   if (trial?.isActive) {
-    return (
-      <TrialActiveCard
-        trial={trial}
-        dateJoined={user?.date_joined}
-        onPurchase={handleSuccess}
-      />
-    )
+    return <TrialActiveCard trial={trial} onPurchase={handleSuccess} />
   }
 
   return <TrialEndedCard onPurchase={handleSuccess} />

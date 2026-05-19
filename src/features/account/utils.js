@@ -1,19 +1,33 @@
 // src/features/account/utils.js
 
-export const TRIAL_DAYS = 3
+export const TRIAL_QUESTION_LIMIT = 60
 export const ACCESS_PRICE = '$9.99'
 
 // ─── Trial helpers ─────────────────────────────────────────────────────────────
 
-export function getTrialInfo(dateJoinedStr) {
-  if (!dateJoinedStr) return null
-  const joined = new Date(dateJoinedStr)
-  const now = new Date()
-  const msPerDay = 1000 * 60 * 60 * 24
-  const daysUsed = Math.floor((now - joined) / msPerDay)
-  const daysLeft = Math.max(TRIAL_DAYS - daysUsed, 0)
-  const trialEndDate = new Date(joined.getTime() + TRIAL_DAYS * msPerDay)
-  return { daysUsed, daysLeft, isActive: daysLeft > 0, trialEndDate }
+/**
+ * Returns trial progress info based on questions answered.
+ *
+ * @param {number} questionsUsed   - trial_questions_used from the profile endpoint
+ * @param {number} questionsLimit  - trial_questions_limit from the profile endpoint (default 60)
+ */
+export function getTrialInfo(
+  questionsUsed,
+  questionsLimit = TRIAL_QUESTION_LIMIT
+) {
+  if (questionsUsed === undefined || questionsUsed === null) return null
+
+  const used = Math.min(questionsUsed, questionsLimit) // cap display at limit
+  const questionsLeft = Math.max(questionsLimit - questionsUsed, 0)
+  const pctUsed = Math.round((used / questionsLimit) * 100)
+
+  return {
+    questionsUsed: used,
+    questionsLeft,
+    questionsLimit,
+    pctUsed,
+    isActive: questionsLeft > 0
+  }
 }
 
 export function formatDate(dateStr) {
