@@ -7,7 +7,7 @@ import { ROUTES } from '@/shared/constants/routes'
 const faqs = [
   {
     q: 'How much does it cost?',
-    a: '$9.99 gives you 1 month of full access — no auto-renewal, no subscription. Every new account starts with a free 3-day trial, no credit card required. When your access period ends, you can purchase another month if you need more time.'
+    a: '$9.99 gives you 1 month of full access — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase a month of full access anytime.'
   },
   {
     q: 'How many questions should I practice before the exam?',
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: 'Do I need to create an account?',
-    a: 'Yes, a free account is required to track your progress and save your practice history. Sign up takes under a minute — just an email and password, no credit card needed to start your 3-day trial.'
+    a: 'Yes, a free account is required to track your progress and save your practice history. Sign up takes under a minute — just an email and password, no credit card needed to start your 60-question free trial.'
   }
 ]
 
@@ -156,7 +156,7 @@ export default function Home() {
             >
               <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                 <span className="text-success text-base hero-check">✓</span>
-                3-day free trial · No credit card required
+                60 free questions · No credit card required
               </p>
               <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                 <span className="text-success text-base hero-check">✓</span>
@@ -573,7 +573,7 @@ export default function Home() {
 
         <div className="max-w-2xl mx-auto text-center relative z-10 flex flex-col items-center gap-6">
           <div className="badge bg-white/15 text-white border-0 px-4 py-3 text-xs font-semibold tracking-wider uppercase">
-            ✓ 3-Day Free Trial — No Credit Card Required
+            ✓ 60 Free Questions — No Credit Card Required
           </div>
           <h2 className="font-display text-4xl md:text-5xl text-primary-content">
             Ready to Pass Your Exam?
@@ -598,7 +598,8 @@ export default function Home() {
                 Start Free Trial →
               </button>
               <p className="text-primary-content/50 text-xs font-medium">
-                3 days free · then $9.99 for 1-month access · no auto-renewal
+                60 questions free · then $9.99 for 1-month access · no
+                auto-renewal
               </p>
             </div>
           )}
@@ -641,7 +642,7 @@ export default function Home() {
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-base-100/95 backdrop-blur border-t border-base-300 px-4 py-3 flex items-center gap-3 shadow-lg">
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-base-content truncate">
-              Start your free 3-day trial
+              Start with 60 free questions
             </p>
             <p className="text-xs text-base-content/40">
               No credit card required
