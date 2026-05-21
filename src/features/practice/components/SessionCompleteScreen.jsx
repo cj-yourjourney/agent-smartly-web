@@ -28,10 +28,11 @@ export function SessionCompleteScreen({
     : total > 0
       ? Math.round((correct / total) * 100)
       : 0
-  // API returns duration_minutes (float, e.g. 2.3); convert to seconds for
-  // formatTimePretty. Fall back to the component-tracked elapsedTime.
+  // complete/ endpoint returns duration_seconds; the sessions list endpoint
+  // exposes duration_minutes as a computed field. Check both.
   const displayElapsed = completedSession
-    ? Math.round(completedSession.duration_minutes * 60)
+    ? (completedSession.duration_seconds ??
+      Math.round((completedSession.duration_minutes ?? 0) * 60))
     : elapsedTime
 
   const passed = accuracy >= 70

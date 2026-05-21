@@ -20,6 +20,7 @@ import {
 } from './state/practiceSlice'
 import { ROUTES } from '../../shared/constants/routes'
 import { fetchSubscriptionStatus } from '../subscription/state/subscriptionSlice'
+import { fetchSessions } from '../progress/state/progressSlice'
 
 import { LoadingScreen } from './components/LoadingScreen'
 import { NoQuestionsScreen } from './components/NoQuestionsScreen'
@@ -261,14 +262,35 @@ export default function PracticeMode() {
     dispatch(fetchSubscriptionStatus())
   }
 
-  const finishSession = useCallback(() => {
+  const finishSession = useCallback(async () => {
+    // Snapshot duration at the exact moment the user finishes — before any
+    // async work that could alter state.  For practice quiz we recompute from
+    // quizStartTimestamp (source of truth) rather than from elapsedTime, which
+    // only updates every 1 s and may lag by up to a second.
+    const snapshotNow = Date.now()
+    const durationSeconds =
+      isPracticeQuiz && quizStartTimestamp
+        ? Math.min(
+            Math.floor((snapshotNow - quizStartTimestamp) / 1000),
+            SESSION_MAX_SECONDS
+          )
+        : Math.min(elapsedTime, SESSION_MAX_SECONDS)
+
     if (sessionId) {
-      dispatch(
-        completeSession({ sessionId, durationSeconds: getSessionDuration() })
-      )
+      await dispatch(completeSession({ sessionId, durationSeconds }))
+      // Refresh the sessions list in Redux so the Progress page shows the
+      // just-completed session with its correct duration immediately.
+      dispatch(fetchSessions())
     }
     setShowSessionComplete(true)
-  }, [dispatch, sessionId, getSessionDuration])
+  }, [
+    dispatch,
+    sessionId,
+    isPracticeQuiz,
+    quizStartTimestamp,
+    elapsedTime,
+    SESSION_MAX_SECONDS
+  ])
 
   const handleNextQuestion = () => {
     if (isLastQuestion && answerResult) {
@@ -284,11 +306,8 @@ export default function PracticeMode() {
   }
 
   const handleViewDetails = () => {
-    if (sessionId) {
-      dispatch(
-        completeSession({ sessionId, durationSeconds: getSessionDuration() })
-      )
-    }
+    // Note: completeSession was already called (and awaited) in finishSession
+    // before showSessionComplete was set to true, so no need to call it again here.
     dispatch(resetToTopicSelection())
     resetLocalState()
     router.push(`${ROUTES.LEARNING.PROGRESS}?tab=sessions`)

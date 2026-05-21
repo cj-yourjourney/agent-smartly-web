@@ -17,6 +17,20 @@ import {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+// Formats a session duration as "2m06s", matching the SessionCompleteScreen display.
+// Prefers duration_seconds from the API; falls back to converting duration_minutes
+// (a float property the serializer may return instead).
+function formatDuration(session) {
+  let totalSeconds =
+    session.duration_seconds != null
+      ? Math.round(session.duration_seconds)
+      : Math.round((session.duration_minutes || 0) * 60)
+  if (!totalSeconds || totalSeconds <= 0) return null
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}m ${String(s).padStart(2, '0')}s`
+}
+
 function AccuracyBar({ pct }) {
   const color = pct >= 70 ? 'bg-success' : pct >= 40 ? 'bg-warning' : 'bg-error'
   return (
@@ -110,6 +124,8 @@ function SessionCard({ session }) {
   const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState(null)
 
+  const formattedDuration = formatDuration(session)
+
   const statusBadge = () => {
     if (session.status === 'in_progress')
       return <span className="badge badge-warning badge-sm">In Progress</span>
@@ -190,8 +206,11 @@ function SessionCard({ session }) {
                 {session.questions_attempted}/{session.total_questions_planned}{' '}
                 questions
               </span>
-              {session.duration_minutes > 0 && (
-                <span>{session.duration_minutes} min</span>
+              {formattedDuration && (
+                <span className="flex items-center gap-0.5">
+                  <Clock className="w-3 h-3" />
+                  {formattedDuration}
+                </span>
               )}
               <span
                 className={
@@ -202,7 +221,7 @@ function SessionCard({ session }) {
                       : 'text-error font-medium'
                 }
               >
-                {session.accuracy}%
+                {Math.round(session.accuracy)}%
               </span>
             </div>
             {session.questions_attempted > 0 && (
