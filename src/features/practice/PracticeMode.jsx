@@ -59,6 +59,11 @@ export default function PracticeMode() {
   // Guard so the time-up alert fires exactly once per session even if the
   // interval fires multiple times at the boundary second.
   const timeUpFiredRef = useRef(false)
+  // Wall-clock start time for topic/subtopic sessions.  Practice quiz uses
+  // quizStartTimestamp from Redux instead (set when questions arrive), but
+  // topic sessions have no Redux equivalent, so we capture Date.now() here
+  // the moment the user picks a topic/subtopic.
+  const nonQuizStartTimeRef = useRef(null)
 
   const sessionResults = {
     total: Object.keys(answeredMap).length,
@@ -158,6 +163,8 @@ export default function PracticeMode() {
     setShowSessionComplete(false)
     // Reset the time-up guard so a new exam can show the alert again.
     timeUpFiredRef.current = false
+    // Clear the topic-session clock so a future session starts fresh.
+    nonQuizStartTimeRef.current = null
   }, [])
 
   const resolveTopicLabel = useCallback(() => {
@@ -177,6 +184,7 @@ export default function PracticeMode() {
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
   const handleTopicSelect = (topicValue) => {
+    nonQuizStartTimeRef.current = Date.now()
     dispatch(fetchQuestionsByTopic(topicValue))
     dispatch(
       createSession({
@@ -188,6 +196,7 @@ export default function PracticeMode() {
   }
 
   const handleSubtopicSelect = (topicValue, subtopicValue) => {
+    nonQuizStartTimeRef.current = Date.now()
     dispatch(
       fetchQuestionsBySubtopic({ topic: topicValue, subtopic: subtopicValue })
     )
@@ -264,9 +273,9 @@ export default function PracticeMode() {
 
   const finishSession = useCallback(async () => {
     // Snapshot duration at the exact moment the user finishes — before any
-    // async work that could alter state.  For practice quiz we recompute from
-    // quizStartTimestamp (source of truth) rather than from elapsedTime, which
-    // only updates every 1 s and may lag by up to a second.
+    // async work that could alter state.
+    // • Practice quiz  → quizStartTimestamp from Redux (set when questions arrive)
+    // • Topic/subtopic → nonQuizStartTimeRef captured when the user picked a topic
     const snapshotNow = Date.now()
     const durationSeconds =
       isPracticeQuiz && quizStartTimestamp
@@ -274,7 +283,12 @@ export default function PracticeMode() {
             Math.floor((snapshotNow - quizStartTimestamp) / 1000),
             SESSION_MAX_SECONDS
           )
-        : Math.min(elapsedTime, SESSION_MAX_SECONDS)
+        : nonQuizStartTimeRef.current
+          ? Math.min(
+              Math.floor((snapshotNow - nonQuizStartTimeRef.current) / 1000),
+              SESSION_MAX_SECONDS
+            )
+          : 0
 
     if (sessionId) {
       await dispatch(completeSession({ sessionId, durationSeconds }))
@@ -288,7 +302,6 @@ export default function PracticeMode() {
     sessionId,
     isPracticeQuiz,
     quizStartTimestamp,
-    elapsedTime,
     SESSION_MAX_SECONDS
   ])
 
@@ -315,9 +328,20 @@ export default function PracticeMode() {
 
   const handleBackToTopics = () => {
     if (sessionId) {
-      dispatch(
-        abandonSession({ sessionId, durationSeconds: getSessionDuration() })
-      )
+      const snapshotNow = Date.now()
+      const durationSeconds =
+        isPracticeQuiz && quizStartTimestamp
+          ? Math.min(
+              Math.floor((snapshotNow - quizStartTimestamp) / 1000),
+              SESSION_MAX_SECONDS
+            )
+          : nonQuizStartTimeRef.current
+            ? Math.min(
+                Math.floor((snapshotNow - nonQuizStartTimeRef.current) / 1000),
+                SESSION_MAX_SECONDS
+              )
+            : 0
+      dispatch(abandonSession({ sessionId, durationSeconds }))
     }
     dispatch(resetToTopicSelection())
     resetLocalState()
