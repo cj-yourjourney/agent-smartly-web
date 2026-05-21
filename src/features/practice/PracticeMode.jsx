@@ -44,7 +44,8 @@ export default function PracticeMode() {
     startTime,
     isPracticeQuiz,
     sessionId,
-    quizStartTimestamp
+    quizStartTimestamp,
+    completedSession
   } = useSelector((state) => state.practice)
 
   const [expandedTopic, setExpandedTopic] = useState(null)
@@ -124,7 +125,10 @@ export default function PracticeMode() {
   // starts), so the interval is created once and runs straight to 00:00 with
   // zero resets. No bootstrap loop, no secondary ref, no race conditions.
   useEffect(() => {
-    if (!isPracticeQuiz || !quizStartTimestamp) return
+    // Stop ticking as soon as the complete screen is shown — elapsedTime
+    // freezes and SessionCompleteScreen will switch to the API value once
+    // completeSession resolves.
+    if (!isPracticeQuiz || !quizStartTimestamp || showSessionComplete) return
 
     // Reset the one-shot guard whenever a fresh exam begins.
     timeUpFiredRef.current = false
@@ -141,7 +145,7 @@ export default function PracticeMode() {
     tick() // paint the correct time immediately, before the first 1 s delay
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [isPracticeQuiz, quizStartTimestamp, timeLimit])
+  }, [isPracticeQuiz, quizStartTimestamp, timeLimit, showSessionComplete])
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -310,6 +314,7 @@ export default function PracticeMode() {
     return (
       <SessionCompleteScreen
         results={sessionResults}
+        completedSession={completedSession}
         topicLabel={resolveTopicLabel()}
         elapsedTime={elapsedTime}
         onPracticeAgain={handlePracticeAgain}

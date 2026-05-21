@@ -10,15 +10,31 @@ import { formatTimePretty } from '../utils'
 
 export function SessionCompleteScreen({
   results,
+  completedSession,
   topicLabel,
   elapsedTime,
   onPracticeAgain,
   onViewDetails
 }) {
-  const accuracy =
-    results.total > 0 ? Math.round((results.correct / results.total) * 100) : 0
+  // Prefer server-verified data from the completed session API response.
+  // Fall back to the locally-tracked counts for topic/subtopic sessions
+  // where completeSession may not have resolved yet.
+  const total = completedSession?.questions_attempted ?? results.total
+  const correct = completedSession?.questions_correct ?? results.correct
+  const incorrect = completedSession?.questions_incorrect ?? total - correct
+  // API returns accuracy as a plain number e.g. 66.7; round to nearest integer.
+  const accuracy = completedSession
+    ? Math.round(completedSession.accuracy)
+    : total > 0
+      ? Math.round((correct / total) * 100)
+      : 0
+  // API returns duration_minutes (float, e.g. 2.3); convert to seconds for
+  // formatTimePretty. Fall back to the component-tracked elapsedTime.
+  const displayElapsed = completedSession
+    ? Math.round(completedSession.duration_minutes * 60)
+    : elapsedTime
+
   const passed = accuracy >= 70
-  const incorrect = results.total - results.correct
 
   const ringColor =
     accuracy >= 70
@@ -73,13 +89,13 @@ export function SessionCompleteScreen({
           <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-8">
             <div className="bg-base-200 rounded-xl p-3 text-center">
               <p className="text-2xl sm:text-2xl font-bold tabular-nums">
-                {results.total}
+                {total}
               </p>
               <p className="text-xs text-base-content/50 mt-0.5">Questions</p>
             </div>
             <div className="bg-success/10 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold tabular-nums text-success">
-                {results.correct}
+                {correct}
               </p>
               <p className="text-xs text-base-content/50 mt-0.5">Correct</p>
             </div>
@@ -92,10 +108,10 @@ export function SessionCompleteScreen({
           </div>
 
           {/* Time */}
-          {elapsedTime > 0 && (
+          {displayElapsed > 0 && (
             <div className="flex items-center justify-center gap-1.5 text-xs text-base-content/40 mb-5 sm:mb-8">
               <Clock className="w-3.5 h-3.5" />
-              <span>Time: {formatTimePretty(elapsedTime)}</span>
+              <span>Time: {formatTimePretty(displayElapsed)}</span>
             </div>
           )}
 

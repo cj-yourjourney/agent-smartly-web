@@ -160,7 +160,11 @@ const initialState = {
   // Absolute Unix ms timestamp set once when the practice exam begins.
   // Lives in Redux (not a component ref) so it survives component remounts
   // and can never be accidentally reset mid-session by a re-render.
-  quizStartTimestamp: null
+  quizStartTimestamp: null,
+  // Stores the session object returned by the complete/ endpoint so
+  // SessionCompleteScreen can show server-verified stats instead of
+  // locally-tracked counts.
+  completedSession: null
 }
 
 // Slice
@@ -208,6 +212,7 @@ const practiceSlice = createSlice({
       state.isPracticeQuiz = false
       state.sessionId = null
       state.quizStartTimestamp = null
+      state.completedSession = null
     },
     setStartTime: (state) => {
       state.startTime = Date.now()
@@ -324,9 +329,10 @@ const practiceSlice = createSlice({
         // Silent failure — session tracking is non-critical, practice still works
         console.error('Failed to create session:', action.payload)
       })
-      // Complete session — clear session ID (resetToTopicSelection also clears it)
-      .addCase(completeSession.fulfilled, (state) => {
+      // Complete session — store the server-verified session data and clear session ID
+      .addCase(completeSession.fulfilled, (state, action) => {
         state.sessionId = null
+        state.completedSession = action.payload
       })
       .addCase(completeSession.rejected, (state, action) => {
         console.error('Failed to complete session:', action.payload)
