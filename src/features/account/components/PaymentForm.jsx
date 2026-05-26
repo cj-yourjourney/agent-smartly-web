@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, CreditCard, Lock } from 'lucide-react'
 import { API_CONFIG, authenticatedFetch } from '../../../shared/api/config'
-import { ACCESS_PRICE, getStripe } from '../utils'
+import { PLANS, DEFAULT_PLAN, getStripe } from '../utils'
 import OneTimeChargeNotice from './OneTimeChargeNotice'
 
 export default function PaymentForm({ onSuccess, isRenewal = false }) {
@@ -11,6 +11,7 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
   const stripeRef = useRef(null)
   const cardRef = useRef(null)
 
+  const [selectedPlan, setSelectedPlan] = useState(DEFAULT_PLAN)
   const [stripeReady, setStripeReady] = useState(false)
   const [cardComplete, setCardComplete] = useState(false)
   const [paying, setPaying] = useState(false)
@@ -80,12 +81,12 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
     setPaying(true)
 
     try {
-      // Step 1: Create the PaymentIntent on our backend
+      // Step 1: Create the PaymentIntent on our backend (send chosen plan)
       const intentRes = await authenticatedFetch(
         API_CONFIG.ENDPOINTS.SUBSCRIBE,
         {
           method: 'POST',
-          body: JSON.stringify({})
+          body: JSON.stringify({ plan: selectedPlan.id })
         }
       )
       const intentData = await intentRes.json()
@@ -121,9 +122,65 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
 
   return (
     <div className="space-y-4">
-      <OneTimeChargeNotice />
+      {/* ── Plan selector ─────────────────────────────────────────────────── */}
+      <div>
+        <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
+          Choose Your Plan
+        </label>
+        <div className="space-y-2">
+          {PLANS.map((plan) => {
+            const isSelected = selectedPlan.id === plan.id
+            return (
+              <button
+                key={plan.id}
+                type="button"
+                onClick={() => setSelectedPlan(plan)}
+                className={`
+                  w-full flex items-center justify-between px-4 py-3 rounded-xl
+                  border-2 transition-all text-left
+                  ${
+                    isSelected
+                      ? 'border-primary bg-primary/5'
+                      : 'border-base-300 bg-base-100 hover:border-primary/40'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Radio dot */}
+                  <div
+                    className={`
+                      w-4 h-4 rounded-full border-2 flex items-center
+                      justify-center shrink-0
+                      ${isSelected ? 'border-primary' : 'border-base-300'}
+                    `}
+                  >
+                    {isSelected && (
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                    )}
+                  </div>
 
-      {/* Card input */}
+                  <div>
+                    <span className="text-sm font-semibold text-base-content">
+                      {plan.label}
+                    </span>
+                    <span className="text-xs text-base-content/50 ml-2">
+                      {plan.description}
+                    </span>
+                  </div>
+                </div>
+
+                <span className="text-sm font-bold text-base-content">
+                  {plan.price}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <OneTimeChargeNotice plan={selectedPlan} />
+
+      {/* ── Card input ────────────────────────────────────────────────────── */}
       <div>
         <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
           Card Details
@@ -157,7 +214,7 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
         <span>Encrypted & secured by Stripe. We never store your card.</span>
       </div>
 
-      {/* Large tap target for mobile */}
+      {/* ── Submit ────────────────────────────────────────────────────────── */}
       <button
         onClick={handleSubmit}
         disabled={!stripeReady || !cardComplete || paying}
@@ -172,8 +229,8 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
           <>
             <CreditCard className="h-5 w-5" />
             {isRenewal
-              ? `Extend access — ${ACCESS_PRICE}`
-              : `Get access — ${ACCESS_PRICE}`}
+              ? `Extend access — ${selectedPlan.price}`
+              : `Get access — ${selectedPlan.price}`}
           </>
         )}
       </button>

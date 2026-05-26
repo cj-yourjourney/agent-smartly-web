@@ -8,12 +8,7 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react'
-import {
-  ACCESS_PRICE,
-  TRIAL_QUESTION_LIMIT,
-  formatDate,
-  getTrialInfo
-} from '../utils'
+import { PLANS, TRIAL_QUESTION_LIMIT, formatDate, getTrialInfo } from '../utils'
 import PaymentForm from './PaymentForm'
 
 // ─── Sub-states ────────────────────────────────────────────────────────────────
@@ -37,10 +32,6 @@ function ActiveAccessCard({ subscription, onRenew }) {
 
       <div className="card-body p-4 space-y-3">
         <div className="flex justify-between text-sm py-1">
-          <span className="text-base-content/50">Amount paid</span>
-          <span className="font-semibold">{ACCESS_PRICE}</span>
-        </div>
-        <div className="flex justify-between text-sm py-1">
           <span className="text-base-content/50">Access expires</span>
           <span className="font-semibold">
             {formatDate(subscription.expires_at)}
@@ -63,13 +54,13 @@ function ActiveAccessCard({ subscription, onRenew }) {
             className="btn btn-sm btn-outline w-full gap-2 h-12"
           >
             <RefreshCw className="h-4 w-4" />
-            Extend access by another month
+            Extend access
           </button>
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-base-content/50 leading-relaxed">
-              This is a one-time charge. Paying now extends your access by one
-              month — nothing auto-renews.
+              This is a one-time charge. Paying now extends your access for the
+              chosen plan — nothing auto-renews.
             </p>
             <PaymentForm onSuccess={onRenew} isRenewal />
             <button
@@ -112,6 +103,8 @@ function SuccessCard({ expiresAt }) {
 function TrialActiveCard({ trial, onPurchase }) {
   const [showForm, setShowForm] = useState(false)
 
+  const startingPrice = PLANS[0].price // cheapest plan for soft-CTA copy
+
   return (
     <div className="space-y-3">
       {/* Trial progress */}
@@ -151,7 +144,8 @@ function TrialActiveCard({ trial, onPurchase }) {
               Get full access after your trial
             </p>
             <p className="text-sm text-base-content/50 mt-1 mb-1">
-              {ACCESS_PRICE} one-time · no recurring charges · renew anytime
+              From {startingPrice} · one-time · no recurring charges · renew
+              anytime
             </p>
             <p className="text-xs text-info font-semibold mb-4">
               Not a subscription — you will never be auto-charged.
@@ -169,10 +163,10 @@ function TrialActiveCard({ trial, onPurchase }) {
         <div className="card bg-base-100 border border-primary/20 rounded-2xl shadow-sm">
           <div className="card-body p-5 space-y-3">
             <p className="text-base font-bold text-base-content">
-              Get full access · {ACCESS_PRICE} one-time
+              Get full access — choose a plan
             </p>
             <p className="text-sm text-base-content/50">
-              Your card is charged once today. Renew manually anytime — no
+              Your card is charged once. Renew manually anytime — no
               auto-renewals, ever.
             </p>
             <PaymentForm onSuccess={onPurchase} />
@@ -228,7 +222,6 @@ export default function AccessSection({
 }) {
   const [successData, setSuccessData] = useState(null)
 
-  // Derive trial state from question counts returned by the profile endpoint
   const trial = getTrialInfo(
     profileData?.trial_questions_used,
     profileData?.trial_questions_limit

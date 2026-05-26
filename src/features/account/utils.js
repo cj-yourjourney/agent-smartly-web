@@ -1,7 +1,35 @@
 // src/features/account/utils.js
 
 export const TRIAL_QUESTION_LIMIT = 60
-export const ACCESS_PRICE = '$9.99'
+
+// ─── Pricing plans ─────────────────────────────────────────────────────────────
+
+export const PLANS = [
+  {
+    id: 'week',
+    price: '$29.50',
+    label: '1 Week',
+    description: '7-day access',
+    days: 7
+  },
+  {
+    id: 'month',
+    price: '$39.50',
+    label: '1 Month',
+    description: '30-day access',
+    days: 30
+  },
+  {
+    id: 'three_months',
+    price: '$49.50',
+    label: '3 Months',
+    description: '90-day access',
+    days: 90
+  }
+]
+
+/** Default plan pre-selected in the payment form. */
+export const DEFAULT_PLAN = PLANS[1] // 1 Month
 
 // ─── Trial helpers ─────────────────────────────────────────────────────────────
 
@@ -17,12 +45,12 @@ export function getTrialInfo(
 ) {
   if (questionsUsed === undefined || questionsUsed === null) return null
 
-  const used = Math.min(questionsUsed, questionsLimit) // cap display at limit
+  const used = Math.min(questionsUsed, questionsLimit)
   const questionsLeft = Math.max(questionsLimit - questionsUsed, 0)
   const pctUsed = Math.round((used / questionsLimit) * 100)
 
   return {
-    questionsUsed: used,
+    questionsUsed,
     questionsLeft,
     questionsLimit,
     pctUsed,
@@ -41,7 +69,6 @@ export function formatDate(dateStr) {
 
 // ─── Stripe loader ─────────────────────────────────────────────────────────────
 
-// Dynamically load Stripe.js once across the session
 let stripePromise = null
 
 export function getStripe(publicKey) {
