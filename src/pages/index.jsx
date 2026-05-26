@@ -7,7 +7,7 @@ import { ROUTES } from '@/shared/constants/routes'
 const faqs = [
   {
     q: 'How much does it cost?',
-    a: '$9.99 gives you 1 month of full access — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase a month of full access anytime.'
+    a: 'Plans start at $29.50 for 1 week, $39.50 for 1 month, or $49.50 for 3 months — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase any plan anytime.'
   },
   {
     q: 'How many questions should I practice before the exam?',
@@ -160,7 +160,7 @@ export default function Home() {
               </p>
               <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                 <span className="text-success text-base hero-check">✓</span>
-                $9.99 for 1-month access · One-time charge · Renew anytime
+                Plans from $29.50 · One-time charge · No auto-renewal
               </p>
             </div>
           </div>
@@ -598,8 +598,7 @@ export default function Home() {
                 Start Free Trial →
               </button>
               <p className="text-primary-content/50 text-xs font-medium">
-                60 questions free · then $9.99 for 1-month access · no
-                auto-renewal
+                60 questions free · then from $29.50 · no auto-renewal
               </p>
             </div>
           )}
