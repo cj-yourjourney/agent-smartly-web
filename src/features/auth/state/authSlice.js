@@ -1,63 +1,65 @@
-// features/auth/state/authSlice.js - Enhanced with auto-refresh and token monitoring
+// features/auth/state/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_CONFIG } from '../../../shared/api/config'
 
-// Helper functions for token management
+// ─── Token storage helpers ────────────────────────────────────────────────────
+
 const getTokensFromStorage = () => {
-  if (typeof window !== 'undefined') {
-    const access = localStorage.getItem('accessToken')
-    const refresh = localStorage.getItem('refreshToken')
-    return { access, refresh }
+  if (typeof window === 'undefined') return { access: null, refresh: null }
+  return {
+    access: localStorage.getItem('accessToken'),
+    refresh: localStorage.getItem('refreshToken')
   }
-  return { access: null, refresh: null }
 }
 
 const saveTokensToStorage = (access, refresh) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('accessToken', access)
-    if (refresh) localStorage.setItem('refreshToken', refresh)
-  }
+  if (typeof window === 'undefined') return
+  if (access) localStorage.setItem('accessToken', access)
+  if (refresh) localStorage.setItem('refreshToken', refresh)
 }
 
 const removeTokensFromStorage = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-  }
+  if (typeof window === 'undefined') return
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
 }
 
-// Check if token is expired or about to expire (with buffer)
-const isTokenExpired = (token) => {
-  if (!token) return true
+// ─── Token introspection helpers ─────────────────────────────────────────────
 
+/**
+ * Decode a JWT payload without verifying the signature.
+ * Returns null if the token is missing or malformed.
+ */
+const decodeTokenPayload = (token) => {
+  if (!token) return null
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    const exp = payload.exp * 1000
-    const now = Date.now()
-
-    // Token expired if it expires in less than 10 seconds
-    return exp - now < 10000
-  } catch (error) {
-    console.error('Error checking token expiration:', error)
-    return true
+    return JSON.parse(atob(token.split('.')[1]))
+  } catch {
+    return null
   }
 }
 
-// Get time until token expires
-const getTokenExpiryTime = (token) => {
-  if (!token) return 0
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    const exp = payload.exp * 1000
-    const now = Date.now()
-    return Math.max(0, exp - now)
-  } catch (error) {
-    return 0
-  }
+/**
+ * Returns true if the token is expired (or within `bufferMs` of expiring).
+ * A null / malformed token is treated as expired.
+ */
+const isTokenExpired = (token, bufferMs = 10_000) => {
+  const payload = decodeTokenPayload(token)
+  if (!payload?.exp) return true
+  return payload.exp * 1000 - Date.now() < bufferMs
 }
 
-// Async thunk for login
+/**
+ * Returns milliseconds until the token expires (0 if already expired).
+ */
+const msUntilExpiry = (token) => {
+  const payload = decodeTokenPayload(token)
+  if (!payload?.exp) return 0
+  return Math.max(0, payload.exp * 1000 - Date.now())
+}
+
+// ─── Async thunks ─────────────────────────────────────────────────────────────
+
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
@@ -66,30 +68,20 @@ export const loginUser = createAsyncThunk(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TOKEN_OBTAIN}`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(credentials)
         }
       )
-
       const data = await response.json()
-
-      if (!response.ok) {
-        return rejectWithValue(data)
-      }
-
+      if (!response.ok) return rejectWithValue(data)
       saveTokensToStorage(data.access, data.refresh)
       return data
-    } catch (error) {
-      return rejectWithValue({
-        detail: 'Network error. Please check your connection.'
-      })
+    } catch {
+      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
     }
   }
 )
 
-// Async thunk for registration
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
@@ -98,30 +90,20 @@ export const registerUser = createAsyncThunk(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REGISTER}`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(userData)
         }
       )
-
       const data = await response.json()
-
-      if (!response.ok) {
-        return rejectWithValue(data)
-      }
-
+      if (!response.ok) return rejectWithValue(data)
       // No tokens yet — user must verify email first
       return data
-    } catch (error) {
-      return rejectWithValue({
-        detail: 'Network error. Please check your connection.'
-      })
+    } catch {
+      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
     }
   }
 )
 
-// Async thunk for email verification (magic link)
 export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async (token, { rejectWithValue }) => {
@@ -138,15 +120,12 @@ export const verifyEmail = createAsyncThunk(
       if (!response.ok) return rejectWithValue(data)
       saveTokensToStorage(data.access, data.refresh)
       return data
-    } catch (error) {
-      return rejectWithValue({
-        detail: 'Network error. Please check your connection.'
-      })
+    } catch {
+      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
     }
   }
 )
 
-// Async thunk for requesting a password reset email
 export const requestPasswordReset = createAsyncThunk(
   'auth/requestPasswordReset',
   async (email, { rejectWithValue }) => {
@@ -162,15 +141,12 @@ export const requestPasswordReset = createAsyncThunk(
       const data = await response.json()
       if (!response.ok) return rejectWithValue(data)
       return data
-    } catch (error) {
-      return rejectWithValue({
-        detail: 'Network error. Please check your connection.'
-      })
+    } catch {
+      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
     }
   }
 )
 
-// Async thunk for confirming a password reset with token + new password
 export const confirmPasswordReset = createAsyncThunk(
   'auth/confirmPasswordReset',
   async ({ token, password, password2 }, { rejectWithValue }) => {
@@ -186,165 +162,135 @@ export const confirmPasswordReset = createAsyncThunk(
       const data = await response.json()
       if (!response.ok) return rejectWithValue(data)
       return data
-    } catch (error) {
-      return rejectWithValue({
-        detail: 'Network error. Please check your connection.'
-      })
+    } catch {
+      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
     }
   }
 )
 
-// Async thunk for token refresh
+/**
+ * Refresh the access token using the stored refresh token.
+ *
+ * With ROTATE_REFRESH_TOKENS=True on the backend, Django returns a brand-new
+ * refresh token alongside the new access token. We persist both so the 30-day
+ * window resets on every successful refresh (active users never get logged out).
+ */
 export const refreshAccessToken = createAsyncThunk(
   'auth/refresh',
   async (_, { getState, rejectWithValue }) => {
+    const storedRefresh =
+      getState().auth.refreshToken || getTokensFromStorage().refresh
+
+    if (!storedRefresh) {
+      return rejectWithValue({ detail: 'No refresh token available' })
+    }
+
     try {
-      const state = getState().auth
-      const refreshToken = state.refreshToken || getTokensFromStorage().refresh
-
-      if (!refreshToken) {
-        return rejectWithValue({ detail: 'No refresh token available' })
-      }
-
-      console.log('🔄 Refreshing access token...')
-
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TOKEN_REFRESH}`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ refresh: refreshToken })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: storedRefresh })
         }
       )
 
       const data = await response.json()
+      if (!response.ok) return rejectWithValue(data)
 
-      if (!response.ok) {
-        console.error('❌ Token refresh failed:', data)
-        return rejectWithValue(data)
-      }
+      // data.refresh is the rotated refresh token (present when ROTATE_REFRESH_TOKENS=True).
+      // Fall back to the token we sent in case the backend doesn't rotate.
+      const newRefresh = data.refresh || storedRefresh
+      saveTokensToStorage(data.access, newRefresh)
 
-      // Save new access token
-      saveTokensToStorage(data.access, refreshToken)
-      console.log('✅ Token refreshed successfully')
-
-      return { access: data.access, refresh: refreshToken }
-    } catch (error) {
-      console.error('❌ Token refresh error:', error)
-      return rejectWithValue({
-        detail: 'Failed to refresh token'
-      })
+      return { access: data.access, refresh: newRefresh }
+    } catch {
+      return rejectWithValue({ detail: 'Failed to refresh token' })
     }
   }
 )
 
-// Async thunk for fetching user details
 export const fetchUserDetails = createAsyncThunk(
   'auth/fetchUserDetails',
   async (_, { getState, dispatch, rejectWithValue }) => {
     try {
       let { accessToken } = getState().auth
+      if (!accessToken) accessToken = getTokensFromStorage().access
+      if (!accessToken) return rejectWithValue({ detail: 'No access token available' })
 
-      if (!accessToken) {
-        accessToken = getTokensFromStorage().access
-      }
-
-      if (!accessToken) {
-        return rejectWithValue({ detail: 'No access token available' })
-      }
-
-      // Check if token needs refresh
+      // Proactively refresh if the access token is expired or nearly so
       if (isTokenExpired(accessToken)) {
-        console.log('🔄 Token expired, refreshing before fetching user...')
-        const refreshResult = await dispatch(refreshAccessToken()).unwrap()
-        accessToken = refreshResult.access
+        const result = await dispatch(refreshAccessToken()).unwrap()
+        accessToken = result.access
       }
 
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_AUTH}`,
-        {
+      const fetchWithToken = async (token) =>
+        fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_AUTH}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${token}`
           }
-        }
-      )
+        })
 
-      const data = await response.json()
+      let response = await fetchWithToken(accessToken)
 
-      if (!response.ok) {
-        // If 401, try refresh once more
-        if (response.status === 401) {
-          console.log('🔄 Got 401, attempting token refresh...')
-          const refreshResult = await dispatch(refreshAccessToken()).unwrap()
-
-          // Retry with new token
-          const retryResponse = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_AUTH}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${refreshResult.access}`
-              }
-            }
-          )
-
-          const retryData = await retryResponse.json()
-
-          if (!retryResponse.ok) {
-            return rejectWithValue(retryData)
-          }
-
-          return retryData
-        }
-
-        return rejectWithValue(data)
+      // If we still get 401, try one more refresh (handles race conditions)
+      if (response.status === 401) {
+        const result = await dispatch(refreshAccessToken()).unwrap()
+        accessToken = result.access
+        response = await fetchWithToken(accessToken)
       }
 
+      const data = await response.json()
+      if (!response.ok) return rejectWithValue(data)
       return data
     } catch (error) {
-      console.error('❌ Fetch user details error:', error)
-      return rejectWithValue({
-        detail: 'Failed to fetch user details'
-      })
+      return rejectWithValue({ detail: error?.message || 'Failed to fetch user details' })
     }
   }
 )
 
-// Initial state
+// ─── Slice ────────────────────────────────────────────────────────────────────
+
 const initialState = {
   user: null,
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  isInitialized: false,
   loading: false,
   error: null,
-  registerSuccess: false,
-  isInitialized: false,
-  refreshTimer: null
+  registerSuccess: false
 }
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    /**
+     * Called once on app boot (AuthProvider mount).
+     *
+     * THE CORE FIX:
+     * We no longer use the access token to decide if the user is authenticated.
+     * The access token expires every hour — that's expected and fine.
+     * Instead we check the REFRESH TOKEN (30-day lifetime).
+     * If it's still valid, the user is authenticated; AuthProvider will
+     * immediately fire refreshAccessToken() to get a fresh access token.
+     */
     initializeAuth: (state) => {
-      const tokens = getTokensFromStorage()
-      state.accessToken = tokens.access
-      state.refreshToken = tokens.refresh
-      state.isAuthenticated = !!tokens.access && !isTokenExpired(tokens.access)
-      state.isInitialized = true
+      const { access, refresh } = getTokensFromStorage()
 
-      console.log('🔐 Auth initialized:', {
-        hasAccessToken: !!tokens.access,
-        hasRefreshToken: !!tokens.refresh,
-        isAuthenticated: state.isAuthenticated
-      })
+      state.accessToken = access
+      state.refreshToken = refresh
+
+      // Authenticated = has a non-expired refresh token.
+      // Access token expiry is irrelevant here; it will be refreshed shortly.
+      const refreshAlive = refresh && !isTokenExpired(refresh, 0)
+      state.isAuthenticated = !!refreshAlive
+      state.isInitialized = true
     },
+
     logout: (state) => {
       state.user = null
       state.accessToken = null
@@ -353,21 +299,16 @@ const authSlice = createSlice({
       state.error = null
       state.registerSuccess = false
       removeTokensFromStorage()
-      console.log('👋 User logged out')
     },
-    clearError: (state) => {
-      state.error = null
-    },
-    clearRegisterSuccess: (state) => {
-      state.registerSuccess = false
-    },
-    setUser: (state, action) => {
-      state.user = action.payload
-    }
+
+    clearError: (state) => { state.error = null },
+    clearRegisterSuccess: (state) => { state.registerSuccess = false },
+    setUser: (state, action) => { state.user = action.payload }
   },
+
   extraReducers: (builder) => {
     builder
-      // Login cases
+      // ── Login ──────────────────────────────────────────────────────────────
       .addCase(loginUser.pending, (state) => {
         state.loading = true
         state.error = null
@@ -384,7 +325,8 @@ const authSlice = createSlice({
         state.error = action.payload?.detail || 'Login failed'
         state.isAuthenticated = false
       })
-      // Register cases
+
+      // ── Register ───────────────────────────────────────────────────────────
       .addCase(registerUser.pending, (state) => {
         state.loading = true
         state.error = null
@@ -392,9 +334,9 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false
-        state.isAuthenticated = false // Not authenticated yet — email unverified
+        state.isAuthenticated = false // email not verified yet
         state.error = null
-        state.registerSuccess = true // Triggers "check your inbox" UI in SignUpPage
+        state.registerSuccess = true
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
@@ -402,7 +344,8 @@ const authSlice = createSlice({
         state.isAuthenticated = false
         state.registerSuccess = false
       })
-      // Email verification cases
+
+      // ── Email verification ─────────────────────────────────────────────────
       .addCase(verifyEmail.pending, (state) => {
         state.loading = true
         state.error = null
@@ -411,19 +354,18 @@ const authSlice = createSlice({
         state.loading = false
         state.accessToken = action.payload.access
         state.refreshToken = action.payload.refresh
-        state.user = action.payload.user
+        state.user = action.payload.user ?? null
         state.isAuthenticated = true
         state.error = null
       })
       .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false
         state.error =
-          action.payload?.error ||
-          action.payload?.detail ||
-          'Verification failed'
+          action.payload?.error || action.payload?.detail || 'Verification failed'
         state.isAuthenticated = false
       })
-      // Request password reset cases
+
+      // ── Password reset request ─────────────────────────────────────────────
       .addCase(requestPasswordReset.pending, (state) => {
         state.loading = true
         state.error = null
@@ -434,10 +376,10 @@ const authSlice = createSlice({
       })
       .addCase(requestPasswordReset.rejected, (state, action) => {
         state.loading = false
-        state.error =
-          action.payload?.error || action.payload?.detail || 'Request failed'
+        state.error = action.payload?.error || action.payload?.detail || 'Request failed'
       })
-      // Confirm password reset cases
+
+      // ── Password reset confirm ─────────────────────────────────────────────
       .addCase(confirmPasswordReset.pending, (state) => {
         state.loading = true
         state.error = null
@@ -448,28 +390,32 @@ const authSlice = createSlice({
       })
       .addCase(confirmPasswordReset.rejected, (state, action) => {
         state.loading = false
-        state.error =
-          action.payload?.error || action.payload?.detail || 'Reset failed'
+        state.error = action.payload?.error || action.payload?.detail || 'Reset failed'
       })
-      // Refresh token cases
+
+      // ── Token refresh ──────────────────────────────────────────────────────
       .addCase(refreshAccessToken.pending, (state) => {
         state.loading = true
       })
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         state.loading = false
         state.accessToken = action.payload.access
+        // Persist the rotated refresh token (ROTATE_REFRESH_TOKENS=True)
+        state.refreshToken = action.payload.refresh
+        state.isAuthenticated = true
         state.error = null
       })
       .addCase(refreshAccessToken.rejected, (state) => {
+        // Refresh token is dead (expired / revoked) → full logout
         state.loading = false
         state.accessToken = null
         state.refreshToken = null
         state.isAuthenticated = false
         state.user = null
         removeTokensFromStorage()
-        console.log('❌ Token refresh failed, logging out')
       })
-      // Fetch user details cases
+
+      // ── Fetch user details ─────────────────────────────────────────────────
       .addCase(fetchUserDetails.pending, (state) => {
         state.loading = true
       })
@@ -481,12 +427,9 @@ const authSlice = createSlice({
       .addCase(fetchUserDetails.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload?.detail || 'Failed to fetch user details'
-
-        // If it's an auth error, logout
-        if (
-          action.payload?.detail?.includes('token') ||
-          action.payload?.detail?.includes('authentication')
-        ) {
+        // Only force logout on hard auth errors, not transient failures
+        const msg = (action.payload?.detail || '').toLowerCase()
+        if (msg.includes('token') || msg.includes('authentication')) {
           state.accessToken = null
           state.refreshToken = null
           state.isAuthenticated = false
@@ -497,17 +440,11 @@ const authSlice = createSlice({
   }
 })
 
-export const {
-  initializeAuth,
-  logout,
-  clearError,
-  clearRegisterSuccess,
-  setUser
-} = authSlice.actions
+export const { initializeAuth, logout, clearError, clearRegisterSuccess, setUser } =
+  authSlice.actions
 
 export default authSlice.reducer
 
-// Selector to get token expiry time
-export const selectTokenExpiryTime = (state) => {
-  return getTokenExpiryTime(state.auth.accessToken)
-}
+// Selector: ms until access token expires (used by AuthProvider timer)
+export const selectAccessTokenExpiry = (state) =>
+  msUntilExpiry(state.auth.accessToken)
