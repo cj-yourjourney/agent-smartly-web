@@ -40,7 +40,6 @@ const PILLARS = [
   { label: 'Key Concepts', weight: 15, desc: '134 concepts, time-tracked' }
 ]
 
-// ── Small reusable connector line ─────────────────────────────────────────────
 function Connector() {
   return (
     <div className="flex justify-center my-1">
@@ -49,7 +48,6 @@ function Connector() {
   )
 }
 
-// ── Chapter card shell ─────────────────────────────────────────────────────────
 function Chapter({
   accentClass = '',
   headerClass = '',
@@ -125,9 +123,16 @@ export default function AboutPage() {
                 </span>
               </h1>
               <p className="text-base-content/60 text-base sm:text-lg leading-relaxed max-w-md">
-                This isn't a product built by a big company. It's a project born
-                out of a layoff, a career pivot, and the stubborn belief that if
-                you can't find the right tool — you build it.
+                No prep book. No guesswork. Just{' '}
+                <span className="font-semibold text-base-content">
+                  134 concepts
+                </span>
+                ,{' '}
+                <span className="font-semibold text-base-content">
+                  7 topics
+                </span>
+                , and a clear loop that tells you exactly what to study next —
+                built by someone who passed using it.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-2">
                 {[
@@ -147,9 +152,9 @@ export default function AboutPage() {
               {/* Social proof stat strip */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-5 pt-2 border-t border-base-300 w-full">
                 {[
-                  { value: '500+', label: 'exam passers' },
-                  { value: '1st try', label: 'how most pass' },
-                  { value: '0', label: 'ads, no marketing budget' }
+                  { value: '500+', label: 'people passed' },
+                  { value: '134', label: 'concepts — nothing extra' },
+                  { value: '×7', label: "topics, then you're done" }
                 ].map((stat) => (
                   <div
                     key={stat.label}
@@ -165,6 +170,47 @@ export default function AboutPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── UVP STRIP ────────────────────────────────────────────────────────── */}
+      <div className="bg-base-100 border-b border-base-200 py-8 px-5">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-xs font-bold tracking-widest uppercase text-base-content/35 mb-5">
+            Why it works
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                icon: '📌',
+                title: "134 concepts. That's it.",
+                desc: 'Every question maps to the official DRE blueprint. No filler, no guesswork — only what the exam actually tests.'
+              },
+              {
+                icon: '🔁',
+                title: 'Review → Practice → Repeat ×7',
+                desc: 'Study one topic, drill questions in that topic, move on. You always know exactly what to do next.'
+              },
+              {
+                icon: '📊',
+                title: "Know when you're ready",
+                desc: 'Your Exam Readiness Score tracks accuracy, volume, coverage, and concepts — all weighted to match the real exam.'
+              }
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="bg-base-200 rounded-2xl px-5 py-5 flex flex-col gap-2"
+              >
+                <span className="text-xl">{item.icon}</span>
+                <p className="font-semibold text-base-content text-sm">
+                  {item.title}
+                </p>
+                <p className="text-base-content/55 text-sm leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -236,19 +282,20 @@ export default function AboutPage() {
           <p>
             I enrolled in my pre-licensing course and threw myself into
             studying. I bought the prep books. I used the flashcard apps. I paid
-            for a third-party exam site. None of them felt right — and I
-            couldn't tell if that was the tools or just me not being smart
-            enough.
+            for a third-party exam site. None of them felt right.
           </p>
           <p>
-            I remember sitting at my kitchen table at 11pm, grinding through
-            practice questions, and thinking:{' '}
+            The problem wasn't the volume of content — it was that there was{' '}
+            <span className="font-semibold text-base-content">
+              too much of it
+            </span>
+            . Hundreds of random questions across topics that weren't weighted
+            to the real exam. No clear starting point. No way to know if the
+            studying was working. I remember sitting at my kitchen table at
+            11pm, grinding through practice questions, thinking:{' '}
             <span className="font-semibold text-base-content">
               I have no idea if I'm actually ready or just spinning my wheels.
-            </span>{' '}
-            There was no signal. No score that meant anything. Just a completion
-            percentage that told me nothing about whether I'd walk out of that
-            exam room with a pass.
+            </span>
           </p>
           <p>
             The questions didn't match the official DRE blueprint. The
@@ -257,14 +304,15 @@ export default function AboutPage() {
           </p>
           <div className="rounded-xl border-l-4 border-error/40 bg-error/5 px-4 sm:px-5 py-4 !mt-4">
             <p className="text-base-content/75 italic leading-relaxed text-sm">
-              "The worst part wasn't the hard questions. It was the uncertainty.
-              Not knowing if the studying was working."
+              "The worst part wasn't the hard questions. It was the uncertainty
+              — not knowing if the studying was working. That's exactly what I
+              built Agent Smartly to fix."
             </p>
           </div>
           <p>
             As an engineer, there's a thought pattern that's hard to turn off:{' '}
             <span className="font-semibold text-base-content">
-              if I can't find the right solution, I'll just build it.
+              if I can't find the right solution, I'll build it.
             </span>
           </p>
         </Chapter>
@@ -286,15 +334,6 @@ export default function AboutPage() {
           </div>
           <div className="px-5 sm:px-6 py-5 space-y-3 text-base-content/65 leading-relaxed text-sm sm:text-base">
             <p>
-              Let me be clear about what this was:{' '}
-              <span className="font-semibold text-base-content">
-                I wasn't trying to build a business. I just didn't want to fail
-                my exam.
-              </span>{' '}
-              I wasn't thinking about users or revenue or launch dates. I was
-              thinking about how to not waste six months of my life.
-            </p>
-            <p>
               I started with the{' '}
               <a
                 href="https://www.dre.ca.gov/examinees/SalesExamContent.html#property"
@@ -304,19 +343,34 @@ export default function AboutPage() {
               >
                 official DRE Salesperson Examination Content Outline
               </a>{' '}
-              and used it as the backbone for everything — every practice
-              question, every key concept, every topic weight. Not guesswork.
-              The actual exam blueprint.
+              and used it as the backbone for everything. Not guesswork — the
+              actual exam blueprint. I mapped{' '}
+              <span className="font-semibold text-base-content">
+                134 key concepts
+              </span>{' '}
+              across{' '}
+              <span className="font-semibold text-base-content">7 topics</span>,
+              weighted exactly as the DRE does. Practice of Real Estate gets 25%
+              of the exam — so it gets 25% of the questions. No topic gets more
+              attention than it deserves.
             </p>
             <p>
-              Then I built the feature I wished I'd had from day one: an{' '}
+              Then I built a simple loop:{' '}
+              <span className="font-semibold text-base-content">
+                review the key concepts in a topic → drill practice questions in
+                that topic → check your score → move to the next topic.
+              </span>{' '}
+              Repeat × 7. That's the whole method. No guessing what to study
+              next. No wasted sessions on topics you've already mastered.
+            </p>
+            <p>
+              The last piece was the feature I wished I'd had from day one: an{' '}
               <span className="font-semibold text-base-content">
                 Exam Readiness Score
-              </span>
-              . Not just a completion percentage — a composite score built on
-              four pillars weighted to how the real exam is structured. It also
-              factors in study freshness, because cramming three months ago and
-              doing nothing since doesn't mean you're ready today.
+              </span>{' '}
+              — a composite score built on four pillars, all weighted to how the
+              real exam is structured. It tells you not just how much you've
+              done, but whether you're actually ready to sit.
             </p>
           </div>
 
@@ -349,7 +403,6 @@ export default function AboutPage() {
           {/* Dashboard mockup */}
           <div className="px-5 sm:px-6 pb-6">
             <div className="rounded-2xl border border-primary/20 bg-base-100 overflow-hidden shadow-md">
-              {/* Mock browser bar */}
               <div className="bg-base-200 px-4 py-2.5 flex items-center gap-2 border-b border-base-300">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-error/50" />
@@ -362,9 +415,7 @@ export default function AboutPage() {
                   </span>
                 </div>
               </div>
-              {/* Mock dashboard content */}
               <div className="p-4 sm:p-5 space-y-4">
-                {/* Score header */}
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-base-content/40 mb-0.5">
@@ -389,7 +440,6 @@ export default function AboutPage() {
                     87%
                   </div>
                 </div>
-                {/* Mini topic bars */}
                 <div className="space-y-2">
                   {[
                     {
@@ -436,17 +486,11 @@ export default function AboutPage() {
                 2025 — The Proof
               </p>
               <h2 className="font-bold text-base-content text-base sm:text-lg leading-snug">
-                I passed on my first try
+                I passed on my first try. Then 500+ others did too.
               </h2>
             </div>
           </div>
           <div className="px-5 sm:px-6 py-5 space-y-3 text-base-content/65 leading-relaxed text-sm sm:text-base">
-            <p>
-              Honestly? I wasn't sure it would work for anyone else. It had only
-              worked for me. Maybe I just got lucky with the questions. Maybe
-              I'm better at multiple choice than most people. I had no idea if
-              what I built was genuinely good — or just good enough for me.
-            </p>
             <p>
               In 2025, I sat for the DRE Salesperson Exam using Agent Smartly as
               my primary prep tool. When I walked out of that exam room and saw
@@ -458,26 +502,29 @@ export default function AboutPage() {
             </p>
             <p>
               It meant everything — not just because I'd earned my license, but
-              because it proved the approach actually worked. I hadn't just
-              studied hard. I had studied <span className="italic">smart</span>.
+              because it proved the method works. Not just for me. I started
+              sharing it with friends who were also preparing. They passed too.
+              Then their friends asked. Word spread through referrals — no ads,
+              no marketing budget, just people telling other people it worked.
             </p>
             <p>
-              I started sharing it with friends who were also preparing. They
-              passed too. Then their friends asked. Word spread through
-              referrals — no ads, no marketing budget, just people telling other
-              people it worked. That organic growth told me something real was
-              here.
+              Today,{' '}
+              <span className="font-semibold text-base-content">
+                500+ people have passed the CA real estate exam using Agent
+                Smartly
+              </span>
+              . Every single one used the same method: 134 concepts, 7 topics,
+              review → practice → check progress. Repeat until ready.
             </p>
           </div>
           <div className="mx-5 sm:mx-6 mb-6 bg-success/10 border border-success/20 rounded-xl px-4 sm:px-5 py-4 flex items-center gap-4">
             <span className="text-3xl shrink-0">✅</span>
             <p className="text-sm text-base-content/70 leading-relaxed">
-              Passed the CA DRE Salesperson Exam on the{' '}
               <span className="font-semibold text-base-content">
-                first attempt
-              </span>
-              , 2025. Then 20+ others did too — all through word of mouth, zero
-              ads.
+                500+ CA exam passers
+              </span>{' '}
+              — all through word of mouth, zero ads. The method works because
+              it's built on the actual DRE blueprint, not guesswork.
             </p>
           </div>
         </div>
@@ -548,11 +595,11 @@ export default function AboutPage() {
               that actually changes their lives.
             </p>
             <p>
-              Every question, every concept, every feature on this site exists
-              because I needed it myself first. I know what it feels like to sit
-              at your kitchen table at 11pm, unsure if the studying is working.
-              I built this so that feeling goes away — and so you walk into that
-              exam room knowing exactly where you stand.
+              Every question, every concept, every feature exists because I
+              needed it myself first. I know what it feels like to sit at your
+              kitchen table at 11pm, unsure if the studying is working. I built
+              this so that feeling goes away — and so you walk into that exam
+              room knowing exactly where you stand.
             </p>
           </div>
         </div>
@@ -566,7 +613,8 @@ export default function AboutPage() {
             <span className="text-primary">Now let's get you there.</span>
           </h2>
           <p className="text-base-content/55 text-base sm:text-lg max-w-md">
-            Start your free 3-day trial — no credit card required.
+            134 concepts. 7 topics. Start with 60 free questions — no credit
+            card required.
           </p>
           <div className="flex flex-col items-center gap-3 w-full sm:w-auto">
             <button
@@ -576,7 +624,7 @@ export default function AboutPage() {
               Start Free Trial →
             </button>
             <p className="text-base-content/40 text-xs font-medium">
-              3 days free · then $9.99 for 1-month access · no auto-renewal
+              60 questions free · then from $29.50 · no auto-renewal
             </p>
           </div>
         </div>

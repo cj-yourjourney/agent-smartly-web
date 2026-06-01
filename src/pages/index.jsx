@@ -98,19 +98,22 @@ export default function Home() {
               className="font-display text-4xl md:text-5xl leading-tight hero-fade-up"
               style={{ animationDelay: '0ms' }}
             >
-              Pass the CA Real Estate{' '}
+              Pass the CA Real Estate Salesperson Exam —{' '}
               <span className="font-display-italic text-primary">
-                Salesperson
-              </span>{' '}
-              Exam
+                Without the Overwhelm
+              </span>
             </h1>
 
             <p
               className="text-lg text-base-content/70 max-w-lg hero-fade-up"
               style={{ animationDelay: '120ms' }}
             >
-              Over 1,300 practice questions, 134 key concepts, and full progress
-              tracking — built around the exact topics the DRE tests you on.
+              Skip the textbooks.{' '}
+              <span className="font-semibold text-base-content">
+                134 concepts. 7 topics.
+              </span>{' '}
+              Review a topic, practice questions on it, check your score. Repeat
+              × 7. That's the whole method.
             </p>
 
             <div
@@ -156,11 +159,11 @@ export default function Home() {
             >
               <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                 <span className="text-success text-base hero-check">✓</span>
-                60 free questions · No credit card required
+                500+ people passed the CA real estate exam using Agent Smartly
               </p>
               <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                 <span className="text-success text-base hero-check">✓</span>
-                Plans from $29.50 · One-time charge · No auto-renewal
+                60 free questions · No credit card required
               </p>
             </div>
           </div>
@@ -174,11 +177,11 @@ export default function Home() {
             style={{ animationDelay: '200ms' }}
           >
             <img
-              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
-              alt="Exam Readiness Score dashboard — 84.5/100 On Track"
-              className="w-full h-auto block rounded-2xl border border-base-300 hero-float"
+              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/hero-image.png"
+              alt="Study method: Review Key Concepts → Practice Questions → Check Your Progress, repeated for all 7 DRE exam topics"
+              className="w-full h-auto block hero-float"
               style={{
-                filter: 'drop-shadow(0 20px 48px rgba(0,0,0,0.18))'
+                filter: 'drop-shadow(0 20px 48px rgba(0,0,0,0.10))'
               }}
               loading="eager"
             />
@@ -191,10 +194,10 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4">
             {[
+              { value: '134', label: 'Essential Key Concepts' },
+              { value: '7', label: 'Exam Topics — Review & Practice Each' },
               { value: '1,300+', label: 'Practice Questions' },
-              { value: '134', label: 'Key Concepts' },
-              { value: '7', label: 'Exam Topics' },
-              { value: '500+', label: 'Exam Takers' }
+              { value: '500+', label: 'Exams Passed' }
             ].map((s, i) => (
               <div
                 key={i}
@@ -217,185 +220,269 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── TOPICS ── */}
-      <div className="py-16 px-4 bg-base-100">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
-            Exam Blueprint
-          </p>
-          <h2 className="font-display text-3xl md:text-4xl text-center mb-10">
-            All 7 DRE Exam Topics Covered
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {topics.map((t, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 bg-base-200 rounded-xl px-4 py-3"
-              >
-                <span className="text-base shrink-0">{t.icon}</span>
-                <span className="text-sm font-medium flex-1">{t.title}</span>
-                <span className="text-xs font-bold text-primary shrink-0 ml-1">
-                  {t.pct}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── FEATURES SHOWCASE ── */}
-      <div className="py-24 px-4 bg-base-100">
-        <div className="max-w-6xl mx-auto">
+      {/* ── HOW IT WORKS ── */}
+      <div className="py-24 px-4 bg-base-100 border-t border-base-200">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
           <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
             How It Works
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
-            Everything You Need to Pass
+            Less Material. More Clarity. Faster Pass.
           </h2>
-          <p className="text-center text-base-content/60 text-lg mb-20 max-w-xl mx-auto">
-            Three tools, working together, aligned to the official DRE
-            salesperson exam blueprint.
+          <p className="text-center text-base-content/60 text-lg mb-10 max-w-2xl mx-auto">
+            Most CA exam prep sites give you prep books, video lectures, and
+            thousands of random questions — so much you don't know where to
+            start. Agent Smartly does the opposite: only the essentials, in a
+            clear order, with one tool for each step.
           </p>
 
-          {/* Feature 1 — Exam Readiness Score (image left) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-28">
-            <img
-              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
-              alt="Exam Readiness Score dashboard"
-              className="w-full h-auto block rounded-2xl border border-base-200"
-              style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
-              loading="lazy"
-            />
-            <div className="flex flex-col gap-4">
-              <span className="badge badge-primary badge-outline w-fit">
-                01 — Exam Readiness Score
-              </span>
-              <h3 className="font-display text-3xl md:text-4xl">
-                Know If You're Actually Ready
-              </h3>
-              <p className="text-base-content/65 text-lg leading-relaxed">
-                A composite score built on four weighted pillars — accuracy,
-                question volume, topic coverage, and key concepts — calculated
-                to match how the real DRE exam is structured. No more guessing
-                whether your prep is working.
+          {/* Contrast */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-20 max-w-3xl mx-auto">
+            <div className="rounded-2xl border border-base-300 bg-base-200 px-6 py-5 flex flex-col gap-3">
+              <p className="text-xs font-bold tracking-widest uppercase text-base-content/40">
+                Other prep sites
               </p>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <ul className="flex flex-col gap-2">
                 {[
-                  '4-Pillar Score',
-                  'DRE-Weighted',
-                  'Study Freshness',
-                  'On Track Indicator'
-                ].map((p) => (
-                  <span
-                    key={p}
-                    className="badge badge-primary badge-outline badge-sm"
+                  'Hundreds of random questions',
+                  'Prep books with everything in them',
+                  'No clear starting point',
+                  'You guess what matters',
+                  'Overwhelming, not guiding'
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-sm text-base-content/50"
                   >
-                    {p}
-                  </span>
+                    <span className="text-error mt-0.5 shrink-0">✕</span>
+                    {item}
+                  </li>
                 ))}
-              </div>
+              </ul>
+            </div>
+            <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 px-6 py-5 flex flex-col gap-3">
+              <p className="text-xs font-bold tracking-widest uppercase text-primary">
+                Agent Smartly
+              </p>
+              <ul className="flex flex-col gap-2">
+                {[
+                  '134 concepts — only what the DRE tests',
+                  'Organized by the 7 exact exam topics',
+                  'Three steps, always know what to do next',
+                  'Review → Practice → Check Progress',
+                  'Direct, focused, nothing extra'
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-sm text-base-content/70"
+                  >
+                    <span className="text-success mt-0.5 shrink-0">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          {/* Feature 2 — Practice Questions (full-width: centered text + dual images) */}
-          <div className="mb-28">
-            {/* Centered text header */}
-            <div className="flex flex-col gap-4 items-center text-center max-w-2xl mx-auto mb-12">
-              <span className="badge badge-primary badge-outline w-fit">
-                02 — Practice Questions
-              </span>
+          {/* Step 1 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
+            <div className="flex flex-col gap-4 lg:order-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg shrink-0">
+                  1
+                </div>
+                <span className="text-xs font-bold tracking-widest uppercase text-primary">
+                  Review
+                </span>
+              </div>
               <h3 className="font-display text-3xl md:text-4xl">
-                1,300+ Questions with Instant Explanations
+                Learn the Key Concepts in One Topic
               </h3>
               <p className="text-base-content/65 text-lg leading-relaxed">
-                Pick your mode — run the full 75-question timed exam, or drill
-                by topic. Every question comes with a detailed explanation and
-                memory tip the moment you answer — so you learn <em>why</em>,
-                not just what.
+                Start with the{' '}
+                <span className="font-semibold text-base-content">
+                  134 essential key concepts
+                </span>{' '}
+                — the real terms, rules, and definitions the DRE actually tests.
+                Nothing more. Study one subject at a time (e.g., Agency Laws)
+                with definitions, memory tricks, and AI explanations built in.
               </p>
-              <div className="flex flex-wrap gap-2 justify-center mt-1">
+              <div className="flex flex-wrap gap-2">
                 {[
-                  'Full Practice Exam',
-                  'Study by Topic',
-                  'Instant Explanations',
-                  'Memory Tips'
-                ].map((p) => (
-                  <span
-                    key={p}
-                    className="badge badge-primary badge-outline badge-sm"
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Side-by-side screenshots */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <div className="flex flex-col gap-2">
-                <img
-                  src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice-mode-05-04.png"
-                  alt="Practice Mode — choose Full Practice Exam or Study by Topic"
-                  className="w-full h-auto block rounded-2xl border border-base-200"
-                  style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
-                  loading="lazy"
-                />
-                <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
-                  Choose your mode
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <img
-                  src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
-                  alt="Practice question with instant explanation and memory tip"
-                  className="w-full h-auto block rounded-2xl border border-base-200"
-                  style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
-                  loading="lazy"
-                />
-                <p className="text-center text-xs text-base-content/40 font-medium tracking-wide uppercase pt-1">
-                  Answer & learn instantly
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Feature 3 — Key Concepts (image left) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <img
-              src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
-              alt="Key Concepts organized by topic with review tracking"
-              className="w-full h-auto block rounded-2xl border border-base-200"
-              style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
-              loading="lazy"
-            />
-            <div className="flex flex-col gap-4">
-              <span className="badge badge-primary badge-outline w-fit">
-                03 — Key Concepts
-              </span>
-              <h3 className="font-display text-3xl md:text-4xl">
-                134 Concepts That Actually Stick
-              </h3>
-              <p className="text-base-content/65 text-lg leading-relaxed">
-                Every essential term and rule from the DRE blueprint, organized
-                by topic with definitions, memory tricks, and AI explanations on
-                demand. Tap any concept for a deeper breakdown — and track which
-                ones you've reviewed.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {[
-                  'Definitions',
+                  '134 Key Concepts',
+                  '7 Topics Organized',
                   'Memory Tricks',
                   'AI Explain',
                   'Review Tracking'
-                ].map((p) => (
+                ].map((tag) => (
                   <span
-                    key={p}
+                    key={tag}
                     className="badge badge-primary badge-outline badge-sm"
                   >
-                    {p}
+                    {tag}
                   </span>
                 ))}
+              </div>
+            </div>
+            <div className="lg:order-2">
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
+                alt="Key Concepts page — 134 concepts organized by topic"
+                className="w-full h-auto block rounded-2xl border border-base-200"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          {/* Divider arrow */}
+          <div className="flex items-center justify-center mb-24 gap-4">
+            <div className="flex-1 h-px bg-base-300" />
+            <span className="text-primary text-2xl">↓</span>
+            <div className="flex-1 h-px bg-base-300" />
+          </div>
+
+          {/* Step 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
+            <div className="lg:order-2 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg shrink-0">
+                  2
+                </div>
+                <span className="text-xs font-bold tracking-widest uppercase text-primary">
+                  Practice
+                </span>
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl">
+                Drill Questions in That Same Topic
+              </h3>
+              <p className="text-base-content/65 text-lg leading-relaxed">
+                Immediately test what you just learned with{' '}
+                <span className="font-semibold text-base-content">
+                  1,300+ topic-filtered practice questions
+                </span>
+                . Every answer comes with a full explanation and memory tip — so
+                you learn why, not just what. Aim for 70%+ before moving on.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'Study by Topic',
+                  '1,300+ Questions',
+                  'Instant Explanations',
+                  'Memory Tips',
+                  'Full Practice Exam'
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="badge badge-primary badge-outline badge-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="lg:order-1 grid grid-cols-2 gap-4">
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/practice-mode-05-04.png"
+                alt="Practice mode — choose topic or full exam"
+                className="w-full h-auto block rounded-2xl border border-base-200"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                loading="lazy"
+              />
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/question-05-04.png"
+                alt="Practice question with instant explanation"
+                className="w-full h-auto block rounded-2xl border border-base-200"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          {/* Divider arrow */}
+          <div className="flex items-center justify-center mb-24 gap-4">
+            <div className="flex-1 h-px bg-base-300" />
+            <span className="text-primary text-2xl">↓</span>
+            <div className="flex-1 h-px bg-base-300" />
+          </div>
+
+          {/* Step 3 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div className="flex flex-col gap-4 lg:order-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg shrink-0">
+                  3
+                </div>
+                <span className="text-xs font-bold tracking-widest uppercase text-primary">
+                  Check Progress
+                </span>
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl">
+                Know Exactly Where You Stand
+              </h3>
+              <p className="text-base-content/65 text-lg leading-relaxed">
+                Your{' '}
+                <span className="font-semibold text-base-content">
+                  Exam Readiness Score
+                </span>{' '}
+                tracks accuracy, question volume, topic coverage, and key
+                concepts reviewed — all weighted to match the real DRE exam. See
+                which topic to focus on next and know when you're actually ready
+                to sit the exam.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  'Readiness Score',
+                  'Per-Topic Accuracy',
+                  'DRE-Weighted',
+                  'On Track Indicator'
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="badge badge-primary badge-outline badge-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="lg:order-2">
+              <img
+                src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/exam-readiness-score-05-04.png"
+                alt="Exam Readiness Score dashboard"
+                className="w-full h-auto block rounded-2xl border border-base-200"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          {/* ×7 + Reddit quote */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl bg-base-200 border border-base-300 px-8 py-7 flex items-center gap-5">
+              <div className="text-5xl font-bold text-primary shrink-0">×7</div>
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-base-content">
+                  Repeat for all 7 DRE exam topics
+                </p>
+                <p className="text-base-content/55 text-sm leading-relaxed">
+                  Agency Laws · Contracts · Financing · Property Ownership ·
+                  Valuation · Transfer · Practice of Real Estate
+                </p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-base-300 bg-base-100 px-7 py-6 flex gap-4 items-start">
+              <div className="text-2xl shrink-0">💬</div>
+              <div className="flex flex-col gap-1">
+                <p className="text-base-content/80 text-sm leading-relaxed italic">
+                  "I review all key concepts in one topic like Contracts, then
+                  take a practice test in Contracts. I instantly see if I really
+                  understand them. Then repeat for all topics."
+                </p>
+                <p className="text-xs text-base-content/40 font-medium mt-1">
+                  — r/CalRealEstateExam · CA exam passer
+                </p>
               </div>
             </div>
           </div>
@@ -409,10 +496,11 @@ export default function Home() {
             Results
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
-            Trusted by CA Exam Takers
+            500+ People Passed With Agent Smartly
           </h2>
           <p className="text-center text-base-content/50 text-lg mb-14 max-w-xl mx-auto">
-            Real people who prepared with Agent Smartly.
+            Real CA exam passers who prepared with Agent Smartly. Here's what
+            they said.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -576,11 +664,11 @@ export default function Home() {
             ✓ 60 Free Questions — No Credit Card Required
           </div>
           <h2 className="font-display text-4xl md:text-5xl text-primary-content">
-            Ready to Pass Your Exam?
+            Start the Loop. Pass the Exam.
           </h2>
           <p className="text-primary-content/70 text-lg max-w-md">
-            Join 500+ CA real estate exam takers who prepared smarter with Agent
-            Smartly.
+            Review key concepts by topic. Practice questions in that topic.
+            Repeat × 7. It's the most direct path — and it starts free.
           </p>
           {isAuthenticated ? (
             <button
