@@ -134,9 +134,6 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
       {/* ── Plan picker (sale prices rendered automatically) ─────────────── */}
       <PlanSelector selected={selectedPlan} onChange={setSelectedPlan} />
 
-      {/* ── One-time charge notice ───────────────────────────────────────── */}
-      <OneTimeChargeNotice plan={selectedPlan} />
-
       {/* ── Stripe card input ────────────────────────────────────────────── */}
       <div>
         <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
@@ -172,6 +169,9 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
           Encrypted &amp; secured by Stripe. We never store your card.
         </span>
       </div>
+
+      {/* ── One-time charge notice ───────────────────────────────────────── */}
+      <OneTimeChargeNotice plan={selectedPlan} />
 
       {/* ── Submit ───────────────────────────────────────────────────────── */}
       <button
