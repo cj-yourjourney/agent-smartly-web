@@ -1,6 +1,8 @@
 // src/features/about/AboutPage.jsx
 import { useRouter } from 'next/router'
 import { ROUTES } from '@/shared/constants/routes'
+import { PLANS, ACTIVE_SALE } from '@/features/pricing/pricingConfig'
+import SaleBanner from '@/features/pricing/components/SaleBanner'
 
 const TESTIMONIALS = [
   {
@@ -86,6 +88,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-base-100">
+      <SaleBanner />
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <div className="bg-base-200 border-b border-base-300">
         <div className="max-w-5xl mx-auto px-5 sm:px-6 py-14 sm:py-20">
@@ -605,6 +608,80 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* ── PRICING ──────────────────────────────────────────────────────────── */}
+      <div className="py-24 px-4 bg-base-100 border-t border-base-200">
+        <div className="max-w-xl mx-auto">
+          <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
+            Pricing
+          </p>
+          <h2 className="font-display text-4xl md:text-5xl text-center mb-3">
+            One-Time Payment.
+          </h2>
+          <p className="text-center text-base-content/55 text-base mb-8 max-w-sm mx-auto">
+            All plans include everything. Pick how long you need.
+          </p>
+
+          {/* Plan rows */}
+          <div className="flex flex-col gap-2 mb-6">
+            {PLANS.map((plan) => {
+              const isPopular = plan.id === 'month'
+              return (
+                <div
+                  key={plan.id}
+                  className={`
+                    flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all
+                    ${isPopular ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-100'}
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    {isPopular && (
+                      <span className="badge badge-primary badge-sm font-semibold hidden sm:inline-flex">
+                        Popular
+                      </span>
+                    )}
+                    <div>
+                      <span className="text-sm font-semibold text-base-content">
+                        {plan.label}
+                      </span>
+                      <span className="text-xs text-base-content/45 ml-2">
+                        {plan.description}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end leading-tight">
+                    <span className="text-sm font-bold text-base-content">
+                      {plan.price}
+                    </span>
+                    {ACTIVE_SALE.enabled && plan.originalPrice && (
+                      <span className="text-xs text-base-content/35 line-through">
+                        {plan.originalPrice}
+                      </span>
+                    )}
+                    {ACTIVE_SALE.enabled && plan.saleSavings && (
+                      <span className="text-[10px] font-semibold text-success">
+                        {plan.saleSavings}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <button
+            className="btn btn-primary w-full h-12 text-base mb-5"
+            onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
+          >
+            Start Free — Pick a Plan Later →
+          </button>
+
+          <p className="text-center text-xs text-base-content/35">
+            60 questions free · no credit card to start · one-time charge · no
+            auto-renewal
+          </p>
+        </div>
+      </div>
+
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
       <div className="bg-base-200 border-t border-base-300">
         <div className="max-w-2xl mx-auto px-5 sm:px-6 py-14 sm:py-16 text-center flex flex-col items-center gap-5">
@@ -624,7 +701,7 @@ export default function AboutPage() {
               Start Free Trial →
             </button>
             <p className="text-base-content/40 text-xs font-medium">
-              60 questions free · then from $29.50 · no auto-renewal
+              60 questions free · then from {PLANS[0].price} · no auto-renewal
             </p>
           </div>
         </div>

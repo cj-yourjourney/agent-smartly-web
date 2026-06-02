@@ -1,9 +1,18 @@
 // src/features/account/components/PaymentForm.jsx
+//
+//  Updated to pull ALL pricing data from src/features/pricing/
+//  No prices or plan arrays defined here — edit pricingConfig.js instead.
+// ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, CreditCard, Lock } from 'lucide-react'
 import { API_CONFIG, authenticatedFetch } from '../../../shared/api/config'
-import { PLANS, DEFAULT_PLAN, getStripe } from '../utils'
-import OneTimeChargeNotice from './OneTimeChargeNotice'
+
+// ── Pricing imports (single source of truth) ──────────────────────────────────
+import { DEFAULT_PLAN } from '../../../features/pricing/pricingConfig'
+import { getStripe } from '../utils' // stays in account/utils — browser-only
+import SaleBanner from '../../../features/pricing/components/SaleBanner'
+import PlanSelector from '../../../features/pricing/components/PlanSelector'
+import OneTimeChargeNotice from '../../../features/pricing/components/OneTimeChargeNotice'
 
 export default function PaymentForm({ onSuccess, isRenewal = false }) {
   const cardElementRef = useRef(null)
@@ -84,10 +93,7 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
       // Step 1: Create the PaymentIntent on our backend (send chosen plan)
       const intentRes = await authenticatedFetch(
         API_CONFIG.ENDPOINTS.SUBSCRIBE,
-        {
-          method: 'POST',
-          body: JSON.stringify({ plan: selectedPlan.id })
-        }
+        { method: 'POST', body: JSON.stringify({ plan: selectedPlan.id }) }
       )
       const intentData = await intentRes.json()
       if (!intentRes.ok)
@@ -122,65 +128,16 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
 
   return (
     <div className="space-y-4">
-      {/* ── Plan selector ─────────────────────────────────────────────────── */}
-      <div>
-        <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
-          Choose Your Plan
-        </label>
-        <div className="space-y-2">
-          {PLANS.map((plan) => {
-            const isSelected = selectedPlan.id === plan.id
-            return (
-              <button
-                key={plan.id}
-                type="button"
-                onClick={() => setSelectedPlan(plan)}
-                className={`
-                  w-full flex items-center justify-between px-4 py-3 rounded-xl
-                  border-2 transition-all text-left
-                  ${
-                    isSelected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-base-300 bg-base-100 hover:border-primary/40'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-3">
-                  {/* Radio dot */}
-                  <div
-                    className={`
-                      w-4 h-4 rounded-full border-2 flex items-center
-                      justify-center shrink-0
-                      ${isSelected ? 'border-primary' : 'border-base-300'}
-                    `}
-                  >
-                    {isSelected && (
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    )}
-                  </div>
+      {/* ── Sale banner (auto-hidden when no sale is active) ─────────────── */}
+      <SaleBanner />
 
-                  <div>
-                    <span className="text-sm font-semibold text-base-content">
-                      {plan.label}
-                    </span>
-                    <span className="text-xs text-base-content/50 ml-2">
-                      {plan.description}
-                    </span>
-                  </div>
-                </div>
+      {/* ── Plan picker (sale prices rendered automatically) ─────────────── */}
+      <PlanSelector selected={selectedPlan} onChange={setSelectedPlan} />
 
-                <span className="text-sm font-bold text-base-content">
-                  {plan.price}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
+      {/* ── One-time charge notice ───────────────────────────────────────── */}
       <OneTimeChargeNotice plan={selectedPlan} />
 
-      {/* ── Card input ────────────────────────────────────────────────────── */}
+      {/* ── Stripe card input ────────────────────────────────────────────── */}
       <div>
         <label className="text-xs font-semibold text-base-content/50 uppercase tracking-wide block mb-2">
           Card Details
@@ -211,10 +168,12 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
 
       <div className="flex items-center gap-2 text-xs text-base-content/40">
         <Lock className="h-3.5 w-3.5 shrink-0" />
-        <span>Encrypted & secured by Stripe. We never store your card.</span>
+        <span>
+          Encrypted &amp; secured by Stripe. We never store your card.
+        </span>
       </div>
 
-      {/* ── Submit ────────────────────────────────────────────────────────── */}
+      {/* ── Submit ───────────────────────────────────────────────────────── */}
       <button
         onClick={handleSubmit}
         disabled={!stripeReady || !cardComplete || paying}

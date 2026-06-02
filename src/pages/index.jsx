@@ -3,11 +3,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSelector } from 'react-redux'
 import { ROUTES } from '@/shared/constants/routes'
+import { PLANS, ACTIVE_SALE } from '@/features/pricing/pricingConfig'
+import SaleBanner from '@/features/pricing/components/SaleBanner'
 
 const faqs = [
   {
     q: 'How much does it cost?',
-    a: 'Plans start at $29.50 for 1 week, $39.50 for 1 month, or $49.50 for 3 months — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase any plan anytime.'
+    // NOTE: price strings are generated at render time from pricingConfig.js — do not hardcode here
+    a: '__PRICING_FAQ__'
   },
   {
     q: 'How many questions should I practice before the exam?',
@@ -85,8 +88,20 @@ export default function Home() {
   const { isAuthenticated } = useSelector((state) => state.auth)
   const [openFaq, setOpenFaq] = useState(null)
 
+  // Build the FAQ pricing answer dynamically from pricingConfig
+  const pricingFaqAnswer = (() => {
+    const planList = PLANS.map((p) => `${p.price} for ${p.description}`).join(
+      ', '
+    )
+    const saleNote = ACTIVE_SALE.enabled
+      ? ` (${ACTIVE_SALE.discountPct}% off during the ${ACTIVE_SALE.label} — regular prices are ${PLANS.map((p) => `${p.originalPrice} for ${p.description}`).join(', ')})`
+      : ''
+    return `Plans start at ${planList}${saleNote} — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase any plan anytime.`
+  })()
+
   return (
     <div className="min-h-screen bg-base-100">
+      <SaleBanner />
       {/* ── HERO ── */}
       <div className="min-h-[88vh] bg-base-200 flex items-center relative overflow-hidden hero-bg-dots">
         {/* Decorative blob behind image */}
@@ -561,6 +576,90 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── PRICING ── */}
+      <div className="py-24 px-4 bg-base-100 border-t border-base-200">
+        <div className="max-w-xl mx-auto">
+          {/* Header */}
+          <p className="text-center text-primary font-bold tracking-widest text-xs uppercase mb-3">
+            Pricing
+          </p>
+          <h2 className="font-display text-4xl md:text-5xl text-center mb-3">
+            One-Time Payment.
+          </h2>
+          <p className="text-center text-base-content/55 text-base mb-8 max-w-sm mx-auto">
+            All plans include everything. Pick how long you need.
+          </p>
+
+          {/* Plan rows — same style as account page */}
+          <div className="flex flex-col gap-2 mb-6">
+            {PLANS.map((plan) => {
+              const isPopular = plan.id === 'month'
+              return (
+                <div
+                  key={plan.id}
+                  className={`
+                    flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all
+                    ${
+                      isPopular
+                        ? 'border-primary bg-primary/5'
+                        : 'border-base-300 bg-base-100'
+                    }
+                  `}
+                >
+                  {/* Left: duration */}
+                  <div className="flex items-center gap-3">
+                    {isPopular && (
+                      <span className="badge badge-primary badge-sm font-semibold hidden sm:inline-flex">
+                        Popular
+                      </span>
+                    )}
+                    <div>
+                      <span className="text-sm font-semibold text-base-content">
+                        {plan.label}
+                      </span>
+                      <span className="text-xs text-base-content/45 ml-2">
+                        {plan.description}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: price */}
+                  <div className="flex flex-col items-end leading-tight">
+                    <span className="text-sm font-bold text-base-content">
+                      {plan.price}
+                    </span>
+                    {ACTIVE_SALE.enabled && plan.originalPrice && (
+                      <span className="text-xs text-base-content/35 line-through">
+                        {plan.originalPrice}
+                      </span>
+                    )}
+                    {ACTIVE_SALE.enabled && plan.saleSavings && (
+                      <span className="text-[10px] font-semibold text-success">
+                        {plan.saleSavings}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Single CTA */}
+          <button
+            className="btn btn-primary w-full h-12 text-base mb-5"
+            onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
+          >
+            Start Free — Pick a Plan Later →
+          </button>
+
+          {/* Trust line */}
+          <p className="text-center text-xs text-base-content/35">
+            60 questions free · no credit card to start · one-time charge · no
+            auto-renewal
+          </p>
+        </div>
+      </div>
+
       {/* ── FOUNDER STORY ── */}
       <div className="py-20 px-4 bg-base-100 border-t border-base-200">
         <div className="max-w-4xl mx-auto">
@@ -645,7 +744,7 @@ export default function Home() {
                 </button>
                 {openFaq === i && (
                   <div className="px-6 pb-5 text-base-content/65 text-sm leading-relaxed border-t border-base-300 pt-4">
-                    {faq.a}
+                    {faq.a === '__PRICING_FAQ__' ? pricingFaqAnswer : faq.a}
                   </div>
                 )}
               </div>
@@ -686,7 +785,7 @@ export default function Home() {
                 Start Free Trial →
               </button>
               <p className="text-primary-content/50 text-xs font-medium">
-                60 questions free · then from $29.50 · no auto-renewal
+                60 questions free · then from {PLANS[0].price} · no auto-renewal
               </p>
             </div>
           )}
