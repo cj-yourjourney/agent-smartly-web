@@ -24,8 +24,8 @@ const BASE_PRICES = {
     description: '30 days',
     basePrice: 79.0
   },
-  quarter: {
-    id: 'quarter',
+  three_months: {
+    id: 'three_months',
     label: '3-Month Access',
     description: '90 days',
     basePrice: 99.0
