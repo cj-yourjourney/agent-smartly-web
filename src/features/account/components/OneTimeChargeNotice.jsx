@@ -1,6 +1,6 @@
 // src/features/account/components/OneTimeChargeNotice.jsx
 import { Info } from 'lucide-react'
-import { DEFAULT_PLAN } from '../utils'
+import { DEFAULT_PLAN } from '../../pricing/pricingConfig'
 
 export default function OneTimeChargeNotice({ plan }) {
   const activePlan = plan ?? DEFAULT_PLAN
@@ -12,10 +12,7 @@ export default function OneTimeChargeNotice({ plan }) {
         <span className="font-semibold text-base-content">
           One-time charge — not a subscription.
         </span>{' '}
-        Your card is charged once for {activePlan.price} (
-        {activePlan.description}). There are{' '}
-        <span className="font-semibold">no recurring charges</span> and nothing
-        auto-renews. You can renew manually anytime before your access expires.
+        Charged once for {activePlan.price}, nothing auto-renews.
       </div>
     </div>
   )
