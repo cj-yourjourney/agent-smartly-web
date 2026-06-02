@@ -2,7 +2,8 @@
 import { useRouter } from 'next/router'
 import { Zap, CheckCircle, ArrowRight, Info } from 'lucide-react'
 import ROUTES from '../../../shared/constants/routes'
-import { TRIAL_QUESTION_LIMIT, PLANS } from '../../account/utils'
+import { TRIAL_QUESTION_LIMIT } from '../../account/utils'
+import { PLANS } from '../../pricing/pricingConfig'
 
 const FEATURES = [
   'Unlimited practice questions',
@@ -26,7 +27,11 @@ export default function AccessExpiredModal() {
     router.push(`${ROUTES.ACCOUNT}?upgrade=true`)
   }
 
-  const startingPrice = PLANS[0].price // $29.50
+  // Always sourced from pricingConfig — the single source of truth for pricing & sales.
+  // PLANS[0] is the cheapest plan (1-Week). When a sale is active, .price is the
+  // discounted price and .originalPrice is the crossed-out retail price.
+  const cheapestPlan = PLANS[0]
+  const { price: salePrice, originalPrice } = cheapestPlan
 
   return (
     /* Backdrop */
@@ -74,7 +79,13 @@ export default function AccessExpiredModal() {
             <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
             <p className="text-xs text-base-content/70 leading-relaxed">
               <span className="font-semibold text-base-content">
-                Plans from {startingPrice} — one-time charge.
+                Plans from{' '}
+                {originalPrice && (
+                  <span className="line-through text-base-content/40 font-normal">
+                    {originalPrice}
+                  </span>
+                )}{' '}
+                {salePrice} — one-time charge.
               </span>{' '}
               Not a subscription — nothing auto-renews. Renew manually anytime.
             </p>
