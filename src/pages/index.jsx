@@ -90,11 +90,9 @@ export default function Home() {
 
   // Build the FAQ pricing answer dynamically from pricingConfig
   const pricingFaqAnswer = (() => {
-    const planList = PLANS.map((p) => `${p.price} for ${p.description}`).join(
-      ', '
-    )
+    const planList = PLANS.map((p) => `${p.price} for ${p.label}`).join(', ')
     const saleNote = ACTIVE_SALE.enabled
-      ? ` (${ACTIVE_SALE.discountPct}% off during the ${ACTIVE_SALE.label} — regular prices are ${PLANS.map((p) => `${p.originalPrice} for ${p.description}`).join(', ')})`
+      ? ` (${ACTIVE_SALE.discountPct}% off during the ${ACTIVE_SALE.label} — regular prices are ${PLANS.map((p) => `${p.originalPrice} for ${p.label}`).join(', ')})`
       : ''
     return `Plans start at ${planList}${saleNote} — no auto-renewal, no subscription. Every new account gets 60 free practice questions — no credit card required. When your free questions run out, you can purchase any plan anytime.`
   })()
@@ -616,9 +614,6 @@ export default function Home() {
                     <div>
                       <span className="text-sm font-semibold text-base-content">
                         {plan.label}
-                      </span>
-                      <span className="text-xs text-base-content/45 ml-2">
-                        {plan.description}
                       </span>
                     </div>
                   </div>

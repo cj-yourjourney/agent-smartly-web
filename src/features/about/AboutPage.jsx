@@ -643,9 +643,6 @@ export default function AboutPage() {
                       <span className="text-sm font-semibold text-base-content">
                         {plan.label}
                       </span>
-                      <span className="text-xs text-base-content/45 ml-2">
-                        {plan.description}
-                      </span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end leading-tight">

@@ -15,19 +15,16 @@ const BASE_PRICES = {
   week: {
     id: 'week',
     label: '1-Week Access',
-    description: '7 days',
     basePrice: 59.0
   },
   month: {
     id: 'month',
     label: '1-Month Access',
-    description: '30 days',
     basePrice: 79.0
   },
   three_months: {
     id: 'three_months',
     label: '3-Month Access',
-    description: '90 days',
     basePrice: 99.0
   }
 }
