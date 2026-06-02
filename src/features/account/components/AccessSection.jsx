@@ -8,7 +8,8 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react'
-import { PLANS, TRIAL_QUESTION_LIMIT, formatDate, getTrialInfo } from '../utils'
+import { TRIAL_QUESTION_LIMIT, formatDate, getTrialInfo } from '../utils'
+import { PLANS } from '../../pricing/pricingConfig'
 import PaymentForm from './PaymentForm'
 
 // ─── Sub-states ────────────────────────────────────────────────────────────────
