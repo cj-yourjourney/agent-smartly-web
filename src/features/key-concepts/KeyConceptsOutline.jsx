@@ -31,13 +31,19 @@ export default function KeyConceptsOutline() {
 
   // Ref map: topic.code → DOM element, for scrolling to the highlighted topic
   const topicRefs = useRef({})
+  // Guard: only clear the highlight when the component truly unmounts (user
+  // navigates away), not during React's initial mount/StrictMode double-invoke.
+  const isMountedRef = useRef(false)
 
   useEffect(() => {
     dispatch(fetchKeyConcepts())
     dispatch(fetchConceptViewCounts())
-    // Clear the highlight when user leaves the page
+    isMountedRef.current = true
+    // Clear the highlight only when the user leaves this page
     return () => {
-      dispatch(setHighlightedTopic(null))
+      if (isMountedRef.current) {
+        dispatch(setHighlightedTopic(null))
+      }
     }
   }, [dispatch])
 

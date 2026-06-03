@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { API_CONFIG, api } from '../../../shared/api/config'
 
 const EXAM_TOPICS = [
@@ -306,30 +306,34 @@ export const selectLoading = (state) => state.keyConcepts.loading
 export const selectError = (state) => state.keyConcepts.error
 export const selectLLMDialog = (state) => state.keyConcepts.llmDialog
 
-export const selectOrganizedConcepts = (state) => {
-  const { concepts, examTopics } = state.keyConcepts
+export const selectOrganizedConcepts = createSelector(
+  (state) => state.keyConcepts.concepts,
+  (state) => state.keyConcepts.examTopics,
+  (concepts, examTopics) => {
+    return examTopics.map((topic) => {
+      const topicConcepts = concepts.filter((c) => c.topic === topic.code)
+      const subtopicMap = new Map()
 
-  return examTopics.map((topic) => {
-    const topicConcepts = concepts.filter((c) => c.topic === topic.code)
-    const subtopicMap = new Map()
+      topicConcepts.forEach((concept) => {
+        if (!subtopicMap.has(concept.subtopic)) {
+          subtopicMap.set(concept.subtopic, [])
+        }
+        subtopicMap.get(concept.subtopic).push(concept)
+      })
 
-    topicConcepts.forEach((concept) => {
-      if (!subtopicMap.has(concept.subtopic)) {
-        subtopicMap.set(concept.subtopic, [])
+      return {
+        ...topic,
+        subtopics: Array.from(subtopicMap.entries()).map(
+          ([code, concepts]) => ({
+            code,
+            name: concepts[0].subtopic_display,
+            concepts
+          })
+        )
       }
-      subtopicMap.get(concept.subtopic).push(concept)
     })
-
-    return {
-      ...topic,
-      subtopics: Array.from(subtopicMap.entries()).map(([code, concepts]) => ({
-        code,
-        name: concepts[0].subtopic_display,
-        concepts
-      }))
-    }
-  })
-}
+  }
+)
 
 export const selectIsTopicExpanded = (topicCode) => (state) => {
   return state.keyConcepts.expandedTopics.includes(topicCode)

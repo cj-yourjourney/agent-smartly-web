@@ -56,8 +56,10 @@ export default function PracticeMode() {
   const [answeredMap, setAnsweredMap] = useState({})
   const [showSessionComplete, setShowSessionComplete] = useState(false)
 
-  // ── Timer refs ───────────────────────────────────────────────────────────────
-  // Guard so the time-up alert fires exactly once per session even if the
+  // Ref to track the in-flight recordQuestionAttempt promise for the last
+  // question. finishSession must wait for it before calling completeSession,
+  // otherwise the backend rejects the attempt with "session already completed".
+  const pendingAttemptRef = useRef(null)
   // interval fires multiple times at the boundary second.
   const timeUpFiredRef = useRef(false)
   // Wall-clock start time for topic/subtopic sessions.  Practice quiz uses
@@ -166,6 +168,8 @@ export default function PracticeMode() {
     timeUpFiredRef.current = false
     // Clear the topic-session clock so a future session starts fresh.
     nonQuizStartTimeRef.current = null
+    // Clear any in-flight attempt promise so it doesn't leak into a new session.
+    pendingAttemptRef.current = null
   }, [])
 
   const resolveTopicLabel = useCallback(() => {
@@ -255,7 +259,7 @@ export default function PracticeMode() {
       }
     }))
 
-    dispatch(
+    const attemptPromise = dispatch(
       recordQuestionAttempt({
         questionId: currentQuestion.id,
         userAnswer: selectedAnswer,
@@ -263,6 +267,10 @@ export default function PracticeMode() {
         sessionId: sessionId || undefined
       })
     )
+    // Store the promise so handleNextQuestion can await it on the last question
+    // before calling finishSession — preventing the race where completeSession
+    // marks the session 'completed' before this attempt POST lands.
+    pendingAttemptRef.current = attemptPromise
 
     // Re-fetch subscription status after every answer.
     // trialQuestionsUsed in Redux reflects the count at login and is never
@@ -306,8 +314,15 @@ export default function PracticeMode() {
     SESSION_MAX_SECONDS
   ])
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (isLastQuestion && answerResult) {
+      // Wait for the last question's attempt to be recorded before completing
+      // the session. Without this, completeSession can resolve first and the
+      // backend rejects the attempt: "Cannot add attempts to a completed session".
+      if (pendingAttemptRef.current) {
+        await pendingAttemptRef.current
+        pendingAttemptRef.current = null
+      }
       finishSession()
       return
     }
@@ -320,23 +335,16 @@ export default function PracticeMode() {
   }
 
   const handleViewDetails = () => {
-    // Note: completeSession was already called (and awaited) in finishSession
-    // before showSessionComplete was set to true, so no need to call it again here.
     dispatch(resetToTopicSelection())
     resetLocalState()
     router.push(`${ROUTES.LEARNING.PROGRESS}?tab=sessions`)
   }
 
-  // Navigate to Key Concepts and highlight the relevant topic.
-  // • Topic/subtopic session → highlight that specific topic.
-  // • Full practice exam → highlight the weakest topic from the session's
-  //   per-topic breakdown (lowest accuracy among topics with ≥1 question).
   const handleReviewKeyConcepts = () => {
     let topicCodeToHighlight = null
 
     if (isPracticeQuiz) {
-      // completedSession.topic_breakdown is expected to be an array like:
-      // [{ topic: 'financing', accuracy: 20, questions_attempted: 5 }, ...]
+      // completedSession.topic_breakdown: [{ topic: 'financing', accuracy: 20, questions_attempted: 5 }, ...]
       const breakdown = completedSession?.topic_breakdown
       if (Array.isArray(breakdown) && breakdown.length > 0) {
         const weakest = breakdown
@@ -345,7 +353,6 @@ export default function PracticeMode() {
         topicCodeToHighlight = weakest?.topic ?? null
       }
     } else {
-      // For topic/subtopic sessions selectedTopic holds the topic code directly
       topicCodeToHighlight =
         selectedTopic !== 'practice_quiz' ? selectedTopic : null
     }
