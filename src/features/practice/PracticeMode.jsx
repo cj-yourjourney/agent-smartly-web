@@ -21,6 +21,7 @@ import {
 import { ROUTES } from '../../shared/constants/routes'
 import { fetchSubscriptionStatus } from '../subscription/state/subscriptionSlice'
 import { fetchSessions } from '../progress/state/progressSlice'
+import { setHighlightedTopic } from '../key-concepts/state/keyConceptsSlice'
 
 import { LoadingScreen } from './components/LoadingScreen'
 import { NoQuestionsScreen } from './components/NoQuestionsScreen'
@@ -326,6 +327,35 @@ export default function PracticeMode() {
     router.push(`${ROUTES.LEARNING.PROGRESS}?tab=sessions`)
   }
 
+  // Navigate to Key Concepts and highlight the relevant topic.
+  // • Topic/subtopic session → highlight that specific topic.
+  // • Full practice exam → highlight the weakest topic from the session's
+  //   per-topic breakdown (lowest accuracy among topics with ≥1 question).
+  const handleReviewKeyConcepts = () => {
+    let topicCodeToHighlight = null
+
+    if (isPracticeQuiz) {
+      // completedSession.topic_breakdown is expected to be an array like:
+      // [{ topic: 'financing', accuracy: 20, questions_attempted: 5 }, ...]
+      const breakdown = completedSession?.topic_breakdown
+      if (Array.isArray(breakdown) && breakdown.length > 0) {
+        const weakest = breakdown
+          .filter((t) => t.questions_attempted > 0)
+          .sort((a, b) => a.accuracy - b.accuracy)[0]
+        topicCodeToHighlight = weakest?.topic ?? null
+      }
+    } else {
+      // For topic/subtopic sessions selectedTopic holds the topic code directly
+      topicCodeToHighlight =
+        selectedTopic !== 'practice_quiz' ? selectedTopic : null
+    }
+
+    dispatch(setHighlightedTopic(topicCodeToHighlight))
+    dispatch(resetToTopicSelection())
+    resetLocalState()
+    router.push(ROUTES.LEARNING.KEY_CONCEPTS)
+  }
+
   const handleBackToTopics = () => {
     if (sessionId) {
       const snapshotNow = Date.now()
@@ -362,6 +392,7 @@ export default function PracticeMode() {
         elapsedTime={elapsedTime}
         onPracticeAgain={handlePracticeAgain}
         onViewDetails={handleViewDetails}
+        onReviewKeyConcepts={handleReviewKeyConcepts}
       />
     )
   }

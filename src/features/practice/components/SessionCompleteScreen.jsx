@@ -4,7 +4,8 @@ import {
   Clock,
   Info,
   ClipboardList,
-  RotateCcw
+  RotateCcw,
+  BookOpen
 } from 'lucide-react'
 import { formatTimePretty } from '../utils'
 
@@ -14,7 +15,9 @@ export function SessionCompleteScreen({
   topicLabel,
   elapsedTime,
   onPracticeAgain,
-  onViewDetails
+  onViewDetails,
+  onReviewKeyConcepts,
+  isPassed70: _isPassed70 // unused directly — derived from accuracy below
 }) {
   // Prefer server-verified data from the completed session API response.
   // Fall back to the locally-tracked counts for topic/subtopic sessions
@@ -129,22 +132,62 @@ export function SessionCompleteScreen({
 
           {/* CTAs */}
           <div className="flex flex-col gap-3">
-            <button
-              onClick={onViewDetails}
-              className="btn btn-primary w-full h-12 gap-2 touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              <ClipboardList className="w-4 h-4" />
-              View Session Details
-            </button>
-            <button
-              onClick={onPracticeAgain}
-              className="btn btn-outline w-full h-12 gap-2 touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              <RotateCcw className="w-4 h-4" />
-              Practice Again
-            </button>
+            {/* Review Key Concepts — primary urgent CTA when below 70%, secondary otherwise */}
+            {!passed ? (
+              <>
+                <button
+                  onClick={onReviewKeyConcepts}
+                  className="btn btn-warning w-full h-12 gap-2 touch-manipulation font-bold"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Review Key Concepts
+                </button>
+                <button
+                  onClick={onViewDetails}
+                  className="btn btn-primary w-full h-12 gap-2 touch-manipulation"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  View Session Details
+                </button>
+                <button
+                  onClick={onPracticeAgain}
+                  className="btn btn-outline w-full h-12 gap-2 touch-manipulation"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Practice Again
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onViewDetails}
+                  className="btn btn-primary w-full h-12 gap-2 touch-manipulation"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  View Session Details
+                </button>
+                <button
+                  onClick={onPracticeAgain}
+                  className="btn btn-outline w-full h-12 gap-2 touch-manipulation"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Practice Again
+                </button>
+                <button
+                  onClick={onReviewKeyConcepts}
+                  className="btn btn-ghost w-full h-10 gap-2 touch-manipulation text-sm text-base-content/60"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Review Key Concepts
+                </button>
+              </>
+            )}
           </div>
 
           <p className="text-center text-xs text-base-content/40 mt-4">

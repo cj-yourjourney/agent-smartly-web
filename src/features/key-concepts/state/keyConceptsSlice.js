@@ -156,6 +156,7 @@ const initialState = {
   concepts: [],
   examTopics: EXAM_TOPICS,
   expandedTopics: [],
+  highlightedTopicCode: null, // set when navigating from SessionCompleteScreen
   conceptViewCounts: {}, // { conceptName: reviewCount }
   loading: false,
   error: null,
@@ -183,6 +184,13 @@ const keyConceptsSlice = createSlice({
         state.expandedTopics.push(topicCode)
       }
     },
+    setHighlightedTopic: (state, action) => {
+      state.highlightedTopicCode = action.payload // topic code string or null
+      // Auto-expand the highlighted topic so user sees it immediately
+      if (action.payload && !state.expandedTopics.includes(action.payload)) {
+        state.expandedTopics.push(action.payload)
+      }
+    },
     expandAllTopics: (state) => {
       state.expandedTopics = state.examTopics.map((t) => t.code)
     },
@@ -200,6 +208,7 @@ const keyConceptsSlice = createSlice({
     resetKeyConcepts: (state) => {
       state.concepts = []
       state.expandedTopics = []
+      state.highlightedTopicCode = null
       state.loading = false
       state.error = null
       state.llmDialog = {
@@ -289,6 +298,8 @@ const keyConceptsSlice = createSlice({
 export const selectKeyConcepts = (state) => state.keyConcepts.concepts
 export const selectExamTopics = (state) => state.keyConcepts.examTopics
 export const selectExpandedTopics = (state) => state.keyConcepts.expandedTopics
+export const selectHighlightedTopicCode = (state) =>
+  state.keyConcepts.highlightedTopicCode
 export const selectConceptViewCounts = (state) =>
   state.keyConcepts.conceptViewCounts
 export const selectLoading = (state) => state.keyConcepts.loading
@@ -329,7 +340,8 @@ export const {
   expandAllTopics,
   collapseAllTopics,
   closeLLMDialog,
-  resetKeyConcepts
+  resetKeyConcepts,
+  setHighlightedTopic
 } = keyConceptsSlice.actions
 
 export default keyConceptsSlice.reducer

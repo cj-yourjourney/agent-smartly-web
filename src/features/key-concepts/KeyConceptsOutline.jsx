@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchKeyConcepts,
@@ -7,11 +7,13 @@ import {
   askLLMAboutConcept,
   selectOrganizedConcepts,
   selectExpandedTopics,
+  selectHighlightedTopicCode,
   selectLoading,
   selectError,
   selectKeyConcepts,
   selectLLMDialog,
-  selectConceptViewCounts
+  selectConceptViewCounts,
+  setHighlightedTopic
 } from './state/keyConceptsSlice'
 import LLMExplanationModal from './components/LLMExplanationModal'
 import { ChevronDown, ChevronRight, BookOpen } from 'lucide-react'
@@ -20,16 +22,36 @@ export default function KeyConceptsOutline() {
   const dispatch = useDispatch()
   const organizedConcepts = useSelector(selectOrganizedConcepts)
   const expandedTopics = useSelector(selectExpandedTopics)
+  const highlightedTopicCode = useSelector(selectHighlightedTopicCode)
   const loading = useSelector(selectLoading)
   const error = useSelector(selectError)
   const concepts = useSelector(selectKeyConcepts)
   const llmDialog = useSelector(selectLLMDialog)
   const conceptViewCounts = useSelector(selectConceptViewCounts)
 
+  // Ref map: topic.code → DOM element, for scrolling to the highlighted topic
+  const topicRefs = useRef({})
+
   useEffect(() => {
     dispatch(fetchKeyConcepts())
     dispatch(fetchConceptViewCounts())
+    // Clear the highlight when user leaves the page
+    return () => {
+      dispatch(setHighlightedTopic(null))
+    }
   }, [dispatch])
+
+  // Scroll highlighted topic into view once concepts have loaded
+  useEffect(() => {
+    if (!highlightedTopicCode || loading) return
+    const el = topicRefs.current[highlightedTopicCode]
+    if (el) {
+      // Small delay so the expand animation doesn't fight the scroll
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 150)
+    }
+  }, [highlightedTopicCode, loading])
 
   const handleToggleTopic = (code) => dispatch(toggleTopic(code))
 
@@ -95,6 +117,7 @@ export default function KeyConceptsOutline() {
         <div className="container mx-auto max-w-3xl px-4 pt-4 space-y-2">
           {organizedConcepts.map((topic, topicIdx) => {
             const isExpanded = expandedTopics.includes(topic.code)
+            const isHighlighted = highlightedTopicCode === topic.code
             const count = topic.subtopics.reduce(
               (sum, st) => sum + st.concepts.length,
               0
@@ -104,10 +127,15 @@ export default function KeyConceptsOutline() {
             return (
               <div
                 key={topic.code}
+                ref={(el) => {
+                  topicRefs.current[topic.code] = el
+                }}
                 className={`rounded-2xl overflow-hidden border transition-all duration-200 ${
-                  isExpanded
-                    ? 'bg-base-100 border-primary/20 shadow-md'
-                    : 'bg-base-100 border-base-200 shadow-sm'
+                  isHighlighted
+                    ? 'bg-base-100 border-warning/60 shadow-lg ring-2 ring-warning/30'
+                    : isExpanded
+                      ? 'bg-base-100 border-primary/20 shadow-md'
+                      : 'bg-base-100 border-base-200 shadow-sm'
                 }`}
               >
                 {/* Topic toggle */}
@@ -118,9 +146,11 @@ export default function KeyConceptsOutline() {
                   {/* Number badge */}
                   <span
                     className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      isExpanded
-                        ? 'bg-primary text-primary-content'
-                        : 'bg-base-200 text-base-content/50'
+                      isHighlighted
+                        ? 'bg-warning text-warning-content'
+                        : isExpanded
+                          ? 'bg-primary text-primary-content'
+                          : 'bg-base-200 text-base-content/50'
                     }`}
                   >
                     {topicIdx + 1}
@@ -131,8 +161,14 @@ export default function KeyConceptsOutline() {
                   </span>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* "Review this" badge shown only on the highlighted topic */}
+                    {isHighlighted && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-bold uppercase tracking-wide">
+                        ★ Review this
+                      </span>
+                    )}
                     <span
-                      className={`text-xs font-medium tabular-nums ${isExpanded ? 'text-primary' : 'text-base-content/40'}`}
+                      className={`text-xs font-medium tabular-nums ${isExpanded || isHighlighted ? 'text-primary' : 'text-base-content/40'}`}
                     >
                       {count}
                     </span>
