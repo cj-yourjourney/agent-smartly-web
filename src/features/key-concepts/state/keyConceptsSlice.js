@@ -51,8 +51,6 @@ export const askLLMAboutConcept = createAsyncThunk(
     },
     { rejectWithValue, dispatch }
   ) => {
-    // Record the view immediately on open — credit is given for any interaction,
-    // regardless of how long the modal stays open or whether it is closed.
     dispatch(
       recordConceptView({
         conceptName,
@@ -63,20 +61,12 @@ export const askLLMAboutConcept = createAsyncThunk(
     )
 
     try {
-      const requestBody = {
+      const response = await api.post(API_CONFIG.ENDPOINTS.EXPLAIN_CONCEPT, {
         main_topic: topicName,
         subtopic: subtopicName,
-        key_concept: conceptName
-      }
-
-      if (description) {
-        requestBody.description = description
-      }
-
-      const response = await api.post(
-        API_CONFIG.ENDPOINTS.EXPLAIN_CONCEPT,
-        requestBody
-      )
+        key_concept: conceptName,
+        description // now required — always sent
+      })
 
       if (!response.success) {
         throw new Error(response.error || 'Failed to get explanation')
@@ -88,8 +78,9 @@ export const askLLMAboutConcept = createAsyncThunk(
         topic: response.main_topic,
         simpleExplanation: response.explanation.simple_explanation,
         keyPoints: response.explanation.key_points,
-        memoryTricks: response.explanation.memory_tricks,
+        memoryTrick: response.explanation.memory_trick, // was memory_tricks
         realWorldExample: response.explanation.real_world_example,
+        commonConfusions: response.explanation.common_confusions, // new field
         examTip: response.explanation.exam_tip
       }
     } catch (error) {
