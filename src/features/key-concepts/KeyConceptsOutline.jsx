@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef, useMemo, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchKeyConcepts,
@@ -31,8 +31,20 @@ import {
 function GuidanceBanner({
   topicProgress,
   highlightedTopicCode,
-  organizedConcepts
+  organizedConcepts,
+  conceptViewCounts
 }) {
+  // Helper: how many concepts in a topic have been reviewed at least once
+  const topicReviewedCount = useCallback(
+    (topicCode) => {
+      const topic = organizedConcepts.find((t) => t.code === topicCode)
+      if (!topic) return 0
+      return topic.subtopics
+        .flatMap((st) => st.concepts.map((c) => c.name))
+        .filter((name) => (conceptViewCounts[name] ?? 0) > 0).length
+    },
+    [organizedConcepts, conceptViewCounts]
+  )
   // Only show banner for topics that exist in Key Concepts (have a code match)
   const knownCodes = useMemo(
     () => new Set(organizedConcepts.map((t) => t.code)),
@@ -63,6 +75,12 @@ function GuidanceBanner({
     const topicName = organizedConcepts.find(
       (t) => t.code === highlightedTopicCode
     )?.name
+    const totalConcepts =
+      organizedConcepts
+        .find((t) => t.code === highlightedTopicCode)
+        ?.subtopics.reduce((s, st) => s + st.concepts.length, 0) ?? 0
+    const reviewed = topicReviewedCount(highlightedTopicCode)
+    const lowReview = totalConcepts > 0 && reviewed / totalConcepts < 0.5
     return (
       <div className="mb-4 rounded-2xl bg-warning/10 border border-warning/30 px-4 py-3.5 flex items-start gap-3">
         <AlertCircle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
@@ -72,7 +90,9 @@ function GuidanceBanner({
           </p>
           <p className="text-xs text-base-content/55 mt-0.5">
             {topic
-              ? `Your accuracy here is ${topic.accuracy}% — review the concepts below to strengthen this area before practicing again.`
+              ? lowReview
+                ? `Your accuracy here is ${topic.accuracy}% and you've only reviewed ${reviewed}/${totalConcepts} concepts — read through them below before practicing again.`
+                : `Your accuracy here is ${topic.accuracy}% — review the concepts below to strengthen this area before practicing again.`
               : 'Review the key concepts in this topic before your next practice session.'}
           </p>
         </div>
@@ -167,6 +187,13 @@ function GuidanceBanner({
   const weakestName = organizedConcepts.find(
     (t) => t.code === weakest.topic
   )?.name
+  const weakestTotal =
+    organizedConcepts
+      .find((t) => t.code === weakest.topic)
+      ?.subtopics.reduce((s, st) => s + st.concepts.length, 0) ?? 0
+  const weakestReviewed = topicReviewedCount(weakest.topic)
+  const weakestLowReview =
+    weakestTotal > 0 && weakestReviewed / weakestTotal < 0.5
   return (
     <div className="mb-4 rounded-2xl bg-base-100 border border-base-200 shadow-sm px-4 py-3.5">
       <div className="flex items-center gap-2 mb-2.5">
@@ -217,7 +244,13 @@ function GuidanceBanner({
         <span className="font-semibold text-base-content/70">
           {weakestName}
         </span>{' '}
-        ({weakest.accuracy}% accuracy).
+        ({weakest.accuracy}% accuracy
+        {weakestLowReview &&
+          `, ${weakestReviewed}/${weakestTotal} concepts reviewed`}
+        ).
+        {weakestLowReview
+          ? ' Read through the concepts first, then practice.'
+          : ' Tap it below to expand and review.'}
         {unpracticedCount > 0 && (
           <>
             {' '}
@@ -350,13 +383,36 @@ export default function KeyConceptsOutline() {
           <div className="container mx-auto max-w-3xl">
             <div className="flex items-center gap-2.5">
               <BookOpen className="w-5 h-5 text-primary flex-shrink-0" />
-              <div>
-                <h1 className="text-lg font-bold leading-tight">
-                  Key Concepts
-                </h1>
-                <p className="text-xs text-base-content/45 leading-none mt-0.5">
-                  {concepts.length} essential concepts · CA Real Estate
-                  Salesperson Exam · Tap to get AI explanation
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h1 className="text-lg font-bold leading-tight">
+                    Key Concepts
+                  </h1>
+                  <span className="text-xs font-semibold tabular-nums text-primary flex-shrink-0">
+                    {
+                      Object.values(conceptViewCounts).filter((v) => v > 0)
+                        .length
+                    }
+                    <span className="text-base-content/40 font-normal">
+                      {' '}
+                      / {concepts.length} reviewed
+                    </span>
+                  </span>
+                </div>
+                <div className="w-full bg-base-300 rounded-full h-1 mt-1.5">
+                  <div
+                    className="bg-primary h-1 rounded-full transition-all duration-500"
+                    style={{
+                      width:
+                        concepts.length > 0
+                          ? `${(Object.values(conceptViewCounts).filter((v) => v > 0).length / concepts.length) * 100}%`
+                          : '0%'
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-base-content/45 leading-none mt-1">
+                  CA Real Estate Salesperson Exam · Tap any concept for AI
+                  explanation
                 </p>
               </div>
             </div>
@@ -369,6 +425,7 @@ export default function KeyConceptsOutline() {
             topicProgress={topicProgress}
             highlightedTopicCode={highlightedTopicCode}
             organizedConcepts={organizedConcepts}
+            conceptViewCounts={conceptViewCounts}
           />
           {organizedConcepts.map((topic, topicIdx) => {
             const isExpanded = expandedTopics.includes(topic.code)
@@ -378,6 +435,12 @@ export default function KeyConceptsOutline() {
               0
             )
             if (count === 0) return null
+            const topicConceptNames = topic.subtopics.flatMap((st) =>
+              st.concepts.map((c) => c.name)
+            )
+            const reviewedCount = topicConceptNames.filter(
+              (name) => (conceptViewCounts[name] ?? 0) > 0
+            ).length
 
             return (
               <div
@@ -422,11 +485,32 @@ export default function KeyConceptsOutline() {
                         ★ Review this
                       </span>
                     )}
-                    <span
-                      className={`text-xs font-medium tabular-nums ${isExpanded || isHighlighted ? 'text-primary' : 'text-base-content/40'}`}
-                    >
-                      {count}
-                    </span>
+                    {/* Per-topic reviewed count */}
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span
+                        className={`text-xs font-medium tabular-nums ${isExpanded || isHighlighted ? 'text-primary' : 'text-base-content/40'}`}
+                      >
+                        <span
+                          className={
+                            reviewedCount === count ? 'text-success' : ''
+                          }
+                        >
+                          {reviewedCount}
+                        </span>
+                        <span className="text-base-content/30">/{count}</span>
+                      </span>
+                      <div className="w-10 h-0.5 rounded-full bg-base-300 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${reviewedCount === count ? 'bg-success' : 'bg-primary/60'}`}
+                          style={{
+                            width:
+                              count > 0
+                                ? `${(reviewedCount / count) * 100}%`
+                                : '0%'
+                          }}
+                        />
+                      </div>
+                    </div>
                     <ChevronDown
                       className={`w-4 h-4 text-base-content/40 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                     />
