@@ -127,10 +127,8 @@ function SessionCard({ session }) {
   const formattedDuration = formatDuration(session)
 
   const statusBadge = () => {
-    if (session.status === 'in_progress')
-      return <span className="badge badge-warning badge-sm">In Progress</span>
-    if (session.status === 'abandoned')
-      return <span className="badge badge-ghost badge-sm">Abandoned</span>
+    if (session.status === 'in_progress' || session.status === 'abandoned')
+      return <span className="badge badge-warning badge-sm">Exited</span>
     if (session.passed)
       return (
         <span className="badge badge-success badge-sm gap-1">
@@ -147,7 +145,7 @@ function SessionCard({ session }) {
   }
 
   const borderColor =
-    session.status !== 'completed'
+    session.status === 'in_progress' || session.status === 'abandoned'
       ? 'border-l-warning'
       : session.passed
         ? 'border-l-success'
