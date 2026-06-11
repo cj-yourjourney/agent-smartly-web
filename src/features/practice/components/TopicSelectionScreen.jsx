@@ -23,28 +23,33 @@ function FullPracticeExamCard({ onSelect }) {
   return (
     <button
       onClick={onSelect}
-      className="w-full p-5 sm:p-6 rounded-2xl active:scale-[0.99] transition-all group text-left touch-manipulation bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg"
+      className="w-full p-5 sm:p-6 rounded-2xl active:scale-[0.99] transition-all group text-left touch-manipulation bg-base-100 hover:bg-base-200/50 border border-base-200"
       title="Start a full 75-question practice exam with 90-minute timer"
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-          <Clock className="w-5 h-5 text-white" />
+        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <Clock className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">
-            Full Practice Exam
-          </h2>
-          <p className="text-sm text-white/70 leading-snug mt-0.5">
-            Timed simulation · closest to the real DRE exam
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg sm:text-xl font-bold text-base-content leading-tight">
+              Full Practice Exam
+            </h2>
+            <span className="text-[10px] px-2 py-0.5 rounded-full border text-primary border-primary/40">
+              Best for exam prep
+            </span>
+          </div>
+          <p className="text-sm text-base-content/60 leading-snug mt-0.5">
+            Half-scale DRE simulation · 75 questions in 90 mins
           </p>
         </div>
-        <ChevronRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+        <ChevronRight className="w-5 h-5 text-base-content/30 group-hover:text-base-content/60 group-hover:translate-x-1 transition-all shrink-0" />
       </div>
-      <div className="flex items-center gap-4 text-xs text-white/60">
+      <div className="flex items-center gap-4 text-xs text-base-content/40">
         {['75 questions', '90 min timer', 'All 7 topics'].map((tag) => (
           <span key={tag} className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-white/40" />
+            <span className="w-1 h-1 rounded-full bg-base-content/30" />
             {tag}
           </span>
         ))}
@@ -190,10 +195,13 @@ function StudyByTopicPanel({
         </div>
         <div className="flex-1">
           <h2 className="text-lg sm:text-2xl font-bold text-base-content leading-tight">
-            Study by Topic
+            Study by Topic / Subtopic
           </h2>
           <p className="text-xs sm:text-sm text-base-content/60 mt-0.5">
-            20 questions · No time limit
+            20 questions · No time limit ·{' '}
+            <span className="text-base-content/40 inline-flex items-center gap-0.5">
+              <ChevronDown className="w-3 h-3" /> tap to drill into subtopics
+            </span>
           </p>
         </div>
       </div>
