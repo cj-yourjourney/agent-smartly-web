@@ -28,32 +28,30 @@ export function SmartGuidanceCard({ topicProgress = [], onSelect }) {
   return (
     <button
       onClick={() => onSelect(recommendedTopic.topic)}
-      className="w-full p-4 sm:p-5 border-2 border-primary/30 rounded-2xl hover:border-primary hover:shadow-md active:scale-[0.99] transition-all group text-left bg-primary/5 touch-manipulation"
+      className="w-full px-4 py-3.5 sm:px-5 border border-primary/25 rounded-2xl hover:border-primary/50 hover:shadow-sm active:scale-[0.99] transition-all group text-left bg-primary/5 touch-manipulation"
       title={`Practice ${recommendedTopic.topic_display} (20 questions)`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-0.5">
-            Recommended for you
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">
+            Focus area
           </p>
-          <p className="text-sm sm:text-base font-bold text-base-content leading-tight truncate">
-            {recommendedTopic.topic_display}
-          </p>
-          <p className="text-xs text-base-content/50 mt-0.5">
-            Your accuracy here is{' '}
+          <div className="flex items-baseline gap-2 min-w-0">
+            <p className="text-sm font-semibold text-base-content leading-tight truncate">
+              {recommendedTopic.topic_display}
+            </p>
             <span
-              className={`font-semibold ${accuracyColor(recommendedTopic.accuracy)}`}
+              className={`text-xs font-bold shrink-0 ${accuracyColor(recommendedTopic.accuracy)}`}
             >
               {recommendedTopic.accuracy}%
-            </span>{' '}
-            — practicing this will boost your overall score the most.
-          </p>
+            </span>
+          </div>
         </div>
-        <ChevronRight className="w-4 h-4 text-base-content/30 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
+        <ChevronRight className="w-4 h-4 text-base-content/25 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
       </div>
     </button>
   )
