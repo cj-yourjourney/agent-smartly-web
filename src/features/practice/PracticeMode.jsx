@@ -20,7 +20,10 @@ import {
 } from './state/practiceSlice'
 import { ROUTES } from '../../shared/constants/routes'
 import { fetchSubscriptionStatus } from '../subscription/state/subscriptionSlice'
-import { fetchSessions } from '../progress/state/progressSlice'
+import {
+  fetchSessions,
+  fetchTopicProgress
+} from '../progress/state/progressSlice'
 import { setHighlightedTopic } from '../key-concepts/state/keyConceptsSlice'
 
 import { LoadingScreen } from './components/LoadingScreen'
@@ -49,6 +52,8 @@ export default function PracticeMode() {
     quizStartTimestamp,
     completedSession
   } = useSelector((state) => state.practice)
+
+  const { topicProgress } = useSelector((state) => state.progress)
 
   const [expandedTopic, setExpandedTopic] = useState(null)
   const [elapsedTime, setElapsedTime] = useState(0)
@@ -108,6 +113,7 @@ export default function PracticeMode() {
   useEffect(() => {
     dispatch(fetchTopics())
     dispatch(fetchTopicStructure())
+    dispatch(fetchTopicProgress())
   }, [dispatch])
 
   useEffect(() => {
@@ -305,6 +311,11 @@ export default function PracticeMode() {
       // just-completed session with its correct duration immediately.
       dispatch(fetchSessions())
     }
+
+    // Refresh topic-level progress so Practice Mode's smart guidance reflects
+    // the just-completed session immediately if the user returns to topic selection.
+    dispatch(fetchTopicProgress())
+
     setShowSessionComplete(true)
   }, [
     dispatch,
@@ -408,6 +419,7 @@ export default function PracticeMode() {
     return (
       <TopicSelectionScreen
         topicStructure={topicStructure}
+        topicProgress={topicProgress}
         expandedTopic={expandedTopic}
         onPracticeQuizSelect={handlePracticeQuizSelect}
         onTopicSelect={handleTopicSelect}

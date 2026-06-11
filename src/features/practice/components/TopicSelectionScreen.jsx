@@ -1,4 +1,23 @@
-import { Clock, ChevronRight, ChevronDown, BookOpen } from 'lucide-react'
+import {
+  Clock,
+  ChevronRight,
+  ChevronDown,
+  BookOpen,
+  Target
+} from 'lucide-react'
+import {
+  SmartGuidanceCard,
+  getRecommendedTopicValue
+} from './SmartGuidanceCard'
+
+const accuracyColor = (acc) =>
+  acc >= 90
+    ? 'text-success'
+    : acc >= 75
+      ? 'text-info'
+      : acc >= 60
+        ? 'text-warning'
+        : 'text-error'
 
 function FullPracticeExamCard({ onSelect }) {
   return (
@@ -36,6 +55,8 @@ function FullPracticeExamCard({ onSelect }) {
 
 function TopicRow({
   item,
+  progress,
+  isRecommended,
   isExpanded,
   onTopicSelect,
   onToggle,
@@ -46,25 +67,66 @@ function TopicRow({
       className={`border rounded-xl transition-all ${
         isExpanded
           ? 'border-primary/50 bg-primary/5 shadow-sm'
-          : 'border-base-200 bg-base-100 hover:border-base-300'
+          : isRecommended
+            ? 'border-primary/40 bg-primary/[0.03]'
+            : 'border-base-200 bg-base-100 hover:border-base-300'
       }`}
     >
-      <div className="flex items-stretch">
+      {/* overflow-hidden on the row prevents the toggle from ever being pushed off-screen */}
+      <div className="flex items-stretch overflow-hidden">
         <button
           onClick={() => onTopicSelect(item.topic.value)}
-          className="flex-1 text-left px-4 py-3.5 text-sm font-medium text-base-content hover:text-primary transition-colors min-h-[48px] flex items-center touch-manipulation"
+          className="flex-1 min-w-0 text-left px-4 py-3 text-sm font-medium text-base-content hover:text-primary transition-colors min-h-[56px] flex items-center touch-manipulation"
           title={`Practice ${item.topic.label} (20 questions)`}
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-          {item.topic.label}
+          {/* min-w-0 here is what allows truncation to actually work inside flex */}
+          <div className="min-w-0 w-full">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="truncate block">{item.topic.label}</span>
+              {/* Lowest-accuracy topic badge */}
+              {isRecommended && (
+                <span className="badge badge-primary badge-xs gap-1 shrink-0">
+                  <Target className="w-2.5 h-2.5" />
+                  Focus here
+                </span>
+              )}
+            </div>
+
+            {/* Topic-level accuracy + questions practiced — labeled so each number is clear */}
+            {progress && progress.questions_attempted > 0 && (
+              <div className="flex items-center gap-3 mt-1">
+                <span className="flex items-baseline gap-1">
+                  <span
+                    className={`text-xs font-bold ${accuracyColor(progress.accuracy)}`}
+                  >
+                    {progress.accuracy}%
+                  </span>
+                  <span className="text-[10px] text-base-content/40 font-normal">
+                    accuracy
+                  </span>
+                </span>
+                <span className="w-px h-3 bg-base-300 shrink-0" />
+                <span className="flex items-baseline gap-1">
+                  <span className="text-xs font-semibold text-base-content/50">
+                    {progress.questions_attempted}
+                  </span>
+                  <span className="text-[10px] text-base-content/40 font-normal">
+                    practiced
+                  </span>
+                </span>
+              </div>
+            )}
+          </div>
         </button>
 
         {item.subtopics.length > 0 && (
           <>
-            <div className="w-px bg-base-200 my-2" />
+            <div className="w-px bg-base-200 my-2 shrink-0" />
+            {/* shrink-0 ensures the toggle is never squeezed off screen on narrow viewports */}
             <button
               onClick={() => onToggle(item.topic.value)}
-              className="px-4 text-base-content/40 hover:text-primary hover:bg-base-200/50 active:bg-base-200 transition-all flex items-center gap-1 touch-manipulation min-w-[60px] justify-center rounded-r-xl"
+              className="shrink-0 px-3 text-base-content/40 hover:text-primary hover:bg-base-200/50 active:bg-base-200 transition-all flex flex-col items-center justify-center gap-0.5 touch-manipulation w-14 rounded-r-xl"
               title={
                 isExpanded
                   ? 'Hide subtopics'
@@ -73,9 +135,14 @@ function TopicRow({
               aria-label="Toggle subtopics"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <span className="text-xs font-bold">{item.subtopics.length}</span>
+              <span className="text-xs font-bold leading-none">
+                {item.subtopics.length}
+              </span>
+              <span className="text-[9px] leading-none text-base-content/30 font-normal">
+                subtopics
+              </span>
               <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                className={`w-3 h-3 transition-transform duration-200 mt-0.5 ${isExpanded ? 'rotate-180' : ''}`}
               />
             </button>
           </>
@@ -108,6 +175,8 @@ function TopicRow({
 
 function StudyByTopicPanel({
   topicStructure,
+  progressMap,
+  recommendedTopicValue,
   expandedTopic,
   onTopicSelect,
   onToggle,
@@ -163,6 +232,8 @@ function StudyByTopicPanel({
           <TopicRow
             key={item.topic.value}
             item={item}
+            progress={progressMap[item.topic.value]}
+            isRecommended={item.topic.value === recommendedTopicValue}
             isExpanded={expandedTopic === item.topic.value}
             onTopicSelect={onTopicSelect}
             onToggle={onToggle}
@@ -176,12 +247,21 @@ function StudyByTopicPanel({
 
 export function TopicSelectionScreen({
   topicStructure,
+  topicProgress = [],
   expandedTopic,
   onPracticeQuizSelect,
   onTopicSelect,
   onToggle,
   onSubtopicSelect
 }) {
+  // Build a quick lookup: topic value -> progress entry
+  const progressMap = {}
+  topicProgress.forEach((p) => {
+    progressMap[p.topic] = p
+  })
+
+  const recommendedTopicValue = getRecommendedTopicValue(topicProgress)
+
   return (
     <div className="min-h-screen bg-base-100">
       {/* Compact sticky header on mobile */}
@@ -198,11 +278,19 @@ export function TopicSelectionScreen({
 
       {/* Content */}
       <div className="px-4 sm:px-6 md:px-12 py-4 sm:py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+          {/* Smart guidance: recommends the lowest-accuracy topic */}
+          <SmartGuidanceCard
+            topicProgress={topicProgress}
+            onSelect={onTopicSelect}
+          />
+
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 lg:items-start">
             <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
             <StudyByTopicPanel
               topicStructure={topicStructure}
+              progressMap={progressMap}
+              recommendedTopicValue={recommendedTopicValue}
               expandedTopic={expandedTopic}
               onTopicSelect={onTopicSelect}
               onToggle={onToggle}
