@@ -23,29 +23,51 @@ function FullPracticeExamCard({ onSelect }) {
   return (
     <button
       onClick={onSelect}
-      className="w-full p-5 sm:p-6 rounded-2xl active:scale-[0.99] transition-all group text-left touch-manipulation bg-base-100 hover:bg-base-200/50 border border-base-200"
+      className="
+        w-full
+        p-5 sm:p-6
+        rounded-2xl
+        active:scale-[0.99]
+        transition-all
+        group
+        text-left
+        touch-manipulation
+        bg-base-100
+        border
+        border-base-300
+        border-l-4
+        border-l-primary
+        shadow-sm
+        hover:shadow-md
+        hover:border-primary/30
+      "
       title="Start a full 75-question practice exam with 90-minute timer"
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Clock className="w-5 h-5 text-primary" />
+        <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <Clock className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
         </div>
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-lg sm:text-[24px] font-bold text-base-content leading-[30px]">
               Full Practice Exam
             </h2>
+
             <span className="text-[10px] px-2 py-0.5 rounded-full border text-primary border-primary/40">
               Best for exam prep
             </span>
           </div>
+
           <p className="text-sm text-base-content/60 leading-snug mt-0.5">
             Half-scale DRE simulation · 75 questions in 90 mins
           </p>
         </div>
+
         <ChevronRight className="w-5 h-5 text-base-content/30 group-hover:text-base-content/60 group-hover:translate-x-1 transition-all shrink-0" />
       </div>
+
       <div className="flex items-center gap-4 text-xs text-base-content/40">
         {['75 questions', '90 min timer', 'All 7 topics'].map((tag) => (
           <span key={tag} className="flex items-center gap-1.5">
@@ -194,7 +216,7 @@ function StudyByTopicPanel({
           <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
         </div>
         <div className="flex-1">
-          <h2 className="text-lg sm:text-2xl font-bold text-base-content leading-tight">
+          <h2 className="text-lg sm:text-[24px] font-bold text-base-content leading-[30px]">
             Study by Topic / Subtopic
           </h2>
           <p className="text-xs sm:text-sm text-base-content/60 mt-0.5">
