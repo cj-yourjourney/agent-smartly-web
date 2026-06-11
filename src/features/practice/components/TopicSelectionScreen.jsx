@@ -33,7 +33,7 @@ function FullPracticeExamCard({ onSelect }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-lg sm:text-xl font-bold text-base-content leading-tight">
+            <h2 className="text-lg sm:text-[24px] font-bold text-base-content leading-[30px]">
               Full Practice Exam
             </h2>
             <span className="text-[10px] px-2 py-0.5 rounded-full border text-primary border-primary/40">
