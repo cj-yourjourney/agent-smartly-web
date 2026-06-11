@@ -5,10 +5,6 @@ import {
   BookOpen,
   Target
 } from 'lucide-react'
-import {
-  SmartGuidanceCard,
-  getRecommendedTopicValue
-} from './SmartGuidanceCard'
 
 const accuracyColor = (acc) =>
   acc >= 90
@@ -18,6 +14,12 @@ const accuracyColor = (acc) =>
       : acc >= 60
         ? 'text-warning'
         : 'text-error'
+
+const getRecommendedTopicValue = (topicProgress = []) => {
+  const attempted = topicProgress.filter((p) => p.questions_attempted > 0)
+  if (attempted.length === 0) return null
+  return [...attempted].sort((a, b) => a.accuracy - b.accuracy)[0].topic
+}
 
 function FullPracticeExamCard({ onSelect }) {
   return (
@@ -54,7 +56,6 @@ function FullPracticeExamCard({ onSelect }) {
             <h2 className="text-lg sm:text-[24px] font-bold text-base-content leading-[30px]">
               Full Practice Exam
             </h2>
-
             <span className="text-[10px] px-2 py-0.5 rounded-full border text-primary border-primary/40">
               Best for exam prep
             </span>
@@ -99,7 +100,6 @@ function TopicRow({
             : 'border-base-200 bg-base-100 hover:border-base-300'
       }`}
     >
-      {/* overflow-hidden on the row prevents the toggle from ever being pushed off-screen */}
       <div className="flex items-stretch overflow-hidden">
         <button
           onClick={() => onTopicSelect(item.topic.value)}
@@ -107,11 +107,9 @@ function TopicRow({
           title={`Practice ${item.topic.label} (20 questions)`}
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-          {/* min-w-0 here is what allows truncation to actually work inside flex */}
           <div className="min-w-0 w-full">
             <div className="flex items-center gap-2 min-w-0">
               <span className="truncate block">{item.topic.label}</span>
-              {/* Lowest-accuracy topic badge */}
               {isRecommended && (
                 <span className="badge badge-primary badge-xs gap-1 shrink-0">
                   <Target className="w-2.5 h-2.5" />
@@ -120,7 +118,6 @@ function TopicRow({
               )}
             </div>
 
-            {/* Topic-level accuracy + questions practiced — labeled so each number is clear */}
             {progress && progress.questions_attempted > 0 && (
               <div className="flex items-center gap-3 mt-1">
                 <span className="flex items-baseline gap-1">
@@ -150,7 +147,6 @@ function TopicRow({
         {item.subtopics.length > 0 && (
           <>
             <div className="w-px bg-base-200 my-2 shrink-0" />
-            {/* shrink-0 ensures the toggle is never squeezed off screen on narrow viewports */}
             <button
               onClick={() => onToggle(item.topic.value)}
               className="shrink-0 px-3 text-base-content/40 hover:text-primary hover:bg-base-200/50 active:bg-base-200 transition-all flex flex-col items-center justify-center gap-0.5 touch-manipulation w-14 rounded-r-xl"
@@ -255,7 +251,6 @@ export function TopicSelectionScreen({
   onToggle,
   onSubtopicSelect
 }) {
-  // Build a quick lookup: topic value -> progress entry
   const progressMap = {}
   topicProgress.forEach((p) => {
     progressMap[p.topic] = p
@@ -265,7 +260,6 @@ export function TopicSelectionScreen({
 
   return (
     <div className="min-h-screen bg-base-100">
-      {/* Compact sticky header on mobile */}
       <div className="sticky top-0 z-10 bg-base-100/95 backdrop-blur-sm border-b border-base-200 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl sm:text-3xl font-bold text-base-content">
@@ -277,15 +271,8 @@ export function TopicSelectionScreen({
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-4 sm:px-6 md:px-12 py-4 sm:py-8">
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-          {/* Smart guidance: recommends the lowest-accuracy topic */}
-          <SmartGuidanceCard
-            topicProgress={topicProgress}
-            onSelect={onTopicSelect}
-          />
-
+        <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 lg:items-start">
             <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
             <StudyByTopicPanel
