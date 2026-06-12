@@ -57,12 +57,12 @@ function FullPracticeExamCard({ onSelect }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-xl font-bold text-base-content leading-tight">
+            <h2 className="text-lg font-bold text-base-content leading-tight">
               Full Practice Exam
             </h2>
             <ChevronRight className="w-5 h-5 text-base-content/30 shrink-0" />
           </div>
-          <p className="text-sm text-base-content/50 mt-0.5 leading-snug">
+          <p className="text-xs text-base-content/45 mt-0.5 leading-snug">
             Half-scale DRE simulation
           </p>
         </div>
@@ -96,9 +96,9 @@ function FullPracticeExamCard({ onSelect }) {
 
 function AccuracyBar({ accuracy }) {
   return (
-    <div className="w-full h-1 bg-base-200 rounded-full overflow-hidden mt-2">
+    <div className="w-full h-1 bg-base-300 rounded-full overflow-hidden mt-1.5">
       <div
-        className={`h-full rounded-full transition-all ${
+        className={`h-full rounded-full transition-all duration-500 ${
           accuracy >= 90
             ? 'bg-success'
             : accuracy >= 75
@@ -126,10 +126,10 @@ function TopicRow({
 
   return (
     <div
-      className={`rounded-xl overflow-hidden transition-all ${
+      className={`rounded-2xl overflow-hidden transition-all duration-200 ${
         isRecommended
-          ? 'border border-warning/40 bg-base-100'
-          : 'border border-base-200 bg-base-100'
+          ? 'bg-base-100 border border-warning/60 shadow-sm'
+          : 'bg-base-100 border border-base-200 shadow-sm'
       }`}
     >
       {/* Recommended banner */}
@@ -150,7 +150,7 @@ function TopicRow({
           className="flex-1 min-w-0 text-left px-4 py-4 touch-manipulation active:bg-base-200/50 transition-colors"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-          <span className="text-[15px] font-semibold text-base-content leading-snug block">
+          <span className="text-sm font-semibold text-base-content leading-snug block">
             {item.topic.label}
           </span>
 
@@ -158,13 +158,13 @@ function TopicRow({
             <>
               <div className="flex items-center gap-3 mt-1.5">
                 <span
-                  className={`text-sm font-bold ${accuracyColor(progress.accuracy)}`}
+                  className={`text-xs font-bold tabular-nums ${accuracyColor(progress.accuracy)}`}
                 >
                   {progress.accuracy}%
                 </span>
-                <span className="text-xs text-base-content/40">accuracy</span>
+                <span className="text-xs text-base-content/45">accuracy</span>
                 <span className="w-px h-3 bg-base-300" />
-                <span className="text-xs text-base-content/40">
+                <span className="text-xs text-base-content/45">
                   <span className="font-semibold text-base-content/60">
                     {progress.questions_attempted}
                   </span>{' '}
@@ -243,50 +243,56 @@ export function TopicSelectionScreen({
   const recommendedTopicValue = getRecommendedTopicValue(topicProgress)
 
   return (
-    <div className="min-h-screen bg-base-200/40">
-      {/* Sticky header — matches Key Concepts style */}
-      <div className="sticky top-0 z-10 bg-base-100/95 backdrop-blur-sm border-b border-base-200 px-4 py-4">
-        <h1 className="text-2xl font-bold text-base-content">Practice Mode</h1>
-        <p className="text-xs text-base-content/50 mt-0.5">
-          Choose how you want to practice
-        </p>
+    <div className="min-h-screen bg-base-200 pb-10">
+      {/* Sticky header — mirrors Key Concepts exactly */}
+      <div className="sticky top-0 z-10 bg-base-200/90 backdrop-blur-sm border-b border-base-300 px-4 py-4">
+        <div className="container mx-auto max-w-7xl">
+          <h1 className="text-lg font-bold leading-tight text-base-content">
+            Practice Mode
+          </h1>
+          <p className="text-xs text-base-content/45 leading-none mt-1">
+            Choose how you want to practice
+          </p>
+        </div>
       </div>
 
-      <div className="px-4 py-5 space-y-6 max-w-2xl mx-auto">
-        {/* Full Practice Exam */}
-        <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
-
-        {/* Study by Topic */}
-        <div>
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <BookOpen className="w-4.5 h-4.5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-base-content leading-tight">
-                Study by Topic
-              </h2>
-              <p className="text-xs text-base-content/50">
-                20 questions · No time limit · tap a topic to expand subtopics
-              </p>
-            </div>
+      <div className="px-4 sm:px-6 md:px-10 py-5 sm:py-8 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-5 lg:gap-8 lg:items-start">
+          {/* Left col — Full Practice Exam (sticky on desktop so it stays visible while scrolling topics) */}
+          <div className="lg:sticky lg:top-24">
+            <FullPracticeExamCard onSelect={onPracticeQuizSelect} />
           </div>
 
-          {/* Topic list */}
-          <div className="space-y-2">
-            {topicStructure.map((item) => (
-              <TopicRow
-                key={item.topic.value}
-                item={item}
-                progress={progressMap[item.topic.value]}
-                isRecommended={item.topic.value === recommendedTopicValue}
-                isExpanded={expandedTopic === item.topic.value}
-                onTopicSelect={onTopicSelect}
-                onToggle={onToggle}
-                onSubtopicSelect={onSubtopicSelect}
-              />
-            ))}
+          {/* Right col — Study by Topic */}
+          <div>
+            {/* Section header — mirrors Key Concepts header style */}
+            <div className="flex items-center gap-2.5 mb-3 px-1">
+              <BookOpen className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold leading-tight text-base-content">
+                  Study by Topic
+                </h2>
+                <p className="text-xs text-base-content/45 leading-none mt-0.5">
+                  20 questions · No time limit · tap to expand subtopics
+                </p>
+              </div>
+            </div>
+
+            {/* Topic list */}
+            <div className="space-y-2">
+              {topicStructure.map((item) => (
+                <TopicRow
+                  key={item.topic.value}
+                  item={item}
+                  progress={progressMap[item.topic.value]}
+                  isRecommended={item.topic.value === recommendedTopicValue}
+                  isExpanded={expandedTopic === item.topic.value}
+                  onTopicSelect={onTopicSelect}
+                  onToggle={onToggle}
+                  onSubtopicSelect={onSubtopicSelect}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
