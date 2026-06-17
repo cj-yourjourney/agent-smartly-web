@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     q: 'How many key concepts should I know?',
-    a: "There are 134 key concepts mapped to the DRE exam. Most prepared users know around 70% (roughly 90–95 concepts) going in. You don't need to memorize every single one — focus on understanding, not rote memorization."
+    a: "There are 144 key concepts mapped to the DRE exam. Most prepared users know around 70% (roughly 100–105 concepts) going in. You don't need to memorize every single one — focus on understanding, not rote memorization."
   },
   {
     q: 'How is this different from a prep book?',
@@ -111,22 +111,18 @@ export default function Home() {
               className="font-display text-4xl md:text-5xl leading-tight hero-fade-up"
               style={{ animationDelay: '0ms' }}
             >
-              Pass the CA Real Estate Salesperson Exam —{' '}
-              <span className="font-display-italic text-primary">
-                Without the Overwhelm
-              </span>
+              144 Key Concepts.
+              <br />
+              Pass the CA Real Estate Salesperson Exam —<br />
+              <span className="italic text-primary">Nothing More.</span>
             </h1>
 
             <p
               className="text-lg text-base-content/70 max-w-lg hero-fade-up"
               style={{ animationDelay: '120ms' }}
             >
-              Skip the textbooks.{' '}
-              <span className="font-semibold text-base-content">
-                134 concepts. 7 topics.
-              </span>{' '}
-              Review a topic, practice questions on it, check your score. Repeat
-              × 7. That's the whole method.
+              <span className="font-semibold text-base-content">7 topics.</span>{' '}
+              Review. Practice. Check. Repeat.
             </p>
 
             <div
@@ -202,12 +198,36 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── UVP ── */}
+      <div className="py-20 px-4 bg-base-100 border-t border-base-200">
+        <div className="max-w-2xl mx-auto">
+          <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 px-8 sm:px-14 py-12 sm:py-14 text-center flex flex-col items-center gap-6">
+            <p className="text-primary font-bold tracking-widest text-xs uppercase">
+              Why Agent Smartly Exists
+            </p>
+            <p className="font-display text-xl sm:text-2xl leading-snug text-base-content">
+              Most prep sites overwhelm you. We found exactly{' '}
+              <span className="text-primary">144 key concepts</span> across 7
+              topics — not 500, not 300.
+            </p>
+            <div className="h-px w-10 bg-primary/25" />
+            <p className="text-base-content/60 text-base leading-relaxed max-w-md">
+              Review. Practice. Check. Repeat. No textbooks, no fluff —{' '}
+              <span className="font-semibold text-base-content">
+                500+ students
+              </span>{' '}
+              have already used it to get licensed.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ── STATS BAR ── */}
       <div className="bg-base-200 py-12 border-y border-base-300">
         <div className="max-w-4xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4">
             {[
-              { value: '134', label: 'Essential Key Concepts' },
+              { value: '144', label: 'Essential Key Concepts' },
               { value: '7', label: 'Exam Topics — Review & Practice Each' },
               { value: '1,300+', label: 'Practice Questions' },
               { value: '500+', label: 'Exams Passed' }
@@ -280,7 +300,7 @@ export default function Home() {
               </p>
               <ul className="flex flex-col gap-2">
                 {[
-                  '134 concepts — only what the DRE tests',
+                  '144 concepts — only what the DRE tests',
                   'Organized by the 7 exact exam topics',
                   'Three steps, always know what to do next',
                   'Review → Practice → Check Progress',
@@ -315,7 +335,7 @@ export default function Home() {
               <p className="text-base-content/65 text-lg leading-relaxed">
                 Start with the{' '}
                 <span className="font-semibold text-base-content">
-                  134 essential key concepts
+                  144 essential key concepts
                 </span>{' '}
                 — the real terms, rules, and definitions the DRE actually tests.
                 Nothing more. Study one subject at a time (e.g., Agency Laws)
@@ -323,7 +343,7 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  '134 Key Concepts',
+                  '144 Key Concepts',
                   '7 Topics Organized',
                   'Memory Tricks',
                   'AI Explain',
@@ -341,7 +361,7 @@ export default function Home() {
             <div className="lg:order-2">
               <img
                 src="https://agent-smartly-images.s3.us-west-1.amazonaws.com/key-concept-05-04.png"
-                alt="Key Concepts page — 134 concepts organized by topic"
+                alt="Key Concepts page — 144 concepts organized by topic"
                 className="w-full h-auto block rounded-2xl border border-base-200"
                 style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.10))' }}
                 loading="lazy"

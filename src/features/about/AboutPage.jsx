@@ -39,7 +39,7 @@ const PILLARS = [
     desc: 'Target: 300 questions answered'
   },
   { label: 'Topic Coverage', weight: 15, desc: '25+ questions per topic' },
-  { label: 'Key Concepts', weight: 15, desc: '134 concepts, time-tracked' }
+  { label: 'Key Concepts', weight: 15, desc: '144 concepts, time-tracked' }
 ]
 
 function Connector() {
@@ -128,7 +128,7 @@ export default function AboutPage() {
               <p className="text-base-content/60 text-base sm:text-lg leading-relaxed max-w-md">
                 No prep book. No guesswork. Just{' '}
                 <span className="font-semibold text-base-content">
-                  134 concepts
+                  144 concepts
                 </span>
                 ,{' '}
                 <span className="font-semibold text-base-content">
@@ -156,7 +156,7 @@ export default function AboutPage() {
               <div className="flex flex-wrap justify-center lg:justify-start gap-5 pt-2 border-t border-base-300 w-full">
                 {[
                   { value: '500+', label: 'people passed' },
-                  { value: '134', label: 'concepts — nothing extra' },
+                  { value: '144', label: 'concepts — nothing extra' },
                   { value: '×7', label: "topics, then you're done" }
                 ].map((stat) => (
                   <div
@@ -187,7 +187,7 @@ export default function AboutPage() {
             {[
               {
                 icon: '📌',
-                title: "134 concepts. That's it.",
+                title: "144 concepts. That's it.",
                 desc: 'Every question maps to the official DRE blueprint. No filler, no guesswork — only what the exam actually tests.'
               },
               {
@@ -349,7 +349,7 @@ export default function AboutPage() {
               and used it as the backbone for everything. Not guesswork — the
               actual exam blueprint. I mapped{' '}
               <span className="font-semibold text-base-content">
-                134 key concepts
+                144 key concepts
               </span>{' '}
               across{' '}
               <span className="font-semibold text-base-content">7 topics</span>,
@@ -516,7 +516,7 @@ export default function AboutPage() {
                 500+ people have passed the CA real estate exam using Agent
                 Smartly
               </span>
-              . Every single one used the same method: 134 concepts, 7 topics,
+              . Every single one used the same method: 144 concepts, 7 topics,
               review → practice → check progress. Repeat until ready.
             </p>
           </div>
@@ -687,7 +687,7 @@ export default function AboutPage() {
             <span className="text-primary">Now let's get you there.</span>
           </h2>
           <p className="text-base-content/55 text-base sm:text-lg max-w-md">
-            134 concepts. 7 topics. Start with 60 free questions — no credit
+            144 concepts. 7 topics. Start with 60 free questions — no credit
             card required.
           </p>
           <div className="flex flex-col items-center gap-3 w-full sm:w-auto">
