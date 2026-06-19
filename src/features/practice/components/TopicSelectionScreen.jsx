@@ -6,6 +6,7 @@ import {
   Target,
   AlertCircle
 } from 'lucide-react'
+import { getTopicGuidance } from '../../progress/utils'
 
 const accuracyColor = (acc) =>
   acc >= 90
@@ -15,21 +16,6 @@ const accuracyColor = (acc) =>
       : acc >= 60
         ? 'text-warning'
         : 'text-error'
-
-const accuracyBg = (acc) =>
-  acc >= 90
-    ? 'bg-success/10'
-    : acc >= 75
-      ? 'bg-info/10'
-      : acc >= 60
-        ? 'bg-warning/10'
-        : 'bg-error/10'
-
-const getRecommendedTopicValue = (topicProgress = []) => {
-  const attempted = topicProgress.filter((p) => p.questions_attempted > 0)
-  if (attempted.length === 0) return null
-  return [...attempted].sort((a, b) => a.accuracy - b.accuracy)[0].topic
-}
 
 function FullPracticeExamCard({ onSelect }) {
   return (
@@ -117,6 +103,7 @@ function TopicRow({
   item,
   progress,
   isRecommended,
+  recommendedReason,
   isExpanded,
   onTopicSelect,
   onToggle,
@@ -137,7 +124,7 @@ function TopicRow({
         <div className="flex items-center gap-1.5 px-4 py-2 bg-warning/10 border-b border-warning/20">
           <AlertCircle className="w-3.5 h-3.5 text-warning shrink-0" />
           <span className="text-xs font-semibold text-warning">
-            Focus here — lowest accuracy
+            {recommendedReason}
           </span>
         </div>
       )}
@@ -240,7 +227,14 @@ export function TopicSelectionScreen({
     progressMap[p.topic] = p
   })
 
-  const recommendedTopicValue = getRecommendedTopicValue(topicProgress)
+  // Same recommendation engine as the Progress page's guidance card —
+  // whatever it suggests there is highlighted here, automatically in sync.
+  const guidance = getTopicGuidance(topicProgress)
+  const recommendedTopicValue = guidance.topicValue
+  const recommendedReason =
+    guidance.phase === 'review'
+      ? 'Focus here — review key concepts first'
+      : 'Focus here — lowest accuracy'
 
   return (
     <div className="min-h-screen bg-base-200 pb-10">
@@ -286,6 +280,7 @@ export function TopicSelectionScreen({
                   item={item}
                   progress={progressMap[item.topic.value]}
                   isRecommended={item.topic.value === recommendedTopicValue}
+                  recommendedReason={recommendedReason}
                   isExpanded={expandedTopic === item.topic.value}
                   onTopicSelect={onTopicSelect}
                   onToggle={onToggle}

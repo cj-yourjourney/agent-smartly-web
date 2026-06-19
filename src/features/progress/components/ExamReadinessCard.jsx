@@ -7,11 +7,9 @@ import {
   Clock,
   ChevronDown,
   ChevronUp,
-  Info,
-  ArrowRight,
-  Lightbulb
+  Info
 } from 'lucide-react'
-import ROUTES from '@/shared/constants/routes'
+import TopicGuidanceCard from './TopicGuidanceCard'
 
 const QUESTION_TARGET = 300
 const ACCURACY_TARGET = 82
@@ -61,67 +59,6 @@ function getScoreBand(score) {
     text: 'text-success',
     bar: 'progress-success'
   }
-}
-
-// ── Smart next-step recommendation ───────────────────────────────────────────
-
-function getNextStep({
-  score,
-  volumePct,
-  accuracyPct,
-  topicCoveragePct,
-  conceptCoverage
-}) {
-  if (score === 0) {
-    return {
-      headline: 'Start your first practice session',
-      detail:
-        'Answer a few questions to get your baseline score and see where you stand.'
-    }
-  }
-
-  const candidates = [
-    {
-      key: 'accuracy',
-      pct: accuracyPct,
-      headline: 'Focus on accuracy',
-      detail:
-        'Accuracy has the biggest impact (45%). Review your weak subtopics and make sure you understand the "why" behind each answer.'
-    },
-    {
-      key: 'volume',
-      pct: volumePct,
-      headline: 'Practice more questions',
-      detail: `You've answered ${Math.round(volumePct * 3)} of 300 target questions. Consistent daily practice builds pattern recognition fast.`
-    },
-    {
-      key: 'topics',
-      pct: topicCoveragePct,
-      headline: 'Cover more topics',
-      detail:
-        'Some topics still need 25+ questions to earn full credit. Spread your practice across all 7 exam topics.'
-    },
-    {
-      key: 'concepts',
-      pct: conceptCoverage,
-      headline: 'Review key concepts',
-      detail: `Read through the 134 key concepts — a quick win with ${CONCEPT_TARGET - Math.round((conceptCoverage * CONCEPT_TARGET) / 100)} still remaining.`
-    }
-  ]
-
-  const top = candidates
-    .filter((c) => c.pct < 100)
-    .sort((a, b) => a.pct - b.pct)[0]
-
-  if (!top) {
-    return {
-      headline: 'Keep your score fresh',
-      detail:
-        "All pillars complete! Practice regularly so your score doesn't decay from inactivity."
-    }
-  }
-
-  return top
 }
 
 // ── Pillar card ───────────────────────────────────────────────────────────────
@@ -250,8 +187,6 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
   const conceptCoverage = summary.key_concept_coverage || 0
   const conceptsFullyReviewed = summary.concepts_fully_reviewed || 0
   const conceptsSkimmed = summary.concepts_skimmed || 0
-  const daysInactive = summary.days_since_last_activity ?? null
-  const freshnessPct = summary.score_freshness_pct ?? 100
 
   const topicsFullyCovered = topicProgress.filter(
     (t) => t.questions_attempted >= 25
@@ -273,13 +208,6 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
   const accuracyPct = Math.min((accuracy / ACCURACY_TARGET) * 100, 100)
 
   const band = getScoreBand(score)
-  const nextStep = getNextStep({
-    score,
-    volumePct,
-    accuracyPct,
-    topicCoveragePct,
-    conceptCoverage
-  })
 
   const pillars = [
     {
@@ -362,54 +290,8 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
           </div>
         </div>
 
-        {/* Inactivity warning */}
-        {daysInactive !== null && daysInactive > 7 && (
-          <div
-            className={`alert py-2 text-sm ${daysInactive > 30 ? 'alert-error' : 'alert-warning'}`}
-          >
-            <Clock className="w-4 h-4 flex-shrink-0" />
-            <span>
-              Score at <strong>{freshnessPct}%</strong> strength —{' '}
-              {daysInactive} days without practice. Practice today to stop the
-              decay.
-            </span>
-          </div>
-        )}
-
-        {/* Next step recommendation */}
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-3">
-          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-0.5">
-            <Lightbulb className="w-4 h-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-primary mb-0.5">
-              {nextStep.headline}
-            </p>
-            <p className="text-xs text-base-content/60 leading-relaxed">
-              {nextStep.detail}
-            </p>
-          </div>
-        </div>
-
-        {/* CTA buttons — full-width stacked, default (md) size */}
-        <div className="flex flex-col gap-2.5">
-          <button
-            onClick={() => router.push(ROUTES.LEARNING.PRACTICE)}
-            className="btn btn-primary w-full gap-2"
-          >
-            <Target className="w-5 h-5" />
-            Practice Questions
-            <ArrowRight className="w-4 h-4 ml-auto" />
-          </button>
-          <button
-            onClick={() => router.push(ROUTES.LEARNING.KEY_CONCEPTS)}
-            className="btn btn-outline w-full gap-2"
-          >
-            <Zap className="w-5 h-5" />
-            Review Key Concepts
-            <ArrowRight className="w-4 h-4 ml-auto" />
-          </button>
-        </div>
+        {/* Topic-level "what to do next" guidance — Review -> Practice loop */}
+        <TopicGuidanceCard topicProgress={topicProgress} router={router} />
 
         {/* 4 Pillars */}
         <div>
