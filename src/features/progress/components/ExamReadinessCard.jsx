@@ -291,7 +291,12 @@ export default function ExamReadinessCard({ summary, topicProgress, router }) {
         </div>
 
         {/* Topic-level "what to do next" guidance — Review -> Practice loop */}
-        <TopicGuidanceCard topicProgress={topicProgress} router={router} />
+        <div>
+          <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+            Recommended Action
+          </p>
+          <TopicGuidanceCard topicProgress={topicProgress} router={router} />
+        </div>
 
         {/* 4 Pillars */}
         <div>

@@ -133,10 +133,19 @@ function buildPracticeRecommendation(topic) {
   }
 }
 
+// Fewer than this many attempts means accuracy isn't meaningful yet —
+// the user just hasn't done enough questions to get a fair read.
+const MIN_ATTEMPTS_FOR_ACCURACY = 5
+
 function buildReviewRecommendation(topic, { alreadyStarted } = {}) {
-  const detail = alreadyStarted
-    ? `${topic.accuracy}% accuracy is low — review the key concepts before practicing more questions.`
-    : 'Not started yet — review the key concepts, then practice questions in this topic.'
+  const tooFewAttempts =
+    alreadyStarted && topic.questions_attempted < MIN_ATTEMPTS_FOR_ACCURACY
+
+  const detail = !alreadyStarted
+    ? 'Not started yet — review the key concepts, then practice questions in this topic.'
+    : tooFewAttempts
+      ? `Only ${topic.questions_attempted} question${topic.questions_attempted === 1 ? '' : 's'} attempted — review the key concepts to build a strong foundation first.`
+      : `${topic.accuracy}% accuracy is low — review the key concepts before practicing more questions.`
 
   return {
     phase: 'review',
@@ -146,7 +155,7 @@ function buildReviewRecommendation(topic, { alreadyStarted } = {}) {
       ? `Review: ${topic.topic_display}`
       : `Start with: ${topic.topic_display}`,
     detail,
-    accuracy: alreadyStarted ? topic.accuracy : null,
+    accuracy: alreadyStarted && !tooFewAttempts ? topic.accuracy : null,
     questionsAttempted: alreadyStarted ? topic.questions_attempted : 0
   }
 }
