@@ -54,26 +54,34 @@ function AttemptRow({ attempt, index }) {
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-medium line-clamp-2 mb-1.5 leading-snug text-sm">
+        <p className="font-medium mb-1.5 leading-snug text-sm">
           {attempt.question_text}
         </p>
 
-        <div className="flex flex-wrap gap-1 mb-2">
-          <span className="badge badge-xs badge-ghost gap-1">
-            <BookOpen className="w-2.5 h-2.5" />
-            {attempt.topic_display || attempt.topic}
-          </span>
-          {attempt.subtopic && (
-            <span className="badge badge-xs badge-outline gap-1">
-              <Target className="w-2.5 h-2.5" />
-              {attempt.subtopic}
+        <div className="space-y-1 mb-2">
+          {/* Topic on its own line — can be long */}
+          <div className="flex items-center gap-1 text-xs text-base-content/50">
+            <BookOpen className="w-2.5 h-2.5 flex-shrink-0" />
+            <span className="truncate">
+              {attempt.topic_display || attempt.topic}
             </span>
-          )}
-          {attempt.time_spent_seconds != null && (
-            <span className="badge badge-xs badge-ghost gap-1">
-              <Clock className="w-2.5 h-2.5" />
-              {attempt.time_spent_seconds}s
-            </span>
+          </div>
+          {/* Subtopic + time on a second line — both short */}
+          {(attempt.subtopic || attempt.time_spent_seconds != null) && (
+            <div className="flex items-center gap-2">
+              {attempt.subtopic && (
+                <span className="badge badge-xs badge-outline gap-1">
+                  <Target className="w-2.5 h-2.5" />
+                  {attempt.subtopic}
+                </span>
+              )}
+              {attempt.time_spent_seconds != null && (
+                <span className="badge badge-xs badge-ghost gap-1">
+                  <Clock className="w-2.5 h-2.5" />
+                  {attempt.time_spent_seconds}s
+                </span>
+              )}
+            </div>
           )}
         </div>
 
@@ -265,16 +273,36 @@ function SessionCard({ session }) {
           {!loading && attempts.length > 0 && (
             <>
               {detail?.topic_breakdown?.length > 1 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {detail.topic_breakdown.map((tb) => (
-                    <div
-                      key={tb.topic}
-                      className="badge badge-outline gap-1 py-2 px-2 text-xs"
-                    >
-                      <span className="font-semibold">{tb.topic_display}:</span>
-                      {tb.questions_correct}/{tb.questions_attempted}
-                    </div>
-                  ))}
+                <div className="rounded-lg border border-base-200 divide-y divide-base-200 mb-3">
+                  {detail.topic_breakdown.map((tb) => {
+                    const pct =
+                      tb.questions_attempted > 0
+                        ? Math.round(
+                            (tb.questions_correct / tb.questions_attempted) *
+                              100
+                          )
+                        : 0
+                    return (
+                      <div
+                        key={tb.topic}
+                        className="flex items-center justify-between gap-3 px-3 py-2"
+                      >
+                        <p className="text-xs text-base-content/70 leading-snug min-w-0 truncate">
+                          {tb.topic_display}
+                        </p>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs tabular-nums text-base-content/50">
+                            {tb.questions_correct}/{tb.questions_attempted}
+                          </span>
+                          <span
+                            className={`text-xs font-semibold tabular-nums ${pct >= 70 ? 'text-success' : pct >= 40 ? 'text-warning' : 'text-error'}`}
+                          >
+                            {pct}%
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
               <div className="space-y-2">

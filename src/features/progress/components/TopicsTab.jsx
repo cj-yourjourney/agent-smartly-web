@@ -40,7 +40,7 @@ export default function TopicsTab({
 }) {
   return (
     <div className="space-y-4">
-      {/* Topic table */}
+      {/* Topic list */}
       <div className="card bg-base-100 shadow-sm border border-base-200">
         <div className="card-body">
           <div className="flex items-center justify-between mb-4">
@@ -48,8 +48,8 @@ export default function TopicsTab({
               <BookOpen className="w-5 h-5 text-primary" />
               Progress by Topic
             </h2>
-            <span className="text-xs text-base-content/40">
-              Click a topic to drill into subtopics
+            <span className="text-xs text-base-content/40 hidden sm:block">
+              Tap a topic to drill into subtopics
             </span>
           </div>
 
@@ -59,115 +59,101 @@ export default function TopicsTab({
               <span>Start practicing to see your progress by topic.</span>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-sm">
-                <thead>
-                  <tr className="text-xs text-base-content/50">
-                    <th>Topic</th>
-                    <th className="text-center">Questions</th>
-                    <th className="text-center">Accuracy</th>
-                    <th className="text-center">Mastery</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topicProgress.map((topic) => (
-                    <>
-                      <tr
-                        key={topic.topic}
-                        className="hover cursor-pointer"
-                        onClick={() => onTopicClick(topic.topic)}
-                      >
-                        <td>
-                          <span className="font-medium text-sm">
-                            {topic.topic_display}
-                          </span>
-                          {topic.questions_attempted > 0 &&
-                            topic.questions_attempted < 25 && (
-                              <span className="badge badge-xs badge-warning ml-2">
-                                needs more
-                              </span>
-                            )}
-                        </td>
-                        <td className="text-center text-sm">
-                          <span
-                            className={
-                              topic.questions_attempted < 25
-                                ? 'text-warning font-medium'
-                                : ''
-                            }
-                          >
-                            {topic.questions_attempted}
-                          </span>
-                          <span className="text-base-content/30"> / 25</span>
-                        </td>
-                        <td className="text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <span
-                              className={`text-sm font-semibold ${accuracyColor(topic.accuracy)}`}
-                            >
-                              {topic.accuracy}%
+            <div className="space-y-2">
+              {topicProgress.map((topic) => (
+                <div key={topic.topic}>
+                  {/* Topic row — card style, works on any screen width */}
+                  <button
+                    className="w-full text-left rounded-xl border border-base-200 bg-base-100 hover:bg-base-200 active:scale-[0.99] transition-all px-4 py-3"
+                    onClick={() => onTopicClick(topic.topic)}
+                  >
+                    {/* Row 1: topic name + mastery badge */}
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm leading-snug">
+                          {topic.topic_display}
+                        </p>
+                        {topic.questions_attempted > 0 &&
+                          topic.questions_attempted < 25 && (
+                            <span className="badge badge-xs badge-warning mt-1">
+                              needs more
                             </span>
+                          )}
+                      </div>
+                      <span
+                        className={`badge badge-sm flex-shrink-0 ${masteryColor(topic.mastery_level)}`}
+                      >
+                        {topic.mastery_level}
+                      </span>
+                    </div>
+
+                    {/* Row 2: questions + accuracy + progress bar */}
+                    <div className="flex items-center gap-4 text-xs text-base-content/50">
+                      <span>
+                        <span
+                          className={
+                            topic.questions_attempted < 25
+                              ? 'text-warning font-medium'
+                              : 'text-base-content/70 font-medium'
+                          }
+                        >
+                          {topic.questions_attempted}
+                        </span>
+                        <span className="text-base-content/30"> / 25 q</span>
+                      </span>
+                      <span
+                        className={`font-semibold ${accuracyColor(topic.accuracy)}`}
+                      >
+                        {topic.accuracy}%
+                      </span>
+                      <progress
+                        className="progress progress-primary flex-1 h-1.5"
+                        value={topic.accuracy}
+                        max="100"
+                      />
+                    </div>
+                  </button>
+
+                  {/* Inline subtopic expansion */}
+                  {selectedTopic === topic.topic &&
+                    subtopicProgress.length > 0 && (
+                      <div className="bg-base-200 rounded-xl mx-1 mt-1 mb-2 p-3 space-y-2">
+                        <p className="text-xs text-base-content/50 font-semibold uppercase tracking-wide flex items-center gap-1">
+                          <Target className="w-3.5 h-3.5" /> Subtopics
+                        </p>
+                        {subtopicProgress.map((sub, i) => (
+                          <div key={i} className="space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-base-content/70 flex-1 min-w-0">
+                                {sub.subtopic_display}
+                              </span>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span
+                                  className={`text-xs font-semibold ${accuracyColor(sub.accuracy)}`}
+                                >
+                                  {sub.accuracy}%
+                                </span>
+                                <span className="text-xs text-base-content/40">
+                                  {sub.questions_attempted}q
+                                </span>
+                                {sub.is_weak_area && (
+                                  <span className="badge badge-error badge-xs">
+                                    weak
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                             <progress
-                              className="progress progress-primary w-14 h-1.5"
-                              value={topic.accuracy}
+                              className="progress progress-primary w-full h-1"
+                              value={sub.accuracy}
                               max="100"
                             />
                           </div>
-                        </td>
-                        <td className="text-center">
-                          <span
-                            className={`badge badge-sm ${masteryColor(topic.mastery_level)}`}
-                          >
-                            {topic.mastery_level}
-                          </span>
-                        </td>
-                      </tr>
-
-                      {/* Inline subtopic expansion */}
-                      {selectedTopic === topic.topic &&
-                        subtopicProgress.length > 0 && (
-                          <tr key={`${topic.topic}-sub`}>
-                            <td colSpan={4} className="p-0">
-                              <div className="bg-base-200 rounded-lg mx-2 mb-2 p-3 space-y-1.5">
-                                <p className="text-xs text-base-content/50 font-semibold uppercase tracking-wide mb-2 flex items-center gap-1">
-                                  <Target className="w-3.5 h-3.5" /> Subtopics
-                                </p>
-                                {subtopicProgress.map((sub, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex items-center gap-3 text-sm"
-                                  >
-                                    <span className="flex-1 text-base-content/70">
-                                      {sub.subtopic_display}
-                                    </span>
-                                    <span
-                                      className={`text-xs font-semibold ${accuracyColor(sub.accuracy)}`}
-                                    >
-                                      {sub.accuracy}%
-                                    </span>
-                                    <progress
-                                      className="progress progress-primary w-14 h-1"
-                                      value={sub.accuracy}
-                                      max="100"
-                                    />
-                                    <span className="text-xs text-base-content/40 w-14 text-right">
-                                      {sub.questions_attempted} q
-                                    </span>
-                                    {sub.is_weak_area && (
-                                      <span className="badge badge-error badge-xs">
-                                        weak
-                                      </span>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                    </>
-                  ))}
-                </tbody>
-              </table>
+                        ))}
+                      </div>
+                    )}
+                </div>
+              ))}
             </div>
           )}
         </div>
