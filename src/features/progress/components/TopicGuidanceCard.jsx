@@ -30,11 +30,11 @@ export default function TopicGuidanceCard({ topicProgress, router }) {
       <div className="mb-2.5">
         <button
           onClick={handleAction}
-          className="w-full flex items-center gap-1.5 bg-primary text-primary-content text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary/90 active:scale-[0.98] transition-all"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-content text-xs font-semibold px-4 py-2 rounded-lg hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
         >
           <ButtonIcon className="w-3.5 h-3.5" />
           {ctaLabel}
-          <ArrowRight className="w-3 h-3 ml-auto" />
+          <ArrowRight className="w-3 h-3" />
         </button>
       </div>
       {topicName && (
