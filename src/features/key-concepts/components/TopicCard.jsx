@@ -47,7 +47,7 @@ export default function TopicCard({
   return (
     <div
       ref={topicRef}
-      className={`rounded-2xl overflow-hidden border transition-all duration-200 ${
+      className={`rounded-2xl border transition-all duration-200 ${
         isHighlighted
           ? 'bg-base-100 border-warning/60 shadow-lg ring-2 ring-warning/30'
           : isExpanded
@@ -58,7 +58,7 @@ export default function TopicCard({
       {/* Topic toggle button */}
       <button
         onClick={() => onToggle(topic.code)}
-        className="w-full flex items-center gap-3 px-4 py-4 text-left active:bg-base-200/60 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-4 text-left active:bg-base-200/60 transition-colors rounded-t-2xl"
       >
         {/* Number badge */}
         <span
@@ -126,8 +126,8 @@ export default function TopicCard({
       {/* Expanded subtopics */}
       {isExpanded && (
         <div className="border-t border-base-200">
-          {/* Practice CTA — visible immediately on expand */}
-          <div className="px-4 py-3 border-b border-base-200">
+          {/* Practice CTA — sticky top so it's always visible while scrolling concepts */}
+          <div className="sticky top-16 z-10 px-4 py-3 bg-base-100 border-b border-base-200 rounded-t-none">
             <button
               onClick={handlePractice}
               className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] ${
