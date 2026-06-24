@@ -1,9 +1,15 @@
 // src/features/auth/VerifyEmailPage.jsx
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
-import { verifyEmail } from './state/authSlice'
+import { verifyEmail, clearError } from './state/authSlice'
 import ROUTES from '@/shared/constants/routes'
+
+// ─── Module-level guard ───────────────────────────────────────────────────────
+// Placed OUTSIDE the component so it survives React remounts (Next.js router
+// hydration can unmount/remount the page, resetting any useRef inside).
+// This ensures the one-time token is only consumed once per page load.
+let verificationAttempted = false
 
 // ─── States ──────────────────────────────────────────────────────────────────
 
@@ -137,16 +143,21 @@ const VerifyEmailPage = () => {
   const router = useRouter()
   const { loading } = useSelector((state) => state.auth)
 
-  // 'idle' | 'verifying' | 'success' | 'error' | 'missing_token'
   const [status, setStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
-    // router.query is empty on first render in Next.js — wait until it's ready
     if (!router.isReady) return
 
-    const { token } = router.query
+    // Module-level guard: prevents double-consumption of the one-time token
+    // if Next.js hydration causes this component to unmount and remount.
+    if (verificationAttempted) return
+    verificationAttempted = true
+
+    dispatch(clearError())
+
+    const token = router.query.token
 
     if (!token) {
       setStatus('missing_token')
@@ -158,7 +169,6 @@ const VerifyEmailPage = () => {
       try {
         await dispatch(verifyEmail(token)).unwrap()
         setStatus('success')
-        // Brief pause so the user sees the success state before redirect
         setTimeout(() => router.replace(ROUTES.ONBOARDING), 1500)
       } catch (err) {
         const message =
@@ -174,7 +184,7 @@ const VerifyEmailPage = () => {
     }
 
     runVerification()
-  }, [router.isReady, router.query]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [router.isReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
