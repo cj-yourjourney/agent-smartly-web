@@ -71,7 +71,7 @@ export function SessionCompleteScreen({
           </p>
 
           {!passed && (
-            <p className="text-sm text-base-content/50 text-center">
+            <p className="text-sm text-base-content/70 font-medium text-center">
               Review the key concepts before trying again.
             </p>
           )}
