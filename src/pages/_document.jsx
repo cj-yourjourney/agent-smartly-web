@@ -1,12 +1,19 @@
-// pages/_document.jsx
+// src/pages/_document.jsx
 import { Html, Head, Main, NextScript } from 'next/document'
 
 export default function Document() {
   return (
     <Html lang="en" data-theme="light">
       <Head>
-        {/* Add any global meta tags, fonts, or icons here */}
-        {/* Google Fonts: Manrope + Instrument Serif */}
+        {/* next-seo owns: title, description, og tags, twitter tags */}
+
+        <meta charSet="utf-8" />
+        <meta name="robots" content="index, follow" />
+
+        {/* Favicon */}
+        <link rel="icon" href="/favicon.ico" />
+
+        {/* Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -17,6 +24,7 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Instrument+Serif:ital@0;1&display=swap"
           rel="stylesheet"
         />
+
         {/* PostHog Analytics */}
         <script
           dangerouslySetInnerHTML={{
