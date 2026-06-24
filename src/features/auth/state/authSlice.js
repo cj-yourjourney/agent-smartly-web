@@ -77,7 +77,9 @@ export const loginUser = createAsyncThunk(
       saveTokensToStorage(data.access, data.refresh)
       return data
     } catch {
-      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
@@ -99,7 +101,9 @@ export const registerUser = createAsyncThunk(
       // No tokens yet — user must verify email first
       return data
     } catch {
-      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
@@ -121,7 +125,9 @@ export const verifyEmail = createAsyncThunk(
       saveTokensToStorage(data.access, data.refresh)
       return data
     } catch {
-      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
@@ -142,7 +148,9 @@ export const requestPasswordReset = createAsyncThunk(
       if (!response.ok) return rejectWithValue(data)
       return data
     } catch {
-      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
@@ -163,7 +171,9 @@ export const confirmPasswordReset = createAsyncThunk(
       if (!response.ok) return rejectWithValue(data)
       return data
     } catch {
-      return rejectWithValue({ detail: 'Network error. Please check your connection.' })
+      return rejectWithValue({
+        detail: 'Network error. Please check your connection.'
+      })
     }
   }
 )
@@ -216,7 +226,8 @@ export const fetchUserDetails = createAsyncThunk(
     try {
       let { accessToken } = getState().auth
       if (!accessToken) accessToken = getTokensFromStorage().access
-      if (!accessToken) return rejectWithValue({ detail: 'No access token available' })
+      if (!accessToken)
+        return rejectWithValue({ detail: 'No access token available' })
 
       // Proactively refresh if the access token is expired or nearly so
       if (isTokenExpired(accessToken)) {
@@ -246,7 +257,9 @@ export const fetchUserDetails = createAsyncThunk(
       if (!response.ok) return rejectWithValue(data)
       return data
     } catch (error) {
-      return rejectWithValue({ detail: error?.message || 'Failed to fetch user details' })
+      return rejectWithValue({
+        detail: error?.message || 'Failed to fetch user details'
+      })
     }
   }
 )
@@ -301,9 +314,15 @@ const authSlice = createSlice({
       removeTokensFromStorage()
     },
 
-    clearError: (state) => { state.error = null },
-    clearRegisterSuccess: (state) => { state.registerSuccess = false },
-    setUser: (state, action) => { state.user = action.payload }
+    clearError: (state) => {
+      state.error = null
+    },
+    clearRegisterSuccess: (state) => {
+      state.registerSuccess = false
+    },
+    setUser: (state, action) => {
+      state.user = action.payload
+    }
   },
 
   extraReducers: (builder) => {
@@ -361,7 +380,9 @@ const authSlice = createSlice({
       .addCase(verifyEmail.rejected, (state, action) => {
         state.loading = false
         state.error =
-          action.payload?.error || action.payload?.detail || 'Verification failed'
+          action.payload?.error ||
+          action.payload?.detail ||
+          'Verification failed'
         state.isAuthenticated = false
       })
 
@@ -376,7 +397,8 @@ const authSlice = createSlice({
       })
       .addCase(requestPasswordReset.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload?.error || action.payload?.detail || 'Request failed'
+        state.error =
+          action.payload?.error || action.payload?.detail || 'Request failed'
       })
 
       // ── Password reset confirm ─────────────────────────────────────────────
@@ -390,7 +412,8 @@ const authSlice = createSlice({
       })
       .addCase(confirmPasswordReset.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload?.error || action.payload?.detail || 'Reset failed'
+        state.error =
+          action.payload?.error || action.payload?.detail || 'Reset failed'
       })
 
       // ── Token refresh ──────────────────────────────────────────────────────
@@ -440,8 +463,13 @@ const authSlice = createSlice({
   }
 })
 
-export const { initializeAuth, logout, clearError, clearRegisterSuccess, setUser } =
-  authSlice.actions
+export const {
+  initializeAuth,
+  logout,
+  clearError,
+  clearRegisterSuccess,
+  setUser
+} = authSlice.actions
 
 export default authSlice.reducer
 

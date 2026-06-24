@@ -138,12 +138,18 @@ export default function LoginPage() {
   const dispatch = useDispatch()
   const router = useRouter()
   const { loading, error, isAuthenticated } = useSelector((state) => state.auth)
+  const { isFetched: subscriptionFetched } = useSelector(
+    (state) => state.subscription
+  )
 
+  // Wait until AuthProvider has finished its bootstrap (user details +
+  // subscription both fetched) before navigating. Without this, the user
+  // arrives at the next page before Redux is hydrated, causing a spinner loop.
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && subscriptionFetched) {
       router.push(ROUTES.LEARNING.PROGRESS)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, subscriptionFetched, router])
 
   useEffect(() => {
     return () => {

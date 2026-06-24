@@ -21,10 +21,14 @@ export default function AuthProvider({ children }) {
   const { isAuthenticated, isInitialized, accessToken, refreshToken } =
     useSelector((state) => state.auth)
   const accessTokenExpiry = useSelector(selectAccessTokenExpiry)
+  const { isFetched: subscriptionFetched } = useSelector(
+    (state) => state.subscription
+  )
 
   const refreshTimerRef = useRef(null)
-  // Tracks whether we've completed the post-init bootstrap (refresh + user fetch)
-  const bootstrapDoneRef = useRef(false)
+  // Tracks whether the initial bootstrap (app mount) has completed.
+  // Separate from the post-login bootstrap so both paths work independently.
+  const bootstrapStarted = useRef(false)
 
   const clearRefreshTimer = useCallback(() => {
     if (refreshTimerRef.current) {
@@ -46,42 +50,30 @@ export default function AuthProvider({ children }) {
 
   // ── 1. Bootstrap: read tokens from localStorage ───────────────────────────
   useEffect(() => {
+    bootstrapStarted.current = false
     dispatch(initializeAuth())
   }, [dispatch])
 
-  // ── 2. Post-init bootstrap ────────────────────────────────────────────────
+  // ── 2. App-mount bootstrap ────────────────────────────────────────────────
   //
   // Runs once after initializeAuth() sets isInitialized = true.
-  //
-  // Scenario A — returning user (most common case for the "logged out daily" bug):
-  //   - isAuthenticated = true  (refresh token is valid)
-  //   - accessToken may be expired (that's fine, it only lasts 1 hour)
-  //   → silently refresh the access token first, then fetch user data
-  //
-  // Scenario B — fresh login / just verified email:
-  //   - isAuthenticated = true, accessToken is fresh
-  //   → skip the refresh, go straight to fetching user data
-  //
-  // Scenario C — not logged in:
-  //   - isAuthenticated = false
-  //   → clear subscription state, done
+  // Handles returning users (refresh token valid, access token may be stale).
   //
   useEffect(() => {
-    if (!isInitialized || bootstrapDoneRef.current) return
-    bootstrapDoneRef.current = true
+    if (!isInitialized) return
+    if (bootstrapStarted.current) return
+    bootstrapStarted.current = true
 
     const bootstrap = async () => {
       if (!isAuthenticated) {
+        // Not logged in — clear any stale subscription state and stop
         dispatch(resetSubscription())
         return
       }
 
-      // Check if access token is missing or expired
+      // Already authenticated on mount (returning user) — load their data
       const accessExpired = !accessToken || accessTokenExpiry < 10_000
-
       if (accessExpired) {
-        // Refresh token is valid (initializeAuth confirmed this) but
-        // access token is stale — get a fresh one before doing anything else.
         try {
           await dispatch(refreshAccessToken()).unwrap()
         } catch {
@@ -90,34 +82,62 @@ export default function AuthProvider({ children }) {
         }
       }
 
-      // Now we have a valid access token — load user data
       try {
         await dispatch(fetchUserDetails()).unwrap()
-        dispatch(fetchSubscriptionStatus())
       } catch {
-        // fetchUserDetails already handles auth errors internally
-        // (it calls refreshAccessToken again if needed); nothing to do here
+        // fetchUserDetails handles auth errors internally
+      }
+
+      try {
+        await dispatch(fetchSubscriptionStatus()).unwrap()
+      } catch {
+        // subscriptionSlice sets isFetched=true + hasAccess=false on error
       }
     }
 
     bootstrap()
   }, [isInitialized]) // eslint-disable-line react-hooks/exhaustive-deps
-  // Intentionally only on isInitialized — we want this to run exactly once
 
-  // ── 3. Schedule proactive access-token refresh ────────────────────────────
+  // ── 3. Post-login bootstrap ───────────────────────────────────────────────
   //
-  // Fires REFRESH_BUFFER_MS before the access token expires so API calls
-  // are never blocked by an expired token during normal usage.
+  // Handles the case where the user logs in during the session:
+  // - App mounted with isAuthenticated=false (no tokens in localStorage)
+  // - User submitted the login form → isAuthenticated flips to true
+  // - The mount bootstrap (effect 2) already ran and saw isAuthenticated=false,
+  //   so fetchUserDetails / fetchSubscriptionStatus were never called.
+  // - This effect catches that transition and runs them now.
   //
+  useEffect(() => {
+    // Only act once the mount bootstrap is done (bootstrapStarted = true)
+    // and only when authentication transitions to true with no subscription data yet.
+    if (!isInitialized) return
+    if (!bootstrapStarted.current) return // mount bootstrap hasn't run yet
+    if (!isAuthenticated) return // not logged in (or just logged out)
+    if (subscriptionFetched) return // already have subscription data
+
+    const postLoginBootstrap = async () => {
+      try {
+        await dispatch(fetchUserDetails()).unwrap()
+      } catch {
+        // fetchUserDetails handles auth errors internally
+      }
+
+      try {
+        await dispatch(fetchSubscriptionStatus()).unwrap()
+      } catch {
+        // subscriptionSlice sets isFetched=true + hasAccess=false on error
+      }
+    }
+
+    postLoginBootstrap()
+  }, [isAuthenticated, isInitialized]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── 4. Schedule proactive access-token refresh ────────────────────────────
   useEffect(() => {
     clearRefreshTimer()
 
     if (!isAuthenticated || !accessToken || !refreshToken) return
-
-    // If token is already expired (or expiry unknown), refresh immediately.
-    // This path is hit when the rotated refresh token comes back but
-    // accessTokenExpiry hasn't updated in Redux yet.
-    if (accessTokenExpiry === 0) return // bootstrap effect handles this
+    if (accessTokenExpiry === 0) return
 
     const delay = Math.max(0, accessTokenExpiry - REFRESH_BUFFER_MS)
 
@@ -140,11 +160,7 @@ export default function AuthProvider({ children }) {
     handleRefreshFailure
   ])
 
-  // ── 4. Refresh on tab focus ───────────────────────────────────────────────
-  //
-  // When the user switches back to the tab after a long time away,
-  // refresh if the access token has less than 5 minutes left.
-  //
+  // ── 5. Refresh on tab focus ───────────────────────────────────────────────
   useEffect(() => {
     if (!isAuthenticated) return
 
@@ -152,7 +168,6 @@ export default function AuthProvider({ children }) {
       if (document.visibilityState !== 'visible') return
       if (!accessToken) return
 
-      // Only refresh if the token is about to expire (< 5 min) or already has
       if (accessTokenExpiry < REFRESH_BUFFER_MS) {
         try {
           await dispatch(refreshAccessToken()).unwrap()
@@ -174,7 +189,9 @@ export default function AuthProvider({ children }) {
   ])
 
   // ── Render ─────────────────────────────────────────────────────────────────
-  if (!isInitialized) {
+  // Block children until auth AND subscription are both resolved.
+  // This prevents SubscriptionGuard from ever seeing isFetched=false.
+  if (!isInitialized || (isAuthenticated && !subscriptionFetched)) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="loading loading-spinner loading-lg" />
