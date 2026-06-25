@@ -61,16 +61,22 @@ export default function PracticeMode() {
   const [answeredMap, setAnsweredMap] = useState({})
   const [showSessionComplete, setShowSessionComplete] = useState(false)
 
-  // Ref to track the in-flight recordQuestionAttempt promise for the last
-  // question. finishSession must wait for it before calling completeSession,
-  // otherwise the backend rejects the attempt with "session already completed".
+  // ── Session ID tracking ────────────────────────────────────────────────────
+  // sessionIdRef always mirrors Redux sessionId so closures never see stale null.
+  const sessionIdRef = useRef(sessionId)
+  useEffect(() => {
+    sessionIdRef.current = sessionId
+  }, [sessionId])
+
+  // sessionReadyPromiseRef holds the Promise returned by dispatching createSession.
+  // handleSubmitAnswer awaits it before firing recordQuestionAttempt, so even
+  // if Q1 is answered the instant the quiz screen appears (before createSession
+  // resolves), the attempt still carries the correct session_id.
+  const sessionReadyPromiseRef = useRef(null)
+
+  // ── Other refs ─────────────────────────────────────────────────────────────
   const pendingAttemptRef = useRef(null)
-  // interval fires multiple times at the boundary second.
   const timeUpFiredRef = useRef(false)
-  // Wall-clock start time for topic/subtopic sessions.  Practice quiz uses
-  // quizStartTimestamp from Redux instead (set when questions arrive), but
-  // topic sessions have no Redux equivalent, so we capture Date.now() here
-  // the moment the user picks a topic/subtopic.
   const nonQuizStartTimeRef = useRef(null)
 
   const sessionResults = {
@@ -86,12 +92,8 @@ export default function PracticeMode() {
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
   // ── Session duration tracking ─────────────────────────────────────────────
-  // Max creditable seconds per session type — mirrors the server-side cap.
   const SESSION_MAX_SECONDS = isPracticeQuiz ? 150 * 60 : 40 * 60
 
-  // Returns elapsed seconds capped at the session maximum.
-  // Uses quizStartTimestamp from Redux so it's always accurate regardless of
-  // component remounts. Falls back to elapsedTime for non-quiz sessions.
   const getSessionDuration = useCallback(() => {
     const anchor =
       quizStartTimestamp ?? (questions.length > 0 ? Date.now() : null)
@@ -122,7 +124,6 @@ export default function PracticeMode() {
     }
   }, [currentQuestionIndex, dispatch, selectedTopic, questions.length])
 
-  // Reset local tracking when a new session begins.
   useEffect(() => {
     if (selectedTopic) {
       setAnsweredMap({})
@@ -130,22 +131,11 @@ export default function PracticeMode() {
     }
   }, [selectedTopic])
 
-  // ── Countdown timer ──────────────────────────────────────────────────────────
-  // Anchored to quizStartTimestamp in Redux — a value that is:
-  //   • Set exactly once when fetchPracticeQuizQuestions.fulfilled fires
-  //   • Cleared only when the session ends (resetToTopicSelection)
-  //   • Immune to component remounts because it lives in the Redux store
-  //
-  // The effect re-runs only when quizStartTimestamp changes (i.e. a new exam
-  // starts), so the interval is created once and runs straight to 00:00 with
-  // zero resets. No bootstrap loop, no secondary ref, no race conditions.
+  // ── Countdown timer ───────────────────────────────────────────────────────
+
   useEffect(() => {
-    // Stop ticking as soon as the complete screen is shown — elapsedTime
-    // freezes and SessionCompleteScreen will switch to the API value once
-    // completeSession resolves.
     if (!isPracticeQuiz || !quizStartTimestamp || showSessionComplete) return
 
-    // Reset the one-shot guard whenever a fresh exam begins.
     timeUpFiredRef.current = false
 
     const tick = () => {
@@ -157,12 +147,12 @@ export default function PracticeMode() {
       }
     }
 
-    tick() // paint the correct time immediately, before the first 1 s delay
+    tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [isPracticeQuiz, quizStartTimestamp, timeLimit, showSessionComplete])
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   const resetLocalState = useCallback(() => {
     setExpandedTopic(null)
@@ -170,12 +160,10 @@ export default function PracticeMode() {
     setShowTimeUpAlert(false)
     setAnsweredMap({})
     setShowSessionComplete(false)
-    // Reset the time-up guard so a new exam can show the alert again.
     timeUpFiredRef.current = false
-    // Clear the topic-session clock so a future session starts fresh.
     nonQuizStartTimeRef.current = null
-    // Clear any in-flight attempt promise so it doesn't leak into a new session.
     pendingAttemptRef.current = null
+    sessionReadyPromiseRef.current = null
   }, [])
 
   const resolveTopicLabel = useCallback(() => {
@@ -192,44 +180,85 @@ export default function PracticeMode() {
     return topics.find((t) => t.value === selectedTopic)?.label ?? selectedTopic
   }, [isPracticeQuiz, selectedSubtopic, selectedTopic, topicStructure, topics])
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
+  // ── Snapshot duration helper ──────────────────────────────────────────────
 
-  const handleTopicSelect = (topicValue) => {
+  const snapshotDuration = useCallback(() => {
+    const now = Date.now()
+    if (isPracticeQuiz && quizStartTimestamp) {
+      return Math.min(
+        Math.floor((now - quizStartTimestamp) / 1000),
+        SESSION_MAX_SECONDS
+      )
+    }
+    if (nonQuizStartTimeRef.current) {
+      return Math.min(
+        Math.floor((now - nonQuizStartTimeRef.current) / 1000),
+        SESSION_MAX_SECONDS
+      )
+    }
+    return 0
+  }, [isPracticeQuiz, quizStartTimestamp, SESSION_MAX_SECONDS])
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+
+  const handleTopicSelect = async (topicValue) => {
     nonQuizStartTimeRef.current = Date.now()
-    dispatch(fetchQuestionsByTopic(topicValue))
-    dispatch(
+
+    // Step 1: fetch questions
+    const fetchResult = await dispatch(fetchQuestionsByTopic(topicValue))
+    if (!fetchQuestionsByTopic.fulfilled.match(fetchResult)) return
+
+    // Step 2: create the session and AWAIT it fully before the QuizScreen
+    // can receive any user input. This guarantees sessionId is in Redux by
+    // the time handleSubmitAnswer fires for Q1.
+    const count = fetchResult.payload.questions?.length || 20
+    const sessionPromise = dispatch(
       createSession({
         sessionType: 'topic',
         topic: topicValue,
-        totalQuestions: 20
+        totalQuestions: count
       })
     )
+    // Store the promise so handleSubmitAnswer can await it as a fallback
+    // safety net (e.g. if the user somehow submits before this line resolves).
+    sessionReadyPromiseRef.current = sessionPromise
+    await sessionPromise
   }
 
-  const handleSubtopicSelect = (topicValue, subtopicValue) => {
+  const handleSubtopicSelect = async (topicValue, subtopicValue) => {
     nonQuizStartTimeRef.current = Date.now()
-    dispatch(
+
+    const fetchResult = await dispatch(
       fetchQuestionsBySubtopic({ topic: topicValue, subtopic: subtopicValue })
     )
-    dispatch(
+    if (!fetchQuestionsBySubtopic.fulfilled.match(fetchResult)) return
+
+    const count = fetchResult.payload.questions?.length || 20
+    const sessionPromise = dispatch(
       createSession({
         sessionType: 'subtopic',
         topic: topicValue,
         subtopic: subtopicValue,
-        totalQuestions: 20
+        totalQuestions: count
       })
     )
+    sessionReadyPromiseRef.current = sessionPromise
+    await sessionPromise
   }
 
-  const handlePracticeQuizSelect = () => {
-    // Reset local display state; quizStartTimestamp is set in Redux when
-    // fetchPracticeQuizQuestions.fulfilled fires, so no manual clock management needed.
+  const handlePracticeQuizSelect = async () => {
     setElapsedTime(0)
     setShowTimeUpAlert(false)
-    dispatch(fetchPracticeQuizQuestions())
-    dispatch(
-      createSession({ sessionType: 'practice_exam', totalQuestions: 75 })
+
+    const fetchResult = await dispatch(fetchPracticeQuizQuestions())
+    if (!fetchPracticeQuizQuestions.fulfilled.match(fetchResult)) return
+
+    const count = fetchResult.payload.questions?.length || 75
+    const sessionPromise = dispatch(
+      createSession({ sessionType: 'practice_exam', totalQuestions: count })
     )
+    sessionReadyPromiseRef.current = sessionPromise
+    await sessionPromise
   }
 
   const handleAnswerSelect = (answer) => {
@@ -238,12 +267,18 @@ export default function PracticeMode() {
 
   const handleSubmitAnswer = async () => {
     if (!selectedAnswer) return
-    // Prevent re-submitting an already-answered question
     if (answeredMap[currentQuestionIndex]) return
+
+    // Safety net: if createSession is still in-flight (e.g. very fast user or
+    // slow network), wait for it to resolve before recording the attempt.
+    // This guarantees session_id is never undefined on any attempt.
+    if (sessionReadyPromiseRef.current) {
+      await sessionReadyPromiseRef.current
+      sessionReadyPromiseRef.current = null
+    }
 
     const currentQuestion = questions[currentQuestionIndex]
 
-    // Cap per-question time at 120 s (admin tracking only, not a user timer).
     const MAX_TIME_PER_QUESTION = 120
     const rawTimeSpent = Math.floor((Date.now() - startTime) / 1000)
     const timeSpent = Math.min(rawTimeSpent, MAX_TIME_PER_QUESTION)
@@ -255,7 +290,6 @@ export default function PracticeMode() {
     const payload = result?.payload ?? {}
     const isCorrect = payload.is_correct ?? false
 
-    // Store full answer data so navigating back shows a read-only review state
     setAnsweredMap((prev) => ({
       ...prev,
       [currentQuestionIndex]: {
@@ -265,71 +299,39 @@ export default function PracticeMode() {
       }
     }))
 
+    // sessionIdRef.current is guaranteed non-null here because we awaited
+    // sessionReadyPromiseRef above, which resolves only after createSession
+    // has written the id into Redux (and thus into sessionIdRef via the effect).
     const attemptPromise = dispatch(
       recordQuestionAttempt({
         questionId: currentQuestion.id,
         userAnswer: selectedAnswer,
         timeSpent,
-        sessionId: sessionId || undefined
+        sessionId: sessionIdRef.current || undefined
       })
     )
-    // Store the promise so handleNextQuestion can await it on the last question
-    // before calling finishSession — preventing the race where completeSession
-    // marks the session 'completed' before this attempt POST lands.
     pendingAttemptRef.current = attemptPromise
 
-    // Re-fetch subscription status after every answer.
-    // trialQuestionsUsed in Redux reflects the count at login and is never
-    // incremented locally, so a threshold check would never fire mid-session.
-    // A lightweight GET after each answer guarantees the paywall modal appears
-    // immediately after question #60 without requiring a page reload.
     dispatch(fetchSubscriptionStatus())
   }
 
   const finishSession = useCallback(async () => {
-    // Snapshot duration at the exact moment the user finishes — before any
-    // async work that could alter state.
-    // • Practice quiz  → quizStartTimestamp from Redux (set when questions arrive)
-    // • Topic/subtopic → nonQuizStartTimeRef captured when the user picked a topic
-    const snapshotNow = Date.now()
-    const durationSeconds =
-      isPracticeQuiz && quizStartTimestamp
-        ? Math.min(
-            Math.floor((snapshotNow - quizStartTimestamp) / 1000),
-            SESSION_MAX_SECONDS
-          )
-        : nonQuizStartTimeRef.current
-          ? Math.min(
-              Math.floor((snapshotNow - nonQuizStartTimeRef.current) / 1000),
-              SESSION_MAX_SECONDS
-            )
-          : 0
+    const durationSeconds = snapshotDuration()
 
-    if (sessionId) {
-      await dispatch(completeSession({ sessionId, durationSeconds }))
-      // Refresh the sessions list in Redux so the Progress page shows the
-      // just-completed session with its correct duration immediately.
+    const currentSessionId = sessionIdRef.current
+    if (currentSessionId) {
+      await dispatch(
+        completeSession({ sessionId: currentSessionId, durationSeconds })
+      )
       dispatch(fetchSessions())
     }
 
-    // Refresh topic-level progress so Practice Mode's smart guidance reflects
-    // the just-completed session immediately if the user returns to topic selection.
     dispatch(fetchTopicProgress())
-
     setShowSessionComplete(true)
-  }, [
-    dispatch,
-    sessionId,
-    isPracticeQuiz,
-    quizStartTimestamp,
-    SESSION_MAX_SECONDS
-  ])
+  }, [dispatch, snapshotDuration])
 
   const handleNextQuestion = async () => {
     if (isLastQuestion && answerResult) {
-      // Wait for the last question's attempt to be recorded before completing
-      // the session. Without this, completeSession can resolve first and the
-      // backend rejects the attempt: "Cannot add attempts to a completed session".
       if (pendingAttemptRef.current) {
         await pendingAttemptRef.current
         pendingAttemptRef.current = null
@@ -355,7 +357,6 @@ export default function PracticeMode() {
     let topicCodeToHighlight = null
 
     if (isPracticeQuiz) {
-      // completedSession.topic_breakdown: [{ topic: 'financing', accuracy: 20, questions_attempted: 5 }, ...]
       const breakdown = completedSession?.topic_breakdown
       if (Array.isArray(breakdown) && breakdown.length > 0) {
         const weakest = breakdown
@@ -375,27 +376,18 @@ export default function PracticeMode() {
   }
 
   const handleBackToTopics = () => {
-    if (sessionId) {
-      const snapshotNow = Date.now()
-      const durationSeconds =
-        isPracticeQuiz && quizStartTimestamp
-          ? Math.min(
-              Math.floor((snapshotNow - quizStartTimestamp) / 1000),
-              SESSION_MAX_SECONDS
-            )
-          : nonQuizStartTimeRef.current
-            ? Math.min(
-                Math.floor((snapshotNow - nonQuizStartTimeRef.current) / 1000),
-                SESSION_MAX_SECONDS
-              )
-            : 0
-      dispatch(abandonSession({ sessionId, durationSeconds }))
+    const currentSessionId = sessionIdRef.current
+    if (currentSessionId) {
+      const durationSeconds = snapshotDuration()
+      dispatch(
+        abandonSession({ sessionId: currentSessionId, durationSeconds })
+      ).then(() => dispatch(fetchSessions()))
     }
     dispatch(resetToTopicSelection())
     resetLocalState()
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading && topics.length === 0) {
     return <LoadingScreen />
@@ -440,13 +432,10 @@ export default function PracticeMode() {
       currentQuestion={questions[currentQuestionIndex]}
       currentQuestionIndex={currentQuestionIndex}
       totalQuestions={questions.length}
-      // If this question was already answered, derive display state from the map
-      // so the user sees read-only review state instead of a blank submit form.
       selectedAnswer={
         answeredMap[currentQuestionIndex]?.userAnswer ?? selectedAnswer
       }
       answerResult={answeredMap[currentQuestionIndex]?.result ?? answerResult}
-      // isReviewing = navigated back to a question that was already answered
       isReviewing={!!answeredMap[currentQuestionIndex] && !answerResult}
       timeRemaining={timeRemaining}
       isTimeUp={isTimeUp}
