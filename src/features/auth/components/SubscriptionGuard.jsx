@@ -65,6 +65,13 @@ export default function SubscriptionGuard({
     return <PageSpinner />
   }
 
+  // BUG FIX: hasAccess===null after isFetched means the API call failed (network
+  // error or token race). We don't know the user's access status — do NOT show
+  // the paywall. Spin instead; AuthProvider will retry on next mount/login.
+  if (requireSubscription && isFetched && hasAccess === null) {
+    return <PageSpinner />
+  }
+
   // ── Access expired — show the page blurred with a modal on top ────────────────
   if (requireSubscription && !hasAccess) {
     return (

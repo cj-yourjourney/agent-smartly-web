@@ -72,8 +72,11 @@ const subscriptionSlice = createSlice({
       })
       .addCase(fetchSubscriptionStatus.rejected, (state, action) => {
         state.isLoading = false
-        // On error, deny access conservatively
-        state.hasAccess = false
+        // BUG FIX: Do NOT set hasAccess=false on a network/API error.
+        // A failed fetch does not mean the user has no access — it means we
+        // don't know yet. Keeping hasAccess=null lets SubscriptionGuard spin
+        // instead of falsely showing the paywall to legitimate users.
+        state.hasAccess = null
         state.isFetched = true
         state.error = action.payload
       })

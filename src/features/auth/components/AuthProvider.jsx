@@ -29,6 +29,11 @@ export default function AuthProvider({ children }) {
   // Tracks whether the initial bootstrap (app mount) has completed.
   // Separate from the post-login bootstrap so both paths work independently.
   const bootstrapStarted = useRef(false)
+  // BUG FIX: Prevents Effect 3 from firing twice when both isAuthenticated and
+  // isInitialized change in the same render cycle, which caused a parallel
+  // fetchSubscriptionStatus call that could race with Effect 2's fetch and
+  // resolve with hasAccess=null (error state), falsely showing the paywall.
+  const postLoginStarted = useRef(false)
 
   const clearRefreshTimer = useCallback(() => {
     if (refreshTimerRef.current) {
@@ -51,6 +56,9 @@ export default function AuthProvider({ children }) {
   // ── 1. Bootstrap: read tokens from localStorage ───────────────────────────
   useEffect(() => {
     bootstrapStarted.current = false
+    // BUG FIX: also reset postLoginStarted on full re-mount so a fresh login
+    // after logout can always trigger Effect 3 correctly.
+    postLoginStarted.current = false
     dispatch(initializeAuth())
   }, [dispatch])
 
@@ -70,6 +78,10 @@ export default function AuthProvider({ children }) {
         dispatch(resetSubscription())
         return
       }
+
+      // Already authenticated on mount (returning user) — load their data.
+      // Mark postLoginStarted so Effect 3 doesn't fire a duplicate fetch.
+      postLoginStarted.current = true
 
       // Already authenticated on mount (returning user) — load their data
       const accessExpired = !accessToken || accessTokenExpiry < 10_000
@@ -91,7 +103,7 @@ export default function AuthProvider({ children }) {
       try {
         await dispatch(fetchSubscriptionStatus()).unwrap()
       } catch {
-        // subscriptionSlice sets isFetched=true + hasAccess=false on error
+        // subscriptionSlice sets isFetched=true + hasAccess=null on error
       }
     }
 
@@ -114,6 +126,10 @@ export default function AuthProvider({ children }) {
     if (!bootstrapStarted.current) return // mount bootstrap hasn't run yet
     if (!isAuthenticated) return // not logged in (or just logged out)
     if (subscriptionFetched) return // already have subscription data
+    // BUG FIX: guard against firing twice (e.g. returning user where Effect 2
+    // already kicked off the fetch — prevents a parallel race fetch)
+    if (postLoginStarted.current) return
+    postLoginStarted.current = true
 
     const postLoginBootstrap = async () => {
       try {
@@ -125,7 +141,7 @@ export default function AuthProvider({ children }) {
       try {
         await dispatch(fetchSubscriptionStatus()).unwrap()
       } catch {
-        // subscriptionSlice sets isFetched=true + hasAccess=false on error
+        // subscriptionSlice sets isFetched=true + hasAccess=null on error
       }
     }
 
