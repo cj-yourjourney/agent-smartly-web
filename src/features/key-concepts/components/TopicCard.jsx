@@ -1,7 +1,12 @@
+// features/key-concepts/components/TopicCard.jsx
+
 import { ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
-import { fetchQuestionsByTopic } from '../../practice/state/practiceSlice'
+import {
+  fetchQuestionsByTopic,
+  createSession
+} from '../../practice/state/practiceSlice'
 import SubtopicSection from './SubtopicSection'
 
 export default function TopicCard({
@@ -14,7 +19,7 @@ export default function TopicCard({
   onAskLLM,
   isLLMLoading,
   topicRef,
-  topicAccuracy // null = never practiced, number = last accuracy (0–100)
+  topicAccuracy
 }) {
   const totalCount = topic.subtopics.reduce(
     (sum, st) => sum + st.concepts.length,
@@ -39,10 +44,29 @@ export default function TopicCard({
       ? `${Math.round(topicAccuracy)}% last time`
       : null
 
-  const handlePractice = () => {
-    dispatch(fetchQuestionsByTopic(topic.code))
+  // ── Fixed: mirrors handleTopicSelect in PracticeMode.jsx ──────────────────
+  const handlePractice = async () => {
+    // Step 1: fetch questions (sets selectedTopic + questions in Redux)
+    const fetchResult = await dispatch(fetchQuestionsByTopic(topic.code))
+    if (!fetchQuestionsByTopic.fulfilled.match(fetchResult)) return
+
+    // Step 2: create the session BEFORE navigating, exactly as PracticeMode
+    // does in handleTopicSelect — so sessionId is already in Redux when
+    // QuizScreen mounts and the user submits their first answer.
+    const count = fetchResult.payload.questions?.length || 20
+    await dispatch(
+      createSession({
+        sessionType: 'topic',
+        topic: topic.code,
+        totalQuestions: count
+      })
+    )
+
+    // Step 3: navigate — PracticeMode will find selectedTopic + questions +
+    // sessionId already set, so it renders QuizScreen directly.
     router.push('/learning/practice')
   }
+  // ──────────────────────────────────────────────────────────────────────────
 
   return (
     <div
@@ -60,7 +84,6 @@ export default function TopicCard({
         onClick={() => onToggle(topic.code)}
         className="w-full flex items-center gap-3 px-4 py-4 text-left active:bg-base-200/60 transition-colors rounded-t-2xl"
       >
-        {/* Number badge */}
         <span
           className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
             isHighlighted
@@ -84,7 +107,6 @@ export default function TopicCard({
             </span>
           )}
 
-          {/* Per-topic reviewed count + mini progress bar */}
           <div className="flex flex-col items-end gap-0.5">
             <span
               className={`text-xs font-medium tabular-nums ${
@@ -126,7 +148,6 @@ export default function TopicCard({
       {/* Expanded subtopics */}
       {isExpanded && (
         <div className="border-t border-base-200">
-          {/* Practice CTA — sticky top so it's always visible while scrolling concepts */}
           <div className="sticky top-16 z-10 px-4 py-3 bg-base-100 border-b border-base-200 rounded-t-none">
             <button
               onClick={handlePractice}
