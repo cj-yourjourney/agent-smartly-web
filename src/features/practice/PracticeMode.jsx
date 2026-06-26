@@ -131,6 +131,26 @@ export default function PracticeMode() {
     }
   }, [selectedTopic])
 
+  // PracticeMode.jsx — add this effect right after the other useEffects
+
+  // ── Key Concepts entry-point: set the duration anchor ─────────────────────
+  // When the user navigates from Key Concepts, fetchQuestionsByTopic +
+  // createSession already ran in TopicCard. PracticeMode mounts and finds
+  // selectedTopic + questions already in Redux, so handleTopicSelect never
+  // fires and nonQuizStartTimeRef is never set.
+  // This effect detects that case and sets the anchor on mount.
+  useEffect(() => {
+    if (
+      selectedTopic &&
+      selectedTopic !== 'practice_quiz' &&
+      questions.length > 0 &&
+      !isPracticeQuiz &&
+      nonQuizStartTimeRef.current === null
+    ) {
+      nonQuizStartTimeRef.current = Date.now()
+    }
+  }, [selectedTopic, questions.length, isPracticeQuiz])
+
   // ── Countdown timer ───────────────────────────────────────────────────────
 
   useEffect(() => {
