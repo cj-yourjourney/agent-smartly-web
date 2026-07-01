@@ -45,7 +45,7 @@ export const ACTIVE_SALE = {
   label: '☀️ Summer Kickoff Sale',
   tagline: 'Limited-time offer — prices go back up soon.',
   discountPct: 50,
-  endDate: '2026-06-30T23:59:59Z',
+  endDate: '2026-07-02T03:00:00Z', // 7/1 8PM PDT
   badgeColor: 'bg-orange-500'
 }
 
