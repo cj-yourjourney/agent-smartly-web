@@ -4,11 +4,13 @@
 //  SINGLE SOURCE OF TRUTH FOR ALL PRICING & SALES
 //
 //  To change prices:      edit BASE_PRICES
-//  To run a sale:         set ACTIVE_SALE.enabled = true and fill its fields
-//  To end a sale:         set ACTIVE_SALE.enabled = false  (prices revert automatically)
-//  To swap a holiday sale: just change ACTIVE_SALE name/label/end date — everything
-//                          else (discount math, UI banners) updates automatically.
+//  To run/rotate a sale:  edit salesCalendar.js — set ACTIVE_SALE_NAME to the
+//                          sale you want live. Nothing in this file changes.
+//  To end all sales:      set ACTIVE_SALE_NAME = null in salesCalendar.js
+//                          (prices revert automatically)
 // ─────────────────────────────────────────────────────────────────────────────
+
+import { SALES, ACTIVE_SALE_NAME } from './salesCalendar'
 
 // ── 1. Base retail prices (what you'd charge with NO sale active) ─────────────
 const BASE_PRICES = {
@@ -29,25 +31,16 @@ const BASE_PRICES = {
   }
 }
 
-// ── 2. Active sale — flip `enabled` to turn it on/off ─────────────────────────
+// ── 2. Active sale — resolved from salesCalendar.js ────────────────────────
 //
-//  name        → machine-readable key, used for analytics / logging
-//  label       → displayed in the UI sale badge  (e.g. "🎆 July 4th Sale")
-//  tagline     → short promo copy shown under the badge
-//  discountPct → integer 0-100.  50 = 50 % off base prices.
-//  endDate     → ISO string (midnight UTC) shown in countdown timers.
-//                Set to null to hide the countdown.
-//  badgeColor  → Tailwind background utility applied to the sale badge.
+//  ACTIVE_SALE.enabled is derived from whether ACTIVE_SALE_NAME points to a
+//  real entry in SALES. Everything downstream (banner, discount math) reads
+//  from this object exactly like before, so no other file needs to change.
 //
-export const ACTIVE_SALE = {
-  enabled: true,
-  name: 'june_summer_kickoff',
-  label: '☀️ Summer Kickoff Sale',
-  tagline: 'Limited-time offer — prices go back up soon.',
-  discountPct: 50,
-  endDate: '2026-07-02T03:00:00Z', // 7/1 8PM PDT
-  badgeColor: 'bg-orange-500'
-}
+export const ACTIVE_SALE =
+  ACTIVE_SALE_NAME && SALES[ACTIVE_SALE_NAME]
+    ? { enabled: true, ...SALES[ACTIVE_SALE_NAME] }
+    : { enabled: false }
 
 // ── 3. Derived plan objects — consumed by every component ─────────────────────
 //
