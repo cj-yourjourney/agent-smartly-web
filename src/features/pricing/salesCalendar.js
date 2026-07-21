@@ -40,19 +40,17 @@ export const SALES = {
     discountPct: 50,
     endDate: '2026-07-21T07:00:00Z', // 7/5 11:59PM PDT
     badgeColor: 'bg-red-600'
+  },
+  summer_sale: {
+    name: 'summer_sale',
+    label: '☀️ Summer Sale',
+    tagline: 'Save big before summer ends.',
+    discountPct: 50,
+    endDate: '2026-08-21T07:00:00Z', // 8/21 midnight PDT
+    badgeColor: 'bg-indigo-600'
   }
-
-  // Add future sales here, e.g.:
-  // labor_day: {
-  //   name: 'labor_day',
-  //   label: '🛠️ Labor Day Sale',
-  //   tagline: 'End of summer savings — 40% off.',
-  //   discountPct: 40,
-  //   endDate: '2026-09-08T07:00:00Z',
-  //   badgeColor: 'bg-blue-600'
-  // }
 }
 
 // ── Which sale is currently live ───────────────────────────────────────────
 //  Set to a key from SALES above, or null to run no sale at all.
-export const ACTIVE_SALE_NAME = 'july_4th'
+export const ACTIVE_SALE_NAME = 'summer_sale'
