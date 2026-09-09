@@ -1,7 +1,7 @@
 // src/features/account/components/AvatarCircle.jsx
 
-export default function AvatarCircle({ username }) {
-  const initial = username ? username.charAt(0).toUpperCase() : 'U'
+export default function AvatarCircle({ firstName }) {
+  const initial = firstName ? firstName.charAt(0).toUpperCase() : 'U'
 
   return (
     <div

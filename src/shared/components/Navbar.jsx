@@ -169,8 +169,8 @@ const Navbar = () => {
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
                   <span className="text-lg font-semibold">
-                    {user?.username
-                      ? user.username.charAt(0).toUpperCase()
+                    {user?.first_name
+                      ? user.first_name.charAt(0).toUpperCase()
                       : 'U'}
                   </span>
                 </div>
@@ -180,7 +180,7 @@ const Navbar = () => {
                 className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
               >
                 <li className="menu-title">
-                  <span>{user?.username || 'User'}</span>
+                  <span>{user?.first_name || 'User'}</span>
                 </li>
                 {user?.email && (
                   <li className="disabled">
@@ -257,7 +257,7 @@ const Navbar = () => {
                 className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
               >
                 <li className="menu-title">
-                  <span>{user?.username || 'User'}</span>
+                  <span>{user?.first_name || 'User'}</span>
                 </li>
                 {user?.email && (
                   <li className="disabled">

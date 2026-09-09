@@ -256,7 +256,7 @@ const SignUpPage = () => {
   const [step, setStep] = useState(1)
   const [isAnimating, setIsAnimating] = useState(false)
   const [formData, setFormData] = useState({
-    username: '',
+    first_name: '',
     email: '',
     password: '',
     password2: '',
@@ -358,11 +358,10 @@ const SignUpPage = () => {
 
   const validateStep1 = () => {
     const errors = {}
-    if (!formData.username) errors.username = 'Username is required'
-    else if (formData.username.length < 3)
-      errors.username = 'Must be at least 3 characters'
-    else if (formData.username.length > 30)
-      errors.username = 'Must be 30 characters or fewer'
+    if (!formData.first_name.trim())
+      errors.first_name = 'First name is required'
+    else if (formData.first_name.trim().length > 30)
+      errors.first_name = 'Must be 30 characters or fewer'
 
     if (!formData.email) errors.email = 'Email is required'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -411,7 +410,7 @@ const SignUpPage = () => {
     if (!validateStep2()) return
 
     const payload = {
-      username: formData.username,
+      first_name: formData.first_name.trim(),
       email: formData.email,
       password: formData.password,
       password2: formData.password2,
@@ -427,7 +426,7 @@ const SignUpPage = () => {
     try {
       await dispatch(registerUser(payload)).unwrap()
     } catch (err) {
-      const step1Fields = ['username', 'email', 'password', 'password2']
+      const step1Fields = ['first_name', 'email', 'password', 'password2']
       if (step1Fields.some((f) => err?.[f])) goToStep(1)
     }
   }
@@ -526,18 +525,20 @@ const SignUpPage = () => {
             className="space-y-4 pb-4"
             noValidate
           >
-            {/* Username */}
-            <FloatingInput label="Username" error={getFieldError('username')}>
+            {/* First name */}
+            <FloatingInput
+              label="First name"
+              error={getFieldError('first_name')}
+            >
               <input
-                ref={setErrorRef('username')}
+                ref={setErrorRef('first_name')}
                 type="text"
-                name="username"
-                value={formData.username}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
-                placeholder="e.g. jsmith"
-                autoComplete="username"
-                autoCapitalize="none"
-                className={`input input-bordered w-full h-12 text-base ${getFieldError('username') ? 'input-error' : ''}`}
+                placeholder="e.g. Jamie"
+                autoComplete="given-name"
+                className={`input input-bordered w-full h-12 text-base ${getFieldError('first_name') ? 'input-error' : ''}`}
                 disabled={loading}
                 autoFocus
               />

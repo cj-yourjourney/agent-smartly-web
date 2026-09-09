@@ -102,16 +102,11 @@ const AccountPage = () => {
 
         {/* Header */}
         <div className="flex flex-col items-center gap-4 mb-8">
-          <AvatarCircle username={user.username} />
+          <AvatarCircle firstName={user.first_name} />
           <div className="text-center">
             <h1 className="text-2xl font-bold text-base-content tracking-tight">
-              {fullName || user.username}
+              {fullName || user.first_name}
             </h1>
-            {fullName && (
-              <p className="text-sm text-base-content/50 mt-0.5">
-                @{user.username}
-              </p>
-            )}
           </div>
         </div>
 
@@ -131,7 +126,7 @@ const AccountPage = () => {
             <h2 className="text-xs font-bold text-base-content/50 uppercase tracking-widest mb-2">
               Account
             </h2>
-            <InfoRow icon={User} label="Username" value={user.username} />
+            <InfoRow icon={User} label="First name" value={user.first_name} />
             <InfoRow icon={Mail} label="Email" value={user.email} />
             <InfoRow
               icon={Calendar}
