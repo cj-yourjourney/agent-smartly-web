@@ -47,8 +47,7 @@ const Navbar = () => {
             onClick={() => handleNavigation(ROUTES.HOME)}
             className="btn btn-ghost normal-case text-xl font-bold"
           >
-            <span className="text-primary">Agent</span>
-            <span>Smartly</span>
+            <span className="text-primary">Agent</span>Smartly
           </button>
         </div>
         <div className="navbar-center hidden lg:flex"></div>
@@ -87,8 +86,7 @@ const Navbar = () => {
           onClick={() => handleNavigation(ROUTES.HOME)}
           className="btn btn-ghost normal-case text-xl font-bold"
         >
-          <span className="text-primary">Agent</span>
-          <span>Smartly</span>
+          <span className="text-primary">Agent</span>Smartly
         </button>
       </div>
 

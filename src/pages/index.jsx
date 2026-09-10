@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     q: 'What accuracy score should I aim for?',
-    a: "Users on Agent Smartly average around 75% accuracy. Aiming for 75–80% consistently across all topics is a strong signal that you're ready. If a specific topic is below 65%, focus there first."
+    a: "Users on AgentSmartly average around 75% accuracy. Aiming for 75–80% consistently across all topics is a strong signal that you're ready. If a specific topic is below 65%, focus there first."
   },
   {
     q: 'How many key concepts should I know?',
@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     q: 'How is this different from a prep book?',
-    a: "Prep books give you static content. Agent Smartly tracks your progress, adapts to your weak areas, and surfaces exactly what you need to work on. You also get AI-powered explanations for any concept you don't understand."
+    a: "Prep books give you static content. AgentSmartly tracks your progress, adapts to your weak areas, and surfaces exactly what you need to work on. You also get AI-powered explanations for any concept you don't understand."
   },
   {
     q: 'Does this cover the full DRE exam blueprint?',
@@ -175,7 +175,7 @@ export default function Home() {
               >
                 <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                   <span className="text-success text-base hero-check">✓</span>
-                  500+ people passed the CA real estate exam using Agent Smartly
+                  500+ people passed the CA real estate exam using AgentSmartly
                 </p>
                 <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                   <span className="text-success text-base hero-check">✓</span>
@@ -210,7 +210,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto">
             <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 px-8 sm:px-14 py-12 sm:py-14 text-center flex flex-col items-center gap-6">
               <p className="text-primary font-bold tracking-widest text-xs uppercase">
-                Why Agent Smartly Exists
+                Why AgentSmartly Exists
               </p>
               <p className="font-display text-xl sm:text-2xl leading-snug text-base-content">
                 Most prep sites overwhelm you. We found exactly{' '}
@@ -273,7 +273,7 @@ export default function Home() {
             <p className="text-center text-base-content/60 text-lg mb-10 max-w-2xl mx-auto">
               Most CA exam prep sites give you prep books, video lectures, and
               thousands of random questions — so much you don't know where to
-              start. Agent Smartly does the opposite: only the essentials, in a
+              start. AgentSmartly does the opposite: only the essentials, in a
               clear order, with one tool for each step.
             </p>
 
@@ -303,7 +303,7 @@ export default function Home() {
               </div>
               <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 px-6 py-5 flex flex-col gap-3">
                 <p className="text-xs font-bold tracking-widest uppercase text-primary">
-                  Agent Smartly
+                  AgentSmartly
                 </p>
                 <ul className="flex flex-col gap-2">
                   {[
@@ -540,10 +540,10 @@ export default function Home() {
               Results
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
-              500+ People Passed With Agent Smartly
+              500+ People Passed With AgentSmartly
             </h2>
             <p className="text-center text-base-content/50 text-lg mb-14 max-w-xl mx-auto">
-              Real CA exam passers who prepared with Agent Smartly. Here's what
+              Real CA exam passers who prepared with AgentSmartly. Here's what
               they said.
             </p>
 
@@ -696,7 +696,7 @@ export default function Home() {
               <div className="flex flex-col items-center lg:items-start gap-4">
                 <img
                   src="https://cjluo.com/static/media/profile.cb5ba9c13f9d23e2ea90.png"
-                  alt="CJ Luo — Founder of Agent Smartly"
+                  alt="CJ Luo — Founder of AgentSmartly"
                   className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl object-cover shadow-xl border-4 border-base-200"
                 />
                 <div className="text-center lg:text-left">
@@ -749,8 +749,8 @@ export default function Home() {
               Common Questions
             </h2>
             <p className="text-center text-base-content/60 text-lg mb-14 max-w-xl mx-auto">
-              Answers based on real data from users who prepared with Agent
-              Smartly.
+              Answers based on real data from users who prepared with
+              AgentSmartly.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -828,7 +828,7 @@ export default function Home() {
               <span className="font-semibold text-base-content/45">
                 Disclaimer:
               </span>{' '}
-              Agent Smartly is an independent study tool, not affiliated with or
+              AgentSmartly is an independent study tool, not affiliated with or
               endorsed by the California Department of Real Estate or any
               licensing authority. Practice questions are independently created
               for study purposes and are not actual exam questions. Use as a
@@ -841,13 +841,13 @@ export default function Home() {
         <footer className="footer footer-center p-10 pb-24 lg:pb-10 bg-base-200 text-base-content border-t border-base-300">
           <div>
             <p className="font-bold text-lg">
-              <span className="text-primary">Agent</span> Smartly
+              <span className="text-primary">Agent</span>Smartly
             </p>
             <p className="text-base-content/50 text-sm">
               California Real Estate Salesperson Exam Prep
             </p>
             <p className="text-base-content/40 text-xs mt-2">
-              © {new Date().getFullYear()} Agent Smartly. All rights reserved.
+              © {new Date().getFullYear()} AgentSmartly. All rights reserved.
             </p>
           </div>
         </footer>
