@@ -47,7 +47,7 @@ const Navbar = () => {
             onClick={() => handleNavigation(ROUTES.HOME)}
             className="btn btn-ghost normal-case text-xl font-bold"
           >
-            <span className="text-primary">Agent</span>Smartly
+            <span className="text-primary">AgentSmartly</span>
           </button>
         </div>
         <div className="navbar-center hidden lg:flex"></div>
@@ -81,12 +81,16 @@ const Navbar = () => {
   return (
     <div className="navbar bg-base-100 shadow-lg px-4 lg:px-8">
       <div className="navbar-start">
-        {/* Logo */}
         <button
           onClick={() => handleNavigation(ROUTES.HOME)}
-          className="btn btn-ghost normal-case text-xl font-bold"
+          className="btn btn-ghost normal-case px-2 text-xl font-bold hover:bg-transparent"
         >
-          <span className="text-primary">Agent</span>Smartly
+          <div className="flex items-center gap-2">
+            <span className="tracking-tight">
+              <span className="text-primary">Agent</span>
+              <span className="text-base-content">Smartly</span>
+            </span>
+          </div>
         </button>
       </div>
 
