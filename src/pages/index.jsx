@@ -7,7 +7,7 @@ import { PAGE_SEO } from '@/shared/constants/seoConfig'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS, ACTIVE_SALE } from '@/features/pricing/pricingConfig'
 import SaleBanner from '@/features/pricing/components/SaleBanner'
-
+import YouTubeSection from '@/features/marketing/components/YouTubeSection'
 
 const faqs = [
   {
@@ -604,6 +604,8 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* ── YOUTUBE ── */}
+        <YouTubeSection />
 
         {/* ── PRICING ── */}
         <div className="py-24 px-4 bg-base-100 border-t border-base-200">
