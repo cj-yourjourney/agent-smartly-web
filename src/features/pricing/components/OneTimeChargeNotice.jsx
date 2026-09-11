@@ -15,7 +15,18 @@ export default function OneTimeChargeNotice({ plan }) {
       <p className="text-xs text-base-content/70 leading-relaxed">
         <span className="font-semibold text-base-content">
           Charged once for {activePlan.price}
-        </span>{' '}
+        </span>
+        {activePlan.promoApplied && (
+          <>
+            {' '}
+            <span className="text-base-content/40 line-through">
+              {activePlan.prePromoPrice}
+            </span>{' '}
+            <span className="text-success font-semibold">
+              ({activePlan.promoDiscountPct}% off with {activePlan.promoCode})
+            </span>
+          </>
+        )}{' '}
         — no subscription, no auto-renew. Renew manually anytime.
       </p>
     </div>

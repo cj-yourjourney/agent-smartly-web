@@ -8,10 +8,14 @@ import { AlertCircle, CreditCard, Lock } from 'lucide-react'
 import { API_CONFIG, authenticatedFetch } from '../../../shared/api/config'
 
 // ── Pricing imports (single source of truth) ──────────────────────────────────
-import { DEFAULT_PLAN } from '../../../features/pricing/pricingConfig'
+import {
+  DEFAULT_PLAN,
+  applyPromoCode
+} from '../../../features/pricing/pricingConfig'
 import { getStripe } from '../utils' // stays in account/utils — browser-only
 import SaleBanner from '../../../features/pricing/components/SaleBanner'
 import PlanSelector from '../../../features/pricing/components/PlanSelector'
+import PromoCodeInput from '../../../features/pricing/components/PromoCodeInput'
 import OneTimeChargeNotice from '../../../features/pricing/components/OneTimeChargeNotice'
 
 export default function PaymentForm({ onSuccess, isRenewal = false }) {
@@ -21,10 +25,17 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
   const cardRef = useRef(null)
 
   const [selectedPlan, setSelectedPlan] = useState(DEFAULT_PLAN)
+  const [promoCode, setPromoCode] = useState(null)
   const [stripeReady, setStripeReady] = useState(false)
   const [cardComplete, setCardComplete] = useState(false)
   const [paying, setPaying] = useState(false)
   const [error, setError] = useState(null)
+
+  // Plan actually being charged — selectedPlan with the promo discount
+  // layered on top, recomputed whenever the plan or promo code changes.
+  const chargePlan = promoCode
+    ? applyPromoCode(selectedPlan, promoCode)
+    : selectedPlan
 
   // Load Stripe public key then mount the Card element
   useEffect(() => {
@@ -90,10 +101,16 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
     setPaying(true)
 
     try {
-      // Step 1: Create the PaymentIntent on our backend (send chosen plan)
+      // Step 1: Create the PaymentIntent on our backend (send chosen plan + promo)
       const intentRes = await authenticatedFetch(
         API_CONFIG.ENDPOINTS.SUBSCRIBE,
-        { method: 'POST', body: JSON.stringify({ plan: selectedPlan.id }) }
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            plan: selectedPlan.id,
+            promo_code: promoCode || ''
+          })
+        }
       )
       const intentData = await intentRes.json()
       if (!intentRes.ok)
@@ -163,6 +180,13 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
         </div>
       )}
 
+      {/* ── Promo code ────────────────────────────────────────────────────── */}
+      <PromoCodeInput
+        appliedCode={promoCode}
+        onApply={setPromoCode}
+        onRemove={() => setPromoCode(null)}
+      />
+
       <div className="flex items-center gap-2 text-xs text-base-content/40">
         <Lock className="h-3.5 w-3.5 shrink-0" />
         <span>
@@ -171,7 +195,7 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
       </div>
 
       {/* ── One-time charge notice ───────────────────────────────────────── */}
-      <OneTimeChargeNotice plan={selectedPlan} />
+      <OneTimeChargeNotice plan={chargePlan} />
 
       {/* ── Submit ───────────────────────────────────────────────────────── */}
       <button
@@ -188,8 +212,8 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
           <>
             <CreditCard className="h-5 w-5" />
             {isRenewal
-              ? `Extend access — ${selectedPlan.price}`
-              : `Get access — ${selectedPlan.price}`}
+              ? `Extend access — ${chargePlan.price}`
+              : `Get access — ${chargePlan.price}`}
           </>
         )}
       </button>

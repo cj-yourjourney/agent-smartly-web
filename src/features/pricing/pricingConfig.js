@@ -84,6 +84,44 @@ export const PLANS = Object.values(BASE_PRICES).map(buildPlan)
 
 export const DEFAULT_PLAN = PLANS.find((p) => p.id === 'month') ?? PLANS[0]
 
+// ── 4. Promo code — single fixed code, 30% off whatever price is active ───────
+//
+//  Mirrors payments/pricing_config.py on the backend. This stacks on top of
+//  the current price, so if a sale is live the promo takes 30% off the sale
+//  price; otherwise it takes 30% off the base price. There's only one code
+//  for now, so it's a constant here too — the backend is still the source of
+//  truth and re-validates the code at checkout, this is just for instant
+//  price preview without a network round trip.
+//
+export const PROMO_CODE = 'AGENT30'
+export const PROMO_DISCOUNT_PCT = 30
+
+export function validatePromoCode(code) {
+  return (
+    typeof code === 'string' &&
+    code.trim().toUpperCase() === PROMO_CODE.toUpperCase()
+  )
+}
+
+// Returns a copy of `plan` with the promo discount applied, if `code` is
+// valid. Returns `plan` unchanged if the code doesn't match.
+export function applyPromoCode(plan, code) {
+  if (!validatePromoCode(code)) return plan
+
+  const currentPrice = plan.priceValue
+  const promoPrice = currentPrice * (1 - PROMO_DISCOUNT_PCT / 100)
+
+  return {
+    ...plan,
+    price: formatPrice(promoPrice),
+    priceValue: promoPrice,
+    prePromoPrice: formatPrice(currentPrice),
+    promoApplied: true,
+    promoCode: PROMO_CODE,
+    promoDiscountPct: PROMO_DISCOUNT_PCT
+  }
+}
+
 // ── Note ──────────────────────────────────────────────────────────────────────
 //  getStripe lives in src/features/account/utils.js (unchanged).
 //  It is NOT exported from here because @stripe/stripe-js is a browser-only
