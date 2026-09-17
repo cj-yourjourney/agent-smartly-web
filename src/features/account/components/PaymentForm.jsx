@@ -16,7 +16,6 @@ import { getStripe } from '../utils' // stays in account/utils — browser-only
 import SaleBanner from '../../../features/pricing/components/SaleBanner'
 import PlanSelector from '../../../features/pricing/components/PlanSelector'
 import PromoCodeInput from '../../../features/pricing/components/PromoCodeInput'
-import OneTimeChargeNotice from '../../../features/pricing/components/OneTimeChargeNotice'
 
 export default function PaymentForm({ onSuccess, isRenewal = false }) {
   const cardElementRef = useRef(null)
@@ -187,21 +186,23 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
         onRemove={() => setPromoCode(null)}
       />
 
-      <div className="flex items-center gap-2 text-xs text-base-content/40">
+      {/* ── Trust + charge-once, merged into a single line ─────────────────── */}
+      <div className="flex items-center gap-2 text-xs text-base-content/40 pt-2 border-t border-base-200">
         <Lock className="h-3.5 w-3.5 shrink-0" />
         <span>
-          Encrypted &amp; secured by Stripe. We never store your card.
+          Secured by Stripe · Charged once ({chargePlan.price}), no auto-renew
         </span>
       </div>
-
-      {/* ── One-time charge notice ───────────────────────────────────────── */}
-      <OneTimeChargeNotice plan={chargePlan} />
 
       {/* ── Submit ───────────────────────────────────────────────────────── */}
       <button
         onClick={handleSubmit}
         disabled={!stripeReady || !cardComplete || paying}
-        className="btn btn-primary w-full gap-2 h-14 text-base"
+        className={`btn w-full gap-2 h-14 text-base ${
+          chargePlan.promoApplied
+            ? 'bg-success border-success text-success-content disabled:opacity-100 disabled:bg-success disabled:border-success disabled:text-success-content'
+            : 'btn-primary'
+        }`}
       >
         {paying ? (
           <>
@@ -211,9 +212,15 @@ export default function PaymentForm({ onSuccess, isRenewal = false }) {
         ) : (
           <>
             <CreditCard className="h-5 w-5" />
-            {isRenewal
-              ? `Extend access — ${chargePlan.price}`
-              : `Get access — ${chargePlan.price}`}
+            <span className="flex items-baseline gap-2">
+              {isRenewal ? 'Extend access —' : 'Get access —'}
+              <span className="font-bold">{chargePlan.price}</span>
+              {chargePlan.promoApplied && (
+                <span className="text-sm line-through opacity-60">
+                  {chargePlan.prePromoPrice}
+                </span>
+              )}
+            </span>
           </>
         )}
       </button>
