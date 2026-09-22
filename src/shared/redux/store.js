@@ -6,6 +6,7 @@ import progressReducer from '../../features/progress/state/progressSlice'
 import keyConceptsReducer from '../../features/key-concepts/state/keyConceptsSlice'
 import subscriptionReducer from '../../features/subscription/state/subscriptionSlice'
 import accountReducer from '../../features/account/state/accountSlice'
+import reviewsReducer from '../../features/reviews/state/reviewsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +15,8 @@ export const store = configureStore({
     progress: progressReducer,
     keyConcepts: keyConceptsReducer,
     subscription: subscriptionReducer,
-    account: accountReducer
+    account: accountReducer,
+    reviews: reviewsReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

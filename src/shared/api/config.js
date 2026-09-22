@@ -29,6 +29,11 @@ export const API_CONFIG = {
     EXPLAIN_CONCEPT: '/api/key-concepts/explain/',
     KEY_CONCEPT_VIEW: '/api/progress/key-concept-view/',
 
+    
+    // Reviews endpoints
+    REVIEWS: '/api/reviews/',
+    REVIEWS_SUMMARY: '/api/reviews/summary/',
+
     // Auth endpoints
     TOKEN_OBTAIN: '/api/users/token/',
     TOKEN_REFRESH: '/api/users/token/refresh/',

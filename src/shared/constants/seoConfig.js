@@ -57,6 +57,18 @@ export const PAGE_SEO = {
         'CJ Luo built AgentSmartly after passing the CA real estate exam in 2025. Learn the story behind the platform.'
     }
   },
+  reviews: {
+    title: 'Reviews',
+    description:
+      'See what students are saying about AgentSmartly — real reviews from people preparing for the CA Real Estate Salesperson Exam.',
+    canonical: `${BASE_URL}/reviews`,
+    openGraph: {
+      url: `${BASE_URL}/reviews`,
+      title: 'Student Reviews | AgentSmartly',
+      description:
+        'See what students are saying about AgentSmartly — real reviews from people preparing for the CA Real Estate Salesperson Exam.'
+    }
+  },
 
   // ── Auth pages (noindex — keep out of Google) ──
   login: {
