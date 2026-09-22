@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 const AVATAR_COLORS = [
   'bg-indigo-500',
   'bg-emerald-500',
@@ -16,23 +14,14 @@ function getAvatarColor(name) {
   return AVATAR_COLORS[index % AVATAR_COLORS.length]
 }
 
-const TRUNCATE_LENGTH = 400
-
 export default function ReviewCard({ review }) {
   const { first_name, rating, content, created_at } = review
-  const [expanded, setExpanded] = useState(false)
 
   const formattedDate = new Date(created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   })
-
-  const isLong = content.length > TRUNCATE_LENGTH
-  const displayText =
-    isLong && !expanded
-      ? `${content.slice(0, TRUNCATE_LENGTH).trim()}…`
-      : content
 
   return (
     <div className="py-6 border-b border-base-200 last:border-b-0">
@@ -65,17 +54,8 @@ export default function ReviewCard({ review }) {
       </div>
 
       <p className="text-base-content/80 text-sm leading-relaxed whitespace-pre-line">
-        {displayText}
+        {content}
       </p>
-
-      {isLong && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-indigo-600 text-xs font-semibold mt-2 hover:underline"
-        >
-          {expanded ? 'Show less' : 'Read more'}
-        </button>
-      )}
     </div>
   )
 }
