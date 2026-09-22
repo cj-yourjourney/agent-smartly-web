@@ -167,7 +167,7 @@ const PageShell = ({ children }) => (
 
 // ─── Email sent success screen ────────────────────────────────────────────────
 
-const VerifyEmailPrompt = ({ email, onBackToLogin }) => (
+const VerifyEmailPrompt = ({ email, onWrongEmail }) => (
   <PageShell>
     {/* Scrollable content */}
     <div className="flex-1 overflow-y-auto px-6 pt-12 pb-6 sm:px-8 sm:pt-10 sm:pb-8">
@@ -234,11 +234,11 @@ const VerifyEmailPrompt = ({ email, onBackToLogin }) => (
         WRONG EMAIL?
       </div>
       <button
-        onClick={onBackToLogin}
+        onClick={onWrongEmail}
         className="btn btn-ghost w-full h-12 text-primary"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to sign in
+        Use a different email
       </button>
     </div>
   </PageShell>
@@ -459,14 +459,18 @@ const SignUpPage = () => {
 
   // ── Success state ─────────────────────────────────────────────────────────────
 
-  if (registerSuccess) {
-    return (
-      <VerifyEmailPrompt
-        email={formData.email}
-        onBackToLogin={() => router.push(ROUTES.AUTH.LOGIN)}
-      />
-    )
-  }
+   if (registerSuccess) {
+     return (
+       <VerifyEmailPrompt
+         email={formData.email}
+         onWrongEmail={() => {
+           dispatch(clearRegisterSuccess())
+           setFormData((prev) => ({ ...prev, email: '' }))
+           setStep(1)
+         }}
+       />
+     )
+   }
 
   // ── Main render ────────────────────────────────────────────────────────────────
 
