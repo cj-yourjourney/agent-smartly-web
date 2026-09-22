@@ -238,7 +238,7 @@ const VerifyEmailPrompt = ({ email, onWrongEmail }) => (
         className="btn btn-ghost w-full h-12 text-primary"
       >
         <ArrowLeft className="h-4 w-4" />
-        Use a different email
+        Change email
       </button>
     </div>
   </PageShell>
