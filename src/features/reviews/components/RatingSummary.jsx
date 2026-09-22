@@ -2,9 +2,9 @@ export default function RatingSummary({ averageRating, count, breakdown }) {
   if (!count) return null
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 px-8 py-7 flex flex-col md:flex-row gap-8 md:items-center">
-      <div className="flex items-center gap-6 shrink-0">
-        <div className="text-6xl font-bold text-indigo-600 leading-none">
+    <div className="rounded-2xl bg-base-100 border border-base-200 p-6">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="text-5xl font-bold text-indigo-600 leading-none">
           {averageRating}
         </div>
         <div className="flex flex-col gap-1">
@@ -29,7 +29,7 @@ export default function RatingSummary({ averageRating, count, breakdown }) {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-1.5 min-w-[200px]">
+      <div className="flex flex-col gap-2.5">
         {[5, 4, 3, 2, 1].map((star) => {
           const starCount = breakdown[star] || 0
           const percent = count ? Math.round((starCount / count) * 100) : 0
