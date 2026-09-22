@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 const AVATAR_COLORS = [
   'bg-indigo-500',
   'bg-emerald-500',
@@ -14,14 +16,23 @@ function getAvatarColor(name) {
   return AVATAR_COLORS[index % AVATAR_COLORS.length]
 }
 
+const TRUNCATE_LENGTH = 220
+
 export default function ReviewCard({ review }) {
   const { first_name, rating, content, created_at } = review
+  const [expanded, setExpanded] = useState(false)
 
   const formattedDate = new Date(created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   })
+
+  const isLong = content.length > TRUNCATE_LENGTH
+  const displayText =
+    isLong && !expanded
+      ? `${content.slice(0, TRUNCATE_LENGTH).trim()}…`
+      : content
 
   return (
     <div className="group relative card bg-base-100 border border-base-200 rounded-2xl transition-all duration-200 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-100">
@@ -63,9 +74,18 @@ export default function ReviewCard({ review }) {
           ))}
         </div>
 
-        <p className="text-base-content/80 text-sm leading-relaxed line-clamp-4">
-          {content}
+        <p className="text-base-content/80 text-sm leading-relaxed whitespace-pre-line">
+          {displayText}
         </p>
+
+        {isLong && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-indigo-600 text-xs font-semibold self-start hover:underline"
+          >
+            {expanded ? 'Show less' : 'Read more'}
+          </button>
+        )}
       </div>
     </div>
   )
