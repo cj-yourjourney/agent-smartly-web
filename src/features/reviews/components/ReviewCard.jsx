@@ -15,7 +15,7 @@ function getAvatarColor(name) {
 }
 
 export default function ReviewCard({ review }) {
-  const { first_name, rating, content, created_at } = review
+  const { first_name, title, rating, content, created_at } = review
 
   const formattedDate = new Date(created_at).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -38,7 +38,7 @@ export default function ReviewCard({ review }) {
       </div>
 
       <div
-        className="rating rating-sm mb-3"
+        className="rating rating-sm mb-2"
         aria-label={`${rating} out of 5 stars`}
       >
         {[1, 2, 3, 4, 5].map((star) => (
@@ -52,6 +52,8 @@ export default function ReviewCard({ review }) {
           />
         ))}
       </div>
+
+      {title && <h3 className="font-semibold text-base mb-1.5">{title}</h3>}
 
       <p className="text-base-content/80 text-sm leading-relaxed whitespace-pre-line">
         {content}
