@@ -1,6 +1,7 @@
 // src/features/auth/components/AuthProvider.jsx
 import { useEffect, useRef, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from 'next/router'
 import {
   initializeAuth,
   fetchUserDetails,
@@ -16,8 +17,17 @@ import {
 // How long before access-token expiry we proactively refresh (5 minutes)
 const REFRESH_BUFFER_MS = 5 * 60 * 1000
 
+// Public, indexable pages. These render immediately (including on the server /
+// at build time) so crawlers get the full HTML, page-specific <title>, canonical
+// and links. Every other route keeps the original behavior: children are
+// blocked until auth (and subscription, if logged in) are resolved.
+// Keep in sync with the public pages in seoConfig.js / the sitemap.
+const PUBLIC_ROUTES = ['/', '/about', '/reviews']
+
 export default function AuthProvider({ children }) {
   const dispatch = useDispatch()
+  const { pathname } = useRouter()
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname)
   const { isAuthenticated, isInitialized, accessToken, refreshToken } =
     useSelector((state) => state.auth)
   const accessTokenExpiry = useSelector(selectAccessTokenExpiry)
@@ -207,7 +217,12 @@ export default function AuthProvider({ children }) {
   // ── Render ─────────────────────────────────────────────────────────────────
   // Block children until auth AND subscription are both resolved.
   // This prevents SubscriptionGuard from ever seeing isFetched=false.
-  if (!isInitialized || (isAuthenticated && !subscriptionFetched)) {
+  // Public routes skip this block so the server-rendered HTML contains the real
+  // page instead of a spinner.
+  if (
+    !isPublicRoute &&
+    (!isInitialized || (isAuthenticated && !subscriptionFetched))
+  ) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <span className="loading loading-spinner loading-lg" />
