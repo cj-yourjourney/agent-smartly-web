@@ -1,11 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { api, API_CONFIG } from '../../../shared/api/config'
+import { publicApi, API_CONFIG } from '../../../shared/api/config'
 
+// Reviews are public: use publicApi so no token is sent and the
+// refresh/redirect logic in authenticatedFetch can never be triggered.
 export const fetchReviews = createAsyncThunk(
   'reviews/fetchReviews',
   async ({ page = 1, pageSize = 10 } = {}, { rejectWithValue }) => {
     try {
-      return await api.get(API_CONFIG.ENDPOINTS.REVIEWS, {
+      return await publicApi.get(API_CONFIG.ENDPOINTS.REVIEWS, {
         page,
         page_size: pageSize
       })
@@ -19,7 +21,7 @@ export const fetchReviewSummary = createAsyncThunk(
   'reviews/fetchReviewSummary',
   async (_, { rejectWithValue }) => {
     try {
-      return await api.get(API_CONFIG.ENDPOINTS.REVIEWS_SUMMARY)
+      return await publicApi.get(API_CONFIG.ENDPOINTS.REVIEWS_SUMMARY)
     } catch (error) {
       return rejectWithValue(error.message || 'Failed to load review summary')
     }

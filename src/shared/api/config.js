@@ -29,7 +29,6 @@ export const API_CONFIG = {
     EXPLAIN_CONCEPT: '/api/key-concepts/explain/',
     KEY_CONCEPT_VIEW: '/api/progress/key-concept-view/',
 
-    
     // Reviews endpoints
     REVIEWS: '/api/reviews/',
     REVIEWS_SUMMARY: '/api/reviews/summary/',
@@ -200,7 +199,8 @@ export const refreshAccessToken = async () => {
     console.error('❌ Token refresh failed:', error)
     removeTokens()
     if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+      // FIX: was '/login', which does not exist (the real route is /auth/login)
+      window.location.href = '/auth/login'
     }
     throw error
   }
@@ -249,9 +249,11 @@ export const authenticatedFetch = async (
     }
   }
 
+  // FIX: only send the Authorization header when we actually have a token
+  // (previously sent `Authorization: ''` for anonymous requests)
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: token ? `Bearer ${token}` : '',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers
   }
 
@@ -336,7 +338,7 @@ export const apiCall = async (endpoint, options = {}) => {
 }
 
 /**
- * API helper methods for common HTTP operations
+ * API helper methods for common HTTP operations (authenticated)
  */
 export const api = {
   get: async (endpoint, params = {}) => {
@@ -373,6 +375,46 @@ export const api = {
     return apiCall(endpoint, {
       method: 'DELETE'
     })
+  }
+}
+
+/**
+ * Public API helper for endpoints anyone can read without logging in.
+ *
+ * - Never attaches a token (a stale/expired token would make DRF return 401
+ *   even on AllowAny views)
+ * - Never triggers token refresh or the login redirect
+ * - Sends no custom headers, so GET requests stay "simple" (no CORS preflight)
+ */
+export const publicApi = {
+  get: async (endpoint, params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    const url = `${API_CONFIG.BASE_URL}${endpoint}${
+      queryString ? `?${queryString}` : ''
+    }`
+
+    let response
+    try {
+      response = await fetch(url)
+    } catch (error) {
+      throw {
+        status: 500,
+        message: error.message || 'Network error occurred',
+        data: null
+      }
+    }
+
+    const data = await response.json().catch(() => null)
+
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        message: data?.detail || data?.message || 'An error occurred',
+        data
+      }
+    }
+
+    return data
   }
 }
 
