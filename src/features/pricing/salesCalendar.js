@@ -64,9 +64,17 @@ export const SALES = {
     discountPct: 50,
     endDate: '2026-09-27T07:00:00Z', // 9/27 midnight PDT
     badgeColor: 'bg-amber-600'
+  },
+  thanksgiving: {
+    name: 'thanksgiving',
+    label: '🍁 Thanksgiving Sale',
+    tagline: 'Give thanks, save big — sale ends soon.',
+    discountPct: 50,
+    endDate: '2026-11-27T08:00:00Z', // 11/26 11:59PM PST (Thanksgiving night)
+    badgeColor: 'bg-orange-600'
   }
 }
 
 // ── Which sale is currently live ───────────────────────────────────────────
 //  Set to a key from SALES above, or null to run no sale at all.
-export const ACTIVE_SALE_NAME = 'fall_sale'
+export const ACTIVE_SALE_NAME = 'thanksgiving'
