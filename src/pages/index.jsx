@@ -1,13 +1,20 @@
 // pages/index.jsx
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useSelector } from 'react-redux'
 import { NextSeo } from 'next-seo'
 import { PAGE_SEO } from '@/shared/constants/seoConfig'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS, ACTIVE_SALE } from '@/features/pricing/pricingConfig'
 import SaleBanner from '@/features/pricing/components/SaleBanner'
 import YouTubeSection from '@/features/marketing/components/YouTubeSection'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import RatingBadge from '@/features/marketing/components/RatingBadge'
+import ReviewsSection from '@/features/marketing/components/ReviewsSection'
+import {
+  fetchReviewSummary,
+  fetchFeaturedReviews
+} from '@/features/reviews/state/reviewsSlice'
 
 const faqs = [
   {
@@ -91,6 +98,13 @@ export default function Home() {
   const { isAuthenticated } = useSelector((state) => state.auth)
   const [openFaq, setOpenFaq] = useState(null)
 
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(fetchReviewSummary())
+    dispatch(fetchFeaturedReviews())
+  }, [dispatch])
+
   // Build the FAQ pricing answer dynamically from pricingConfig
   const pricingFaqAnswer = (() => {
     const planList = PLANS.map((p) => `${p.price} for ${p.label}`).join(', ')
@@ -173,6 +187,7 @@ export default function Home() {
                 className="flex flex-col gap-1.5 hero-fade-up"
                 style={{ animationDelay: '360ms' }}
               >
+                <RatingBadge />
                 <p className="text-sm text-base-content/45 flex items-center gap-1.5">
                   <span className="text-success text-base hero-check">✓</span>
                   500+ people passed the CA real estate exam using AgentSmartly
@@ -259,6 +274,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* ── REVIEWS (social proof) ── */}
+        <ReviewsSection />
 
         {/* ── HOW IT WORKS ── */}
         <div className="py-24 px-4 bg-base-100 border-t border-base-200">
@@ -533,77 +551,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── TESTIMONIALS ── */}
-        <div className="py-24 px-4 bg-base-200">
-          <div className="max-w-5xl mx-auto">
-            <p className="text-center font-bold tracking-widest text-xs uppercase mb-3 text-base-content/40">
-              Results
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-center mb-4">
-              500+ People Passed With AgentSmartly
-            </h2>
-            <p className="text-center text-base-content/50 text-lg mb-14 max-w-xl mx-auto">
-              Real CA exam passers who prepared with AgentSmartly. Here's what
-              they said.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {[
-                {
-                  text: 'I only spent 1-2 days on AgentSmartly before my first exam and scored 68/70 — so close. I then switched to another prep site and did even worse. Coming back to AgentSmartly and really focusing on the key concepts and progress chart made all the difference. Third time, I passed.',
-                  author: 'Gabriel C.',
-                  detail: 'Passed March 2026',
-                  initials: 'GC',
-                  color: 'bg-primary'
-                },
-                {
-                  text: "The key concepts section was a game changer. Having definitions AND memory tricks made the dense legal terminology actually stick. Couldn't recommend it more.",
-                  author: 'Sarah L.',
-                  detail: 'Passed January 2025',
-                  initials: 'SL',
-                  color: 'bg-success'
-                },
-                {
-                  text: 'I loved seeing my progress by topic. When I saw my Property Ownership accuracy was low, I knew exactly where to focus. Felt confident walking into the exam.',
-                  author: 'Diana R.',
-                  detail: 'Passed February 2025',
-                  initials: 'DR',
-                  color: 'bg-warning'
-                }
-              ].map((r, i) => (
-                <div
-                  key={i}
-                  className="card bg-base-100 border border-base-300 shadow-sm relative overflow-hidden"
-                >
-                  <span className="absolute top-4 right-5 text-6xl text-base-content/5 font-serif leading-none select-none">
-                    "
-                  </span>
-                  <div className="card-body gap-4">
-                    <div className="text-warning text-sm tracking-widest">
-                      ★★★★★
-                    </div>
-                    <p className="text-base-content/65 text-sm leading-relaxed">
-                      "{r.text}"
-                    </p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <div
-                        className={`w-9 h-9 rounded-full ${r.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
-                      >
-                        {r.initials}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">{r.author}</div>
-                        <div className="text-xs text-base-content/40">
-                          {r.detail}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         {/* ── YOUTUBE ── */}
         <YouTubeSection />
 

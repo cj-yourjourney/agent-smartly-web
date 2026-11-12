@@ -4,10 +4,14 @@ import { fetchReviews, fetchReviewSummary, setPage } from './state/reviewsSlice'
 import ReviewCard from './components/ReviewCard'
 import Pagination from './components/Pagination'
 import RatingSummary from './components/RatingSummary'
+import { useRouter } from 'next/router'
+import { ROUTES } from '@/shared/constants/routes'
 
 const PAGE_SIZE = 10
 
 export default function ReviewsPage() {
+  const router = useRouter()
+  const { isAuthenticated } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
   const { results, count, next, previous, page, status, error, summary } =
     useSelector((state) => state.reviews)
@@ -70,6 +74,22 @@ export default function ReviewsPage() {
         onPrev={() => previous && dispatch(setPage(page - 1))}
         onNext={() => next && dispatch(setPage(page + 1))}
       />
+      {!isAuthenticated && (
+        <div className="mt-12 rounded-2xl bg-primary/5 border-2 border-primary/20 px-6 py-10 text-center flex flex-col items-center gap-3">
+          <h2 className="font-display text-2xl sm:text-3xl">
+            Ready to be the next one who passes?
+          </h2>
+          <p className="text-base-content/60 text-sm">
+            60 free questions · No credit card required
+          </p>
+          <button
+            className="btn btn-primary btn-lg mt-2"
+            onClick={() => router.push(ROUTES.AUTH.SIGNUP)}
+          >
+            Start Free Trial →
+          </button>
+        </div>
+      )}
     </div>
   )
 }

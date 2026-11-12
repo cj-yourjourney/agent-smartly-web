@@ -28,6 +28,21 @@ export const fetchReviewSummary = createAsyncThunk(
   }
 )
 
+// Home page: grab a larger batch, then pick the best ones client-side
+export const fetchFeaturedReviews = createAsyncThunk(
+  'reviews/fetchFeaturedReviews',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await publicApi.get(API_CONFIG.ENDPOINTS.REVIEWS, {
+        page: 1,
+        page_size: 20
+      })
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to load featured reviews')
+    }
+  }
+)
+
 const initialState = {
   results: [],
   count: 0,
@@ -41,7 +56,8 @@ const initialState = {
     count: 0,
     breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
     status: 'idle'
-  }
+  },
+  featured: { results: [], status: 'idle' }
 }
 
 const reviewsSlice = createSlice({
@@ -80,6 +96,16 @@ const reviewsSlice = createSlice({
       })
       .addCase(fetchReviewSummary.rejected, (state) => {
         state.summary.status = 'failed'
+      })
+      .addCase(fetchFeaturedReviews.pending, (state) => {
+        state.featured.status = 'loading'
+      })
+      .addCase(fetchFeaturedReviews.fulfilled, (state, action) => {
+        state.featured.status = 'succeeded'
+        state.featured.results = action.payload.results
+      })
+      .addCase(fetchFeaturedReviews.rejected, (state) => {
+        state.featured.status = 'failed'
       })
   }
 })

@@ -17,7 +17,8 @@ import {
   LogIn,
   UserPlus,
   UserCircle,
-  Info
+  Info,
+  Star
 } from 'lucide-react'
 import ROUTES from '../constants/routes'
 
@@ -156,6 +157,15 @@ const Navbar = () => {
                 >
                   <Info className="h-5 w-5" />
                   About
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavigation(ROUTES.REVIEWS)}
+                  className={isActive(ROUTES.REVIEWS) ? 'active' : ''}
+                >
+                  <Star className="h-5 w-5" />
+                  Reviews
                 </button>
               </li>
             </>
