@@ -1,20 +1,4 @@
-import { formatReviewDate } from '../utils'
-
-const AVATAR_COLORS = [
-  'bg-indigo-500',
-  'bg-emerald-500',
-  'bg-rose-500',
-  'bg-amber-500',
-  'bg-sky-500',
-  'bg-violet-500'
-]
-
-function getAvatarColor(name) {
-  const index = name
-    .split('')
-    .reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return AVATAR_COLORS[index % AVATAR_COLORS.length]
-}
+import { formatReviewDate, getAvatarColor } from '../utils'
 
 export default function ReviewCard({ review }) {
   const { first_name, title, rating, content, created_at } = review
@@ -37,11 +21,7 @@ export default function ReviewCard({ review }) {
         <div>
           <p className="font-semibold leading-tight">{first_name}</p>
           <p className="text-base-content/50 text-xs">
-            <time
-              dateTime={created_at}
-              title={fullDate}
-              suppressHydrationWarning
-            >
+            <time dateTime={created_at} title={fullDate} suppressHydrationWarning>
               {formattedDate}
             </time>
           </p>

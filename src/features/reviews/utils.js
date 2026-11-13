@@ -1,4 +1,22 @@
 const PASS_RE = /\b(pass|passed|passing)\b/i
+const DAY_MS = 24 * 60 * 60 * 1000
+
+const AVATAR_COLORS = [
+  'bg-indigo-500',
+  'bg-emerald-500',
+  'bg-rose-500',
+  'bg-amber-500',
+  'bg-sky-500',
+  'bg-violet-500'
+]
+
+// Same name -> same color everywhere (reviews page + home page + about page)
+export function getAvatarColor(name = '') {
+  const index = name
+    .split('')
+    .reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return AVATAR_COLORS[index % AVATAR_COLORS.length]
+}
 
 export function pickFeaturedReviews(reviews = [], limit = 6) {
   return reviews
@@ -19,8 +37,6 @@ export function pickFeaturedReviews(reviews = [], limit = 6) {
     .slice(0, limit)
     .map((x) => x.review)
 }
-
-const DAY_MS = 24 * 60 * 60 * 1000
 
 export function formatReviewDate(createdAt) {
   const created = new Date(createdAt)
