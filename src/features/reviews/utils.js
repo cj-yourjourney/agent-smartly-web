@@ -19,3 +19,20 @@ export function pickFeaturedReviews(reviews = [], limit = 6) {
     .slice(0, limit)
     .map((x) => x.review)
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+export function formatReviewDate(createdAt) {
+  const created = new Date(createdAt)
+  const diffDays = Math.floor((Date.now() - created.getTime()) / DAY_MS)
+
+  if (diffDays < 1) return 'Today'
+  if (diffDays === 1) return '1 day ago'
+  if (diffDays < 7) return `${diffDays} days ago`
+
+  return created.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}

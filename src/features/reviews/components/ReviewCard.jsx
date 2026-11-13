@@ -1,3 +1,5 @@
+import { formatReviewDate } from '../utils'
+
 const AVATAR_COLORS = [
   'bg-indigo-500',
   'bg-emerald-500',
@@ -17,7 +19,8 @@ function getAvatarColor(name) {
 export default function ReviewCard({ review }) {
   const { first_name, title, rating, content, created_at } = review
 
-  const formattedDate = new Date(created_at).toLocaleDateString('en-US', {
+  const formattedDate = formatReviewDate(created_at)
+  const fullDate = new Date(created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -33,7 +36,15 @@ export default function ReviewCard({ review }) {
         </div>
         <div>
           <p className="font-semibold leading-tight">{first_name}</p>
-          <p className="text-base-content/50 text-xs">{formattedDate}</p>
+          <p className="text-base-content/50 text-xs">
+            <time
+              dateTime={created_at}
+              title={fullDate}
+              suppressHydrationWarning
+            >
+              {formattedDate}
+            </time>
+          </p>
         </div>
       </div>
 

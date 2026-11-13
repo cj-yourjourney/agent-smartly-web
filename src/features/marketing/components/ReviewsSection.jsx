@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import { ROUTES } from '@/shared/constants/routes'
-import { pickFeaturedReviews } from '@/features/reviews/utils'
+import { pickFeaturedReviews, formatReviewDate } from '@/features/reviews/utils'
 
 const AVATAR_COLORS = [
   'bg-primary',
@@ -46,13 +46,14 @@ const FALLBACK = [
 
 function ReviewTile({ review, index }) {
   const { first_name, title, content, rating, created_at, dateLabel } = review
-  const date =
-    dateLabel ||
-    new Date(created_at).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+  const date = dateLabel || formatReviewDate(created_at)
+  const fullDate = created_at
+    ? new Date(created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    : undefined
 
   return (
     <div
@@ -81,7 +82,19 @@ function ReviewTile({ review, index }) {
           </div>
           <div>
             <div className="font-semibold text-sm">{first_name}</div>
-            <div className="text-xs text-base-content/40">{date}</div>
+            <div className="text-xs text-base-content/40">
+              {created_at ? (
+                <time
+                  dateTime={created_at}
+                  title={fullDate}
+                  suppressHydrationWarning
+                >
+                  {date}
+                </time>
+              ) : (
+                date
+              )}
+            </div>
           </div>
         </div>
       </div>
